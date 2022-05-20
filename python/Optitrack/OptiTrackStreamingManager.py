@@ -1,6 +1,12 @@
+# -----------------------------------------------------------------
+# Author:          Suzuki Hyuga
+# Original Author: Takayoshi Hagiwara (KMD)
+# Created:         2022/5/20
+# Summary:         OptiTrackからのストリーミング管理マネージャー
+# -----------------------------------------------------------------
+
 from threading import local
 import NatNetClient
-
 import numpy as np
 
 class OptiTrackStreamingManager:
@@ -25,10 +31,6 @@ class OptiTrackStreamingManager:
 
         self.serverAddress = serverIP
         self.localAddress = localIP
-
-    def print(self):
-        print(self.serverAddress)
-        print(self.localAddress)
 
     # This is a callback function that gets connected to the NatNet client and called once per mocap frame.
     def receive_new_frame(self, data_dict):
