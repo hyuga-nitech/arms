@@ -1,3 +1,6 @@
-code for transform mikataArm
+code for mikataArm and xArm
+
+# --- mikataArm --- #
 motor:'XM430-W350-R' by DYNAMIXEL
-use RS485 serial connect and need 12V DC
+RS485 serial connect and 12V DC
+
