@@ -1,6 +1,6 @@
 from threading import local
 import NatNetClient
-from FileIO.FileIO import FileIO
+
 import numpy as np
 
 class OptiTrackStreamingManager:
@@ -17,6 +17,7 @@ class OptiTrackStreamingManager:
             self.position['RigidBody'+str(i+1)] = np.zeros(3)
             self.rotation['RigidBody'+str(i+1)] = np.zeros(4)
         
+        from FileIO.FileIO import FileIO
         fileIO = FileIO()
         settings = fileIO.Read('settings.csv',',')
         serverIP = [addr for addr in settings if 'motiveServer' in addr[0]][0][1]
@@ -75,6 +76,3 @@ class OptiTrackStreamingManager:
         streamingClient.new_frame_listener = self.receive_new_frame
         streamingClient.rigid_body_listener = self.receive_rigid_body_frame
         streamingClient.run()
-
-a=OptiTrackStreamingManager()
-a.print()
