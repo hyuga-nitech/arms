@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------
-# Author:          Suzuki Hyuga
+# Author:          Hyuga Suzuki
 # Original Author: Takayoshi Hagiwara (KMD)
 # Created:         2022/5/20
 # Summary:         RigidBody座標の取得
