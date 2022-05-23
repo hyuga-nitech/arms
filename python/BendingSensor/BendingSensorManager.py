@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------
-# Author:          Suzuki Hyuga
+# Author:          Hyuga Suzuki
 # Original Author: Takayoshi Hagiwara (KMD)
 # Created:         2022/5/20
 # Summary:         BendingSensorの値を取得（シリアル通信）
@@ -29,7 +29,7 @@ class BendingSensorManager:
         self.not_used2 = self.ser2.readline()
         """
     
-    def StartReceiving(self, fromUdp: bool = False):
+    def StartReceiving(self):
         """
         Receiving data from bending sensor and update self.bendingValue
         """
