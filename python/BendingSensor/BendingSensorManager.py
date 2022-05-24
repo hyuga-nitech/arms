@@ -5,8 +5,6 @@
 # Summary:         BendingSensorの値を取得（シリアル通信）
 # -----------------------------------------------------------------
 
-import numpy as np
-import socket
 import serial
 
 class BendingSensorManager:

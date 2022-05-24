@@ -34,8 +34,8 @@ class MotionManager:
         streamingThread.start()
 
         self.bendingSensors         = []
-        bendingSensorSerialComs     = ['COM11', 'COM12']
-        bendingSensorSerialPorts    = [9600, 9600]
+        bendingSensorSerialComs     = ['COM11']
+        bendingSensorSerialPorts    = [9600]
 
         for i in range(bendingSensorNum):
             bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs[i], port=bendingSensorSerialPorts[i])
