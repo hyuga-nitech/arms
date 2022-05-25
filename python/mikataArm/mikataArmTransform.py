@@ -25,13 +25,13 @@ class mikataTransform:
     theta = 0
 
     #モータ角度変数
-    d1,d2,d3,d4 = 0,0,0,0,0
+    d1,d2,d3,d4 = 0,0,0,0
 
     #モータ電流変数
-    c1,c2,c3,c4 = 0,0,0,0,0
+    c1,c2,c3,c4 = 0,0,0,0
 
     # ----- Initial limitation ----- #
-    __initR, __initPhi, __initTheta     = 300, 0, 0
+    __initd1, __initd2, __initd3, __initd4, __initd5 = 270, 260, 100, 180, 240
 
     # ----- Minimum limitation ----- #
     __minR, __minPhi, __minTheta     = 60, -150, -30
@@ -88,3 +88,11 @@ class mikataTransform:
             c = 0
         
         return c
+
+    def GetmikataInitialTransform(self):
+        __initc1 = mikataTransform.Degree2Current(self.__initd1)
+        __initc2 = mikataTransform.Degree2Current(self.__initd2)
+        __initc3 = mikataTransform.Degree2Current(self.__initd3)
+        __initc4 = mikataTransform.Degree2Current(self.__initd4)
+        __initc5 = mikataTransform.Degree2Current(self.__initd5)
+        return [__initc1, __initc2, __initc3, __initc4, __initc5]

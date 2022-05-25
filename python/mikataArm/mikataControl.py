@@ -5,6 +5,7 @@
 # -----------------------------------------------------------------
 
 from dynamixel_sdk import * # Uses Dynamixel SDK library
+from FileIO.FileIO import FileIO
 
 class mikataControl:
     def __init__(self):
@@ -25,10 +26,9 @@ class mikataControl:
         # Use the actual port assigned to the U2D2.
         # ex) Windows: "COM*", Linux: "/dev/ttyUSB*", Mac: "/dev/tty.usbserial-*"
 
-        from FileIO.FileIO import FileIO
         self.fileIO = FileIO()
         self.settings = self.fileIO.Read('settings.csv',',')
-        self.DEVICENAME = [addr for addr in self.settings if 'DEVICENAME' in addr[0]][0][1]
+        self.DEVICENAME = [addr for addr in self.settings if 'mikataDEVICENAME' in addr[0]][0][1]
 
         self.DXL_ID                      = [1,2,3,4,5]
 

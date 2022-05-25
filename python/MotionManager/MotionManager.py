@@ -6,26 +6,23 @@
 # -----------------------------------------------------------------
 
 import threading
-import time
 import numpy as np
-import csv
 
 # ----- Custom class ----- #
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 
 # ----- Numeric range remapping ----- #
-targetMin=100
-targetMax=850
-originalMin = 0
-originalMax = 1
+targetMin        = 200
+targetMax        = 240
+originalMin      = 0
+originalMax      = 1
 bendingSensorMin = 0
 bendingSensorMax = 850
 
 class MotionManager:
-    def __int__(self,defaultRigidBodyNum: int,bendingSensorNum: int = 1) ->None:
+    def __int__(self,defaultRigidBodyNum: int) ->None:
         self.defaultRigidBodyNum     = defaultRigidBodyNum
-        self.bendingSensorNum        = bendingSensorNum
         self.InitBendingSensorValues = []
 
         self.optiTrackStreamingManager = OptiTrackStreamingManager(defaultRigidBodyNum=defaultRigidBodyNum)
@@ -33,41 +30,49 @@ class MotionManager:
         streamingThread.setDaemon(True)
         streamingThread.start()
 
+        from FileIO.FileIO import FileIO
+        fileIO = FileIO()
+        settings = fileIO.Read('settings.csv',',')
+        bendingSensorSerialComs = [addr for addr in settings if 'bendingSensorSerialComs' in addr[0]][0][1]
+        bendingSensorSerialPorts =[addr for addr in settings if 'bendingSensorSerialPorts' in addr [0]][0][1]
+
         self.bendingSensors         = []
-        bendingSensorSerialComs     = ['COM11']
-        bendingSensorSerialPorts    = [9600]
 
-        for i in range(bendingSensorNum):
-            bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs[i], port=bendingSensorSerialPorts[i])
-            self.bendingSensors.append(bendingSensorManager)
+        bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs, port=bendingSensorSerialPorts)
+        self.bendingSensors.append(bendingSensorManager)
 
-            # ----- Start receiving bending sensor value from UDP socket ----- #
-            bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
-            bendingSensorThread.setDaemon(True)
-            bendingSensorThread.start()
+        # ----- Start receiving bending sensor value ----- #
+        bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
+        bendingSensorThread.setDaemon(True)
+        bendingSensorThread.start()
         
         # ----- Set init value ----- #
-            self.SetInitialBendingValue()
+        self.SetInitialBendingValue()
 
     def SetInitialBendingValue(self):
         """
         Set init bending value
         """
         
-        if self.gripperInputSystem == 'bendingsensor':
-            self.InitBendingSensorValues    = []
-
-            for i in range(self.bendingSensorNum):
-                self.InitBendingSensorValues.append(self.bendingSensors[i].bendingValue)
+        self.InitBendingSensorValues    = self.bendingSensors.bendingValue
 
     def GripperControlValue(self,loopCount: int = 0):
-        dictGripperValue = {}
-        for i in range(self.bendingSensorNum):
-            bendingVal = self.bendingSensors[i].bendingValue
-            bendingValueNorm = (bendingVal - bendingSensorMin) / (self.InitBendingSensorValues[i] - bendingSensorMin) * (targetMax - targetMin) + targetMin
+        GripperValue = 0
+        bendingVal = self.bendingSensors.bendingValue
+        bendingValueNorm = (bendingVal - bendingSensorMin) / (self.InitBendingSensorValues - bendingSensorMin) * (targetMax - targetMin) + targetMin
 
-            if bendingValueNorm > targetMax:
-                bendingValueNorm = targetMax
-            dictGripperValue['gripperValue'+str(i+1)] = bendingValueNorm
+        if bendingValueNorm > targetMax:
+            bendingValueNorm = targetMax
+        GripperValue = bendingValueNorm
         
-        return dictGripperValue
+        return GripperValue
+
+    def LocalPosition(self, loopCount: int = 0):
+        dictPos = {}
+        dictPos = self.optiTrackStreamingManager.position
+        return dictPos
+
+    def LocalRotation(self, loopCount: int = 0):
+        dictRot = {}
+        dictRot = self.optiTrackStreamingManager.rotation
+        return dictRot
