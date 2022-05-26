@@ -9,7 +9,7 @@ import threading
 import numpy as np
 
 # ----- Custom class ----- #
-from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
+from Optitrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 
 # ----- Numeric range remapping ----- #
@@ -65,12 +65,12 @@ class MotionManager:
         
         return GripperValue
 
-    def LocalPosition(self):
+    def LocalPosition(self, loopCount: int = 0):
         dictPos = {}
         dictPos = self.optiTrackStreamingManager.position
         return dictPos
 
-    def LocalRotation(self):
+    def LocalRotation(self, loopCount: int = 0):
         dictRot = {}
         dictRot = self.optiTrackStreamingManager.rotation
         return dictRot

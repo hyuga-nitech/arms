@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------
 
 from threading import local
-from OptiTrack.NatNetClient import NatNetClient
+from Optitrack.NatNetClient import NatNetClient
 import numpy as np
 
 class OptiTrackStreamingManager:
