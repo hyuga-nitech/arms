@@ -29,7 +29,7 @@ class RobotControlManager:
     def __init__(self) ->None:
         fileIO = FileIO()
 
-        dat = fileIO.Read('setting.csv',',')
+        dat = fileIO.Read('settings.csv',',')
         xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
         self.xArmIpAddress = xArmIP
 
@@ -127,8 +127,8 @@ class RobotControlManager:
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
                         
-                        xArmPosition,xArmRotation       = MotionBehaviour.GetxArmTransform(localPosition,localRotation)
-                        mikataPosition,mikataRotation   = MotionBehaviour.GetmikataArmTransform(localPosition,localRotation)
+                        xArmPosition,xArmRotation       = MotionBehaviour.GetxArmTransform(MotionManager.LocalPosition(self.loopCount),MotionManager.LocalRotation(self.loopCount))
+                        mikataPosition,mikataRotation   = MotionBehaviour.GetmikataArmTransform(MotionManager.LocalPosition(self.loopCount),MotionManager.LocalRotation(self.loopCount))
                         beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4, beforeC5 = mikataC1, mikataC2, mikataC3, mikataC4, mikataC5
 

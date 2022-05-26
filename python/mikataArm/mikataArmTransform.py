@@ -17,7 +17,7 @@ class mikataTransform:
     """
 
     #入力位置変数
-    x,y,z = 0
+    x,y,z = 0,0,0
 
     #極座標変数
     r     = 0
@@ -90,9 +90,9 @@ class mikataTransform:
         return c
 
     def GetmikataInitialTransform(self):
-        __initc1 = mikataTransform.Degree2Current(self.__initd1)
-        __initc2 = mikataTransform.Degree2Current(self.__initd2)
-        __initc3 = mikataTransform.Degree2Current(self.__initd3)
-        __initc4 = mikataTransform.Degree2Current(self.__initd4)
-        __initc5 = mikataTransform.Degree2Current(self.__initd5)
+        __initc1 = round(self.__initd1 * 11.375)
+        __initc2 = round(self.__initd2 * 11.375)
+        __initc3 = round(self.__initd3 * 11.375)
+        __initc4 = round(self.__initd4 * 11.375)
+        __initc5 = round(self.__initd5 * 11.375)
         return [__initc1, __initc2, __initc3, __initc4, __initc5]

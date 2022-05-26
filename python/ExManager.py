@@ -9,4 +9,5 @@ from RobotControlManager.RobotControlManager import RobotControlManager
 
 if __name__ == '__main__':
     robotControlManager = RobotControlManager()
+    robotControlManager.SendDataToRobot()
     print('\n----- End program: ExManager.py -----')

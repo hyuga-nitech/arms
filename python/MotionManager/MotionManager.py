@@ -21,7 +21,7 @@ bendingSensorMin = 0
 bendingSensorMax = 850
 
 class MotionManager:
-    def __int__(self,defaultRigidBodyNum: int) ->None:
+    def __init__(self,defaultRigidBodyNum: int) ->None:
         self.defaultRigidBodyNum     = defaultRigidBodyNum
         self.InitBendingSensorValues = []
 
@@ -36,10 +36,8 @@ class MotionManager:
         bendingSensorSerialComs = [addr for addr in settings if 'bendingSensorSerialComs' in addr[0]][0][1]
         bendingSensorSerialPorts =[addr for addr in settings if 'bendingSensorSerialPorts' in addr [0]][0][1]
 
-        self.bendingSensors         = []
-
         bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs, port=bendingSensorSerialPorts)
-        self.bendingSensors.append(bendingSensorManager)
+        self.bendingSensor = bendingSensorManager
 
         # ----- Start receiving bending sensor value ----- #
         bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
@@ -54,11 +52,11 @@ class MotionManager:
         Set init bending value
         """
         
-        self.InitBendingSensorValues    = self.bendingSensors.bendingValue
+        self.InitBendingSensorValues    = self.bendingSensor.bendingValue
 
     def GripperControlValue(self,loopCount: int = 0):
         GripperValue = 0
-        bendingVal = self.bendingSensors.bendingValue
+        bendingVal = self.bendingSensor.bendingValue
         bendingValueNorm = (bendingVal - bendingSensorMin) / (self.InitBendingSensorValues - bendingSensorMin) * (targetMax - targetMin) + targetMin
 
         if bendingValueNorm > targetMax:
