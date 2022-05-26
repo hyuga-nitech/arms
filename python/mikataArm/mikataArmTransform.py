@@ -43,8 +43,6 @@ class mikataTransform:
         pass
     
     def Transform(self):
-        self.TransformArray = mikataTransform.Cartesian2Polar(self.x,self.y,self.z)
-
         r     = math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
         phi   = math.degrees(math.atan2(self.y,self.x))
         theta = math.degrees(math.atan2(math.sqrt(self.x * self.x + self.y * self.y),-1*(self.z)))
@@ -73,21 +71,23 @@ class mikataTransform:
         d3 = 100 - (180 - 2 * math.degrees(math.asin(r/2/150)))
         d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150)))
 
-        c1 = mikataTransform.Degree2Current(d1)
-        c2 = mikataTransform.Degree2Current(d2)
-        c3 = mikataTransform.Degree2Current(d3)
-        c4 = mikataTransform.Degree2Current(d4)
+        D2C = mikataTransform()
+
+        c1 = D2C.Degree2Current(d1)
+        c2 = D2C.Degree2Current(d2)
+        c3 = D2C.Degree2Current(d3)
+        c4 = D2C.Degree2Current(d4)
 
         return c1,c2,c3,c4
 
     def Degree2Current(self,degree):
         self.c = round(degree / 360 * 4095)
-        if(c > 4095):
-            c = 4095
-        elif(c < 0):
-            c = 0
+        if(self.c > 4095):
+            self.c = 4095
+        elif(self.c < 0):
+            self.c = 0
         
-        return c
+        return self.c
 
     def GetmikataInitialTransform(self):
         __initc1 = round(self.__initd1 * 11.375)

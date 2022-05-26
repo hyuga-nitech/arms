@@ -5,6 +5,7 @@
 # Summary:         xArm,mikataArm,BendingSensorの制御
 # -----------------------------------------------------------------
 
+from asyncore import loop
 import time
 import threading
 import numpy as np
@@ -57,8 +58,8 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
                 
-                    xArmPosition,xArmRotation       = MotionBehaviour.GetxArmTransform(localPosition,localRotation)
-                    mikataPosition,mikataRotation   = MotionBehaviour.GetmikataArmTransform(localPosition,localRotation)
+                    xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
+                    mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
 
                     # ----- Set xArm transform ----- #
                     xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
@@ -68,10 +69,10 @@ class RobotControlManager:
                     mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                     # ----- Bending sensor ----- #
-                    gripperValue = MotionManager.GripperControlValue(loopCount=self.loopCount)
+                    gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
 
                     # ----- Calculate mikata Current ----- #
-                    mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform
+                    mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
                     mikataC5                               = mikatatransform.Degree2Current(gripperValue)
 
                     # ----- Safety Check -----#
@@ -130,7 +131,8 @@ class RobotControlManager:
                         xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
                         mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
                         beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
-                        beforeC1, beforeC2, beforeC3, beforeC4, beforeC5 = mikataC1, mikataC2, mikataC3, mikataC4, mikataC5
+                        beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
+                        beforeC5 = mikatatransform.Degree2Current(motionManager.GripperControlValue(loopCount = self.loopCount))
 
                         motionManager.SetInitialBendingValue()
 

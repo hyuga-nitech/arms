@@ -115,7 +115,7 @@ class MotionBehaviour:
                                 [qy, qw, -qz, qx],
                                 [-qx, qz, qw, qy],
                                 [-qz,-qx, -qy, qw]])
-            self.inversedMatrix['RigidBody'+str(i+1)] = np.linalg.inv(mat4x4)
+            self.inversedMatrix['RigidBody'+str(i+1)] = np.linalg.pinv(mat4x4)
 
     def GetRelativeRotation(self, rotation):
         """
