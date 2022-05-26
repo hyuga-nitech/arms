@@ -54,8 +54,8 @@ class RobotControlManager:
             while True:
                 if isMoving:
                     # ----- Get transform data ----- #
-                    localPosition    = MotionManager.LocalPosition(self.loopCount)
-                    localRotation    = MotionManager.LocalRotation(self.loopCount)
+                    localPosition    = MotionManager.LocalPosition()
+                    localRotation    = MotionManager.LocalRotation()
                 
                     xArmPosition,xArmRotation       = MotionBehaviour.GetxArmTransform(localPosition,localRotation)
                     mikataPosition,mikataRotation   = MotionBehaviour.GetmikataArmTransform(localPosition,localRotation)
@@ -127,8 +127,8 @@ class RobotControlManager:
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
                         
-                        xArmPosition,xArmRotation       = MotionBehaviour.GetxArmTransform(MotionManager.LocalPosition(self.loopCount),MotionManager.LocalRotation(self.loopCount))
-                        mikataPosition,mikataRotation   = MotionBehaviour.GetmikataArmTransform(MotionManager.LocalPosition(self.loopCount),MotionManager.LocalRotation(self.loopCount))
+                        xArmPosition,xArmRotation       = MotionBehaviour.GetxArmTransform(MotionManager.LocalPosition(),MotionManager.LocalRotation())
+                        mikataPosition,mikataRotation   = MotionBehaviour.GetmikataArmTransform(MotionManager.LocalPosition(),MotionManager.LocalRotation())
                         beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4, beforeC5 = mikataC1, mikataC2, mikataC3, mikataC4, mikataC5
 

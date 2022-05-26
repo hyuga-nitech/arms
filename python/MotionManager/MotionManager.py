@@ -65,12 +65,12 @@ class MotionManager:
         
         return GripperValue
 
-    def LocalPosition(self, loopCount: int = 0):
+    def LocalPosition(self):
         dictPos = {}
         dictPos = self.optiTrackStreamingManager.position
         return dictPos
 
-    def LocalRotation(self, loopCount: int = 0):
+    def LocalRotation(self):
         dictRot = {}
         dictRot = self.optiTrackStreamingManager.rotation
         return dictRot
