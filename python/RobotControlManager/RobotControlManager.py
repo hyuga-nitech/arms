@@ -130,6 +130,10 @@ class RobotControlManager:
                         
                         xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
                         mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+
+                        xArmPosition   = xArmPosition * 1000
+                        mikataPosition = mikataPosition * 1000
+
                         beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
                         beforeC5 = mikatatransform.Degree2Current(motionManager.GripperControlValue(loopCount = self.loopCount))

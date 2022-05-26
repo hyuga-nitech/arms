@@ -15,8 +15,6 @@ from BendingSensor.BendingSensorManager import BendingSensorManager
 # ----- Numeric range remapping ----- #
 targetMin        = 200
 targetMax        = 240
-originalMin      = 0
-originalMax      = 1
 bendingSensorMin = 0
 bendingSensorMax = 850
 
