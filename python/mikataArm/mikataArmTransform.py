@@ -40,8 +40,9 @@ class mikataTransform:
     # ----- Maximum limitation ----- #
     __maxR, __maxPhi, __maxTheta     = 300, 150, 90
 
-    def __init__(self,UserArmLong:int):
-        self.longTrans = 300 / UserArmLong
+    def __init__(self,userArmLong:int):
+        self.UserArmLong = userArmLong
+        self.longTrans = 300 / self.UserArmLong
         pass
     
     def Transform(self):
@@ -73,7 +74,7 @@ class mikataTransform:
         d3 = 100 + (180 - 2 * math.degrees(math.asin(r/2/150)))
         d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150)))
 
-        D2C = mikataTransform()
+        D2C = mikataTransform(self.UserArmLong)
 
         c1 = D2C.Degree2Current(d1)
         c2 = D2C.Degree2Current(d2)

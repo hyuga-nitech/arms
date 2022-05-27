@@ -25,7 +25,7 @@ from FileIO.FileIO import FileIO
 userArmLong         = 500
 defaultRigidBodyNum = 3
 xArmMovingLimit     = 50
-mikataMovingLimit   = 100
+mikataMovingLimit   = 2000
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -172,6 +172,7 @@ class RobotControlManager:
         robotArm.motion_enable(enable=True)
         robotArm.set_mode(0)             # set mode: position control mode
         robotArm.set_state(state=0)      # set state: sport state
+
         if isSetInitPosition:
             initX, initY, initZ, initRoll, initPitch, initYaw = xArmtransform.GetInitialTransform()
             robotArm.set_position(x=initX, y=initY, z=initZ, roll=initRoll, pitch=initPitch, yaw=initYaw, wait=True)
@@ -179,6 +180,7 @@ class RobotControlManager:
             robotArm.reset(wait=True)
         print('Initialized > xArm')
 
+        robotArm.motion_enable(enable=True)
         robotArm.set_mode(1)
         robotArm.set_state(state=0)
 
