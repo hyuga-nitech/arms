@@ -61,6 +61,9 @@ class RobotControlManager:
                     xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
                     mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
 
+                    xArmPosition   = xArmPosition * 1000
+                    mikataPosition = mikataPosition * 1000
+
                     # ----- Set xArm transform ----- #
                     xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
                     xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
@@ -99,7 +102,7 @@ class RobotControlManager:
                         print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "r" to reset xArm, or "q" to quit')
                     else:
                         # ----- Send to Arms ----- #
-                        arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
+                        arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = True))
                         mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
                         mikatacontrol.SendtomikataArm(mikataGoal)
 
