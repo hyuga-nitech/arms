@@ -22,6 +22,7 @@ from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 
 # ----- Setting: Number ----- #
+userArmLong         = 500
 defaultRigidBodyNum = 3
 xArmMovingLimit     = 50
 mikataMovingLimit   = 100
@@ -41,7 +42,7 @@ class RobotControlManager:
         # ----- Instantiating custom classes ----- #
         Behaviour       = MotionBehaviour(defaultRigidBodyNum)
         xArmtransform   = xArmTransform()
-        mikatatransform = mikataTransform()
+        mikatatransform = mikataTransform(userArmLong)
         motionManager   = MotionManager(defaultRigidBodyNum)
         mikatacontrol   = mikataControl()
 
@@ -57,6 +58,8 @@ class RobotControlManager:
                     # ----- Get transform data ----- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
+
+                    print('localPosition:',localPosition)
                 
                     xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
                     mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
@@ -70,6 +73,9 @@ class RobotControlManager:
 
                     # ----- Set mikata transform ----- #
                     mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+
+                    print('xArmTransform:',xArmtransform.x,' ', xArmtransform.y,' ', xArmtransform.z)
+                    print('xArmTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
 
                     # ----- Bending sensor ----- #
                     gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)

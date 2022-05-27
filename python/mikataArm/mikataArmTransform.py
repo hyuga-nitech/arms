@@ -14,6 +14,7 @@ class mikataTransform:
     Dynamixelの角度指令値への変換も行う
 
     肩に取り付けた剛体との差を使用する予定のため、必ずリミッターを用いる
+    追記：初期姿勢と開始時の指令値に差が生じやすいため、リミッターを小さい値にしているとエラーになりやすい
     """
 
     #入力位置変数
@@ -39,13 +40,14 @@ class mikataTransform:
     # ----- Maximum limitation ----- #
     __maxR, __maxPhi, __maxTheta     = 300, 150, 90
 
-    def __init__(self):
+    def __init__(self,UserArmLong:int):
+        self.longTrans = 300 / UserArmLong
         pass
     
     def Transform(self):
-        r     = math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
-        phi   = math.degrees(math.atan2(self.y,self.x))
-        theta = math.degrees(math.atan2(math.sqrt(self.x * self.x + self.y * self.y),-1*(self.z)))
+        r     = math.sqrt(self.x * self.longTrans * self.x * self.longTrans + self.y * self.longTrans * self.y * self.longTrans + self.z * self.longTrans * self.z * self.longTrans)
+        phi   = math.degrees(math.atan2(self.y * self.longTrans,self.x * self.longTrans))
+        theta = math.degrees(math.atan2(math.sqrt(self.x * self.longTrans * self.x * self.longTrans + self.y * self.longTrans * self.y * self.longTrans), -1 * self.z * self.longTrans))
 
         # R limit
         if(r > self.__maxR):
@@ -77,6 +79,8 @@ class mikataTransform:
         c2 = D2C.Degree2Current(d2)
         c3 = D2C.Degree2Current(d3)
         c4 = D2C.Degree2Current(d4)
+
+        print('r,phi,theta = ',r,' ',phi,' ',theta,' d1,d2,d3,d4 = ',d1,' ',d2,' ',d3,' ',d4)
 
         return c1,c2,c3,c4
 
