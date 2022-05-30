@@ -48,7 +48,7 @@ class mikataTransform:
     def Transform(self):
         r     = math.sqrt(self.x * self.longTrans * self.x * self.longTrans + self.y * self.longTrans * self.y * self.longTrans + self.z * self.longTrans * self.z * self.longTrans)
         phi   = math.degrees(math.atan2(self.y * self.longTrans,self.x * self.longTrans))
-        theta = -1 * math.degrees(math.atan2(math.sqrt(self.x * self.longTrans * self.x * self.longTrans + self.y * self.longTrans * self.y * self.longTrans), self.z * self.longTrans))
+        theta = -1 * math.degrees(math.atan2(self.z * self.longTrans, math.sqrt(self.x * self.longTrans * self.x * self.longTrans + self.y * self.longTrans * self.y * self.longTrans)))
 
         # R limit
         if(r > self.__maxR):
