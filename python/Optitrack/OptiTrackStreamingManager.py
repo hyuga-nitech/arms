@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------
 
 from threading import local
-from Optitrack.NatNetClient import NatNetClient
+from Optitrack import NatNetClient
 import numpy as np
 
 class OptiTrackStreamingManager:
@@ -71,7 +71,7 @@ class OptiTrackStreamingManager:
             self.rotation['endEffector'] = np.array(rotation)
 
     def stream_run(self):
-        streamingClient = NatNetClient(serverIP=self.serverAddress, localIP=self.localAddress)
+        streamingClient = NatNetClient.NatNetClient(serverIP=self.serverAddress, localIP=self.localAddress)
         
         # Configure the streaming client to call our rigid body handler on the emulator to send data out.
         streamingClient.new_frame_listener = self.receive_new_frame

@@ -5,7 +5,6 @@
 # Summary:         xArm,mikataArm,BendingSensorの制御
 # -----------------------------------------------------------------
 
-from asyncore import loop
 import time
 import threading
 import numpy as np

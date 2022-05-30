@@ -19,8 +19,8 @@ import struct
 from threading import Thread
 import copy
 import time
-from Optitrack.DataDescriptions import DataDescriptions
-from Optitrack.MoCapData import MoCapData
+from Optitrack import DataDescriptions
+from Optitrack import MoCapData
 
 def trace( *args ):
     # uncomment the one you want to use
