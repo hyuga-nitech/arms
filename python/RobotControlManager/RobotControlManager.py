@@ -23,7 +23,7 @@ from FileIO.FileIO import FileIO
 # ----- Setting: Number ----- #
 userArmLong         = 500
 defaultRigidBodyNum = 3
-xArmMovingLimit     = 50
+xArmMovingLimit     = 100
 mikataMovingLimit   = 2000
 
 class RobotControlManager:
@@ -117,7 +117,7 @@ class RobotControlManager:
                         self.errorCount += 1
                         print('[ERROR] >> xArm Error has occured. Please enter "r" to reset xArm, or "q" to quit')
 
-                        self.loopCount += 1
+                    self.loopCount += 1
 
                 else:
                     keycode = input('Input > "q": quit, "r": Clean error and init arm, "s": start control \n')
