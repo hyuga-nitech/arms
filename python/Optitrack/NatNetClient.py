@@ -19,13 +19,13 @@ import struct
 from threading import Thread
 import copy
 import time
-from Optitrack import DataDescriptions
-from Optitrack import MoCapData
+from . import DataDescriptions
+from . import MoCapData
 
 def trace( *args ):
     # uncomment the one you want to use
-    print( "".join(map(str,args)) )
-    #pass
+    # print( "".join(map(str,args)) )
+    pass
 
 #Used for Data Description functions
 def trace_dd( *args ):
@@ -36,7 +36,7 @@ def trace_dd( *args ):
 #Used for MoCap Frame Data functions
 def trace_mf( *args ):
     # uncomment the one you want to use
-    #print( "".join(map(str,args)) )
+    # print( "".join(map(str,args)) )
     pass
 
 def get_message_id(data):
@@ -60,15 +60,15 @@ class NatNetClient:
     # print_level = >1 on / print every nth mocap frame
     print_level = 20
     
-    def __init__( self ):
+    def __init__( self, serverIP: str = '192.168.1.1', localIP: str = '192.168.1.2', multicastAddr: str = '239.255.42.99' ):
         # Change this value to the IP address of the NatNet server.
-        self.server_ip_address = "127.0.0.1"
+        self.server_ip_address = serverIP
 
         # Change this value to the IP address of your local network interface
-        self.local_ip_address = "127.0.0.1"
+        self.local_ip_address = localIP
 
         # This should match the multicast address listed in Motive's streaming settings.
-        self.multicast_address = "239.255.42.99"
+        self.multicast_address = multicastAddr
 
         # NatNet Command channel
         self.command_port = 1510
@@ -1273,11 +1273,12 @@ class NatNetClient:
 
             offset_tmp, mocap_data = self.__unpack_mocap_data( data[offset:], packet_size, major, minor )
             offset += offset_tmp
-            print("MoCap Frame: %d\n"%(mocap_data.prefix_data.frame_number))
+            #print("MoCap Frame: %d\n"%(mocap_data.prefix_data.frame_number))
             # get a string version of the data for output
             mocap_data_str=mocap_data.get_as_string()
             if print_level >= 1:
-                print("%s\n"%mocap_data_str)
+                #print("%s\n"%mocap_data_str)
+                pass
 
         elif message_id == self.NAT_MODELDEF :
             trace( "Message ID  : %3.1d NAT_MODELDEF"% message_id )
