@@ -74,7 +74,7 @@ class RobotControlManager:
                     mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                     print('xArmTransform:',xArmtransform.x,' ', xArmtransform.y,' ', xArmtransform.z)
-                    print('xArmTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
+                    print('mikataTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
 
                     # ----- Bending sensor ----- #
                     gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -117,6 +117,8 @@ class RobotControlManager:
                         self.errorCount += 1
                         print('[ERROR] >> xArm Error has occured. Please enter "r" to reset xArm, or "q" to quit')
 
+                        self.loopCount += 1
+
                 else:
                     keycode = input('Input > "q": quit, "r": Clean error and init arm, "s": start control \n')
                     # ----- Quit program ----- #
@@ -142,9 +144,16 @@ class RobotControlManager:
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
 
-                        beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
+                        # ----- Set xArm transform ----- #
+                        xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
+                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
+
+                        # ----- Set mikata transform ----- #
+                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+
+                        beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
-                        beforeC5 = mikatatransform.Degree2Current(motionManager.GripperControlValue(loopCount = self.loopCount))
+                        beforeC5                               = mikatatransform.Degree2Current(motionManager.GripperControlValue(loopCount = self.loopCount))
 
                         motionManager.SetInitialBendingValue()
 
