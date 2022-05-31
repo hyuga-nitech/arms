@@ -21,7 +21,7 @@ from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 
 # ----- Setting: Number ----- #
-userArmLong         = 500
+userArmLong         = 600
 defaultRigidBodyNum = 3
 xArmMovingLimit     = 100
 mikataMovingLimit   = 2000
@@ -56,15 +56,15 @@ class RobotControlManager:
 
         try:
             while True:
-                if time.perf_counter() - taskStartTime > executionTime:
-                    # ----- Exit processing after task time elapses ----- #
-                    isMoving    = False
+                # if time.perf_counter() - taskStartTime > executionTime:
+                #     # ----- Exit processing after task time elapses ----- #
+                #     isMoving    = False
 
-                    self.taskTime.append(time.perf_counter() - taskStartTime)
-                    self.PrintProcessInfo()
+                #     self.taskTime.append(time.perf_counter() - taskStartTime)
+                #     self.PrintProcessInfo()
 
-                    print('----- Finish task -----')
-                    break
+                #     print('----- Finish task -----')
+                #     break
 
                 if isMoving:
                     # ----- Get transform data ----- #

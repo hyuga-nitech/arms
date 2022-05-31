@@ -69,7 +69,7 @@ class mikataTransform:
             theta = self.__minTheta
 
         # Motor's Kinematics
-        d1 = 270 + phi
+        d1 = 270 - phi
         d2 = 260 - theta - math.degrees(math.acos(r/2/150))
         d3 = 100 + (180 - 2 * math.degrees(math.asin(r/2/150)))
         d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150)))
