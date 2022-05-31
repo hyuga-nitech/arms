@@ -34,9 +34,12 @@ class RobotControlManager:
         xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
         self.xArmIpAddress = xArmIP
 
-    def SendDataToRobot(self):
+    def SendDataToRobot(self,executionTime: int = 120):
         # ----- Process info ----- #
         self.loopCount      = 0
+        self.taskTime       = []
+        self.errorCount     = 0
+        taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
         Behaviour       = MotionBehaviour(defaultRigidBodyNum)
@@ -53,8 +56,19 @@ class RobotControlManager:
 
         try:
             while True:
+                if time.perf_counter() - taskStartTime > executionTime:
+                    # ----- Exit processing after task time elapses ----- #
+                    isMoving    = False
+
+                    self.taskTime.append(time.perf_counter() - taskStartTime)
+                    self.PrintProcessInfo()
+
+                    print('----- Finish task -----')
+                    break
+
                 if isMoving:
                     # ----- Get transform data ----- #
+                    # ---------- Start control process timer ---------- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
@@ -115,6 +129,7 @@ class RobotControlManager:
                     if arm.has_err_warn:
                         isMoving    = False
                         self.errorCount += 1
+                        self.taskTime.append(time.perf_counter() - taskStartTime)
                         print('[ERROR] >> xArm Error has occured. Please enter "r" to reset xArm, or "q" to quit')
 
                     self.loopCount += 1
@@ -158,9 +173,13 @@ class RobotControlManager:
                         motionManager.SetInitialBendingValue()
 
                         isMoving    = True
+                        taskStartTime = time.perf_counter()
 
         except KeyboardInterrupt:
             print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
+
+            self.taskTime.append(time.perf_counter() - taskStartTime)
+            self.PrintProcessInfo()
 
             arm.disconnect()
             mikatacontrol.ClosePort()
@@ -198,3 +217,15 @@ class RobotControlManager:
             __initCurrent = mikatatransform.GetmikataInitialTransform()
             mikatacontrol.SendtomikataArm(__initCurrent)
         print('Initialized > mikataArm')
+
+        def PrintProcessInfo(self):
+            """
+            Print process information. 
+            """
+
+            print('----- Process info -----')
+            print('Total loop count > ', self.loopCount)
+            for ttask in self.taskTime:
+                print('Task time\t > ', ttask, '[s]')
+            print('Error count\t > ', self.errorCount)
+            print('------------------------')
