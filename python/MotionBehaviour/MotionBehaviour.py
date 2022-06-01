@@ -65,10 +65,11 @@ class MotionBehaviour:
         if type(rotation) is np.ndarray:
             rotation = self.NumpyArray2Dict(rotation)
 
-        gapPos = position['RigidBody2'] - position['RigidBody3']
+        gapPos = position['RigidBody2'] - self.originPositions['RigidBody2']
         relativeRot = self.GetRelativeRotation(rotation)
+        relativeRot2 = self.Quaternion2Euler(relativeRot['RigidBody2'])
 
-        return gapPos , relativeRot['RigidBody2']
+        return gapPos , relativeRot2
 
     def SetOriginPosition(self, position) -> None:
         """

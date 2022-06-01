@@ -85,7 +85,7 @@ class RobotControlManager:
                     xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                     # ----- Set mikata transform ----- #
-                    mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                    mikatatransform.x, mikatatransform.y, mikatatransform.z     = (mikataPosition[2] + 300), mikataPosition[0], mikataPosition[1]
 
                     print('xArmTransform:',xArmtransform.x,' ', xArmtransform.y,' ', xArmtransform.z)
                     print('mikataTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
@@ -164,7 +164,7 @@ class RobotControlManager:
                         xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                         # ----- Set mikata transform ----- #
-                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = (mikataPosition[2] + 300), mikataPosition[0], mikataPosition[1]
 
                         beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
