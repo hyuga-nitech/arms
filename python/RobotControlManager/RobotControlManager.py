@@ -218,14 +218,14 @@ class RobotControlManager:
             mikatacontrol.SendtomikataArm(__initCurrent)
         print('Initialized > mikataArm')
 
-        def PrintProcessInfo(self):
-            """
-            Print process information. 
-            """
+    def PrintProcessInfo(self):
+        """
+        Print process information. 
+        """
 
-            print('----- Process info -----')
-            print('Total loop count > ', self.loopCount)
-            for ttask in self.taskTime:
-                print('Task time\t > ', ttask, '[s]')
-            print('Error count\t > ', self.errorCount)
-            print('------------------------')
+        print('----- Process info -----')
+        print('Total loop count > ', self.loopCount)
+        for ttask in self.taskTime:
+            print('Task time\t > ', ttask, '[s]')
+        print('Error count\t > ', self.errorCount)
+        print('------------------------')
