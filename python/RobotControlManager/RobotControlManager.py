@@ -121,7 +121,7 @@ class RobotControlManager:
                         print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "r" to reset xArm, or "q" to quit')
                     else:
                         # ----- Send to Arms ----- #
-                        arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = True))
+                        arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
                         mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
                         mikatacontrol.SendtomikataArm(mikataGoal)
 

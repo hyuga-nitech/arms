@@ -101,7 +101,7 @@ class xArmTransform:
         self.__maxYaw   = maxYaw
     
 
-    def Transform(self, posMagnification = 1, rotMagnification = 1, isLimit = True, isOnlyPosition = True):
+    def Transform(self, posMagnification = 1, rotMagnification = 1, isLimit = True, isOnlyPosition = False):
         """
         Calculate the position and rotation to be sent to xArm.
         
