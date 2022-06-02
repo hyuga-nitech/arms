@@ -21,7 +21,6 @@ from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 
 # ----- Setting: Number ----- #
-userArmLong         = 600
 defaultRigidBodyNum = 3
 xArmMovingLimit     = 100
 mikataMovingLimit   = 2000
@@ -44,7 +43,7 @@ class RobotControlManager:
         # ----- Instantiating custom classes ----- #
         Behaviour       = MotionBehaviour(defaultRigidBodyNum)
         xArmtransform   = xArmTransform()
-        mikatatransform = mikataTransform(userArmLong)
+        mikatatransform = mikataTransform()
         motionManager   = MotionManager(defaultRigidBodyNum)
         mikatacontrol   = mikataControl()
 
@@ -72,7 +71,8 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
-                    print('localPosition:',localPosition)
+                    # ----- (for Debug) ----- #
+                    # print('localPosition:',localPosition)
                 
                     xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
                     mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
@@ -85,10 +85,11 @@ class RobotControlManager:
                     xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                     # ----- Set mikata transform ----- #
-                    mikatatransform.x, mikatatransform.y, mikatatransform.z     = (mikataPosition[2] + 300), mikataPosition[0], mikataPosition[1]
+                    mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
-                    print('xArmTransform:',xArmtransform.x,' ', xArmtransform.y,' ', xArmtransform.z)
-                    print('mikataTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
+                    # ----- (for Debug) ----- #
+                    # print('xArmTransform:',xArmtransform.x,' ', xArmtransform.y,' ', xArmtransform.z)
+                    # print('mikataTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
 
                     # ----- Bending sensor ----- #
                     gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -164,7 +165,7 @@ class RobotControlManager:
                         xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                         # ----- Set mikata transform ----- #
-                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = (mikataPosition[2] + 300), mikataPosition[0], mikataPosition[1]
+                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                         beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()

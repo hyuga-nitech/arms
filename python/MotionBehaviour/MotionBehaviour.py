@@ -52,7 +52,7 @@ class MotionBehaviour:
     def GetmikataArmTransform(self,position :dict,rotation: dict) :
         """
         Calculate the mikataArm transforms
-        Use  gap Position & relative Rotation
+        Use  relative Position & relative Rotation
 
         初期位置、初期回転角との差を利用する
         """
@@ -65,11 +65,11 @@ class MotionBehaviour:
         if type(rotation) is np.ndarray:
             rotation = self.NumpyArray2Dict(rotation)
 
-        gapPos = position['RigidBody2'] - self.originPositions['RigidBody2']
+        relativePos = position['RigidBody2'] - self.originPositions['RigidBody2']
         relativeRot = self.GetRelativeRotation(rotation)
         relativeRot2 = self.Quaternion2Euler(relativeRot['RigidBody2'])
 
-        return gapPos , relativeRot2
+        return relativePos , relativeRot2
 
     def SetOriginPosition(self, position) -> None:
         """
