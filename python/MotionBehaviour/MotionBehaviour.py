@@ -35,14 +35,6 @@ class MotionBehaviour:
         初期位置、初期回転角との差を利用する
         """
 
-        # ----- numpy array to dict: position ----- #
-        if type(position) is np.ndarray:
-            position = self.NumpyArray2Dict(position)
-        
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
-
         relativePos = position['RigidBody1'] - self.originPositions['RigidBody1']
         relativeRot = self.GetRelativeRotation(rotation)
         relativeRot1 = self.Quaternion2Euler(relativeRot['RigidBody1'])
@@ -57,17 +49,37 @@ class MotionBehaviour:
         初期位置、初期回転角との差を利用する
         """
 
-        # ----- numpy array to dict: position ----- #
-        if type(position) is np.ndarray:
-            position = self.NumpyArray2Dict(position)
-        
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
-
         relativePos = position['RigidBody2'] - self.originPositions['RigidBody2']
         relativeRot = self.GetRelativeRotation(rotation)
         relativeRot2 = self.Quaternion2Euler(relativeRot['RigidBody2'])
+
+        return relativePos , relativeRot2
+
+    def GetRatioxArmTransform(self,position: dict,rotation: dict, Ratio) :
+        """
+        Calculate the xArm transforms
+        Use relative Position & relative Rotation
+
+        初期位置、初期回転角との差を利用する
+        """
+
+        relativePos = (position['RigidBody1'] - self.originPositions['RigidBody1']) * Ratio[0] + (position['RigidBody2'] - self.originPositions['RigidBody2']) * Ratio[2]
+        relativeRot = self.GetRelativeRotation(rotation)
+        relativeRot1 = self.Quaternion2Euler(relativeRot['RigidBody1'] * Ratio[0] +relativeRot['RigidBody2'] * Ratio[2])
+
+        return relativePos , relativeRot1
+
+    def GetRatiomikataArmTransform(self,position :dict,rotation: dict, Ratio) :
+        """
+        Calculate the mikataArm transforms
+        Use  relative Position & relative Rotation
+
+        初期位置、初期回転角との差を利用する
+        """
+
+        relativePos = (position['RigidBody1'] - self.originPositions['RigidBody1']) * Ratio[1] + (position['RigidBody2'] - self.originPositions['RigidBody2']) * Ratio[3]
+        relativeRot = self.GetRelativeRotation(rotation)
+        relativeRot2 = self.Quaternion2Euler(relativeRot['RigidBody1'] * Ratio[1] +relativeRot['RigidBody2'] * Ratio[3])
 
         return relativePos , relativeRot2
 
