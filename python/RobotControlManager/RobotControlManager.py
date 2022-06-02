@@ -77,11 +77,11 @@ class RobotControlManager:
                     # print('localPosition:',localPosition)
 
                     if isRatio:
-                        xArmPosition,xArmRotation       = Behaviour.GetRatioxArmTransform(localPosition,localRotation)
-                        mikataPosition,mikataRotation   = Behaviour.GetRatiomikataArmTransform(localPosition,localRotation)
+                        xArmPosition,xArmRotation       = Behaviour.GetRatioxArmTransform(localPosition,localRotation,Ratio)
+                        mikataPosition,mikataRotation   = Behaviour.GetRatiomikataArmTransform(localPosition,localRotation,Ratio)
                     else:
-                        xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation,Ratio)
-                        mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation,Ratio)
+                        xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
+                        mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
 
 
                     xArmPosition   = xArmPosition * 1000
@@ -162,11 +162,11 @@ class RobotControlManager:
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
                         
                         if isRatio:
-                            xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-                            mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-                        else:
                             xArmPosition,xArmRotation       = Behaviour.GetRatioxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),Ratio)
                             mikataPosition,mikataRotation   = Behaviour.GetRatiomikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),Ratio)
+                        else:
+                            xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+                            mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
