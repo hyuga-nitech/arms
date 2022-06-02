@@ -51,7 +51,7 @@ class mikataTransform:
     def Transform(self):
         self.posX = self.x + self.__initX
         self.posY = self.y + self.__initY
-        self.posZ = self.Z + self.__initZ
+        self.posZ = self.z + self.__initZ
 
         r     = math.sqrt(self.posX * self.posX + self.posY * self.posY + self.posZ * self.posZ )
         phi   = math.degrees(math.atan2(self.posY ,self.posX ))
