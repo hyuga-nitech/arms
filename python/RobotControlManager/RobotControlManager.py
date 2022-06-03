@@ -24,7 +24,8 @@ from FileIO.FileIO import FileIO
 defaultRigidBodyNum = 3
 xArmMovingLimit     = 100
 mikataMovingLimit   = 2000
-Ratio               = [0.8,0.2,0.2,0.8]  #[RigidBody1-to-xArm, RigidBody1-to-mikataArm, RigidBody2-to-xArm, RigidBody2-to-mikataArm]
+xRatio               = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+mikataRatio               = [0.8,0.2]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -77,11 +78,11 @@ class RobotControlManager:
                     # print('localPosition:',localPosition)
 
                     if isRatio:
-                        xArmPosition,xArmRotation       = Behaviour.GetRatioxArmTransform(localPosition,localRotation,Ratio)
-                        mikataPosition,mikataRotation   = Behaviour.GetRatiomikataArmTransform(localPosition,localRotation,Ratio)
+                        xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xRatio)
+                        mikataPosition                  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataRatio)
                     else:
                         xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
-                        mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
+                        mikataPosition                  = Behaviour.GetmikataArmTransform(localPosition,localRotation)
 
 
                     xArmPosition   = xArmPosition * 1000
@@ -153,8 +154,6 @@ class RobotControlManager:
                     # ----- Reset xArm and gripper ----- #
                     elif keycode == 'r':
                         self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
-                        # self.InitRobotArm(arm, transform)
-                        # self.InitGripper(arm)
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
@@ -162,11 +161,11 @@ class RobotControlManager:
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
                         
                         if isRatio:
-                            xArmPosition,xArmRotation       = Behaviour.GetRatioxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),Ratio)
-                            mikataPosition,mikataRotation   = Behaviour.GetRatiomikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),Ratio)
+                            xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xRatio)
+                            mikataPosition                  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataRatio)
                         else:
                             xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-                            mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+                            mikataPosition                  = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
