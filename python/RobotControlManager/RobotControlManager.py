@@ -21,11 +21,11 @@ from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 
 # ----- Setting: Number ----- #
-defaultRigidBodyNum = 3
+defaultRigidBodyNum = 2
 xArmMovingLimit     = 100
 mikataMovingLimit   = 2000
-xRatio               = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-mikataRatio               = [0.8,0.2]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+xRatio              = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+mikataRatio         = [0.8,0.2]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -35,7 +35,7 @@ class RobotControlManager:
         xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
         self.xArmIpAddress = xArmIP
 
-    def SendDataToRobot(self,executionTime: int = 120):
+    def SendDataToRobot(self,executionTime: int = 120, isEnableArm: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
@@ -49,8 +49,9 @@ class RobotControlManager:
         motionManager   = MotionManager(defaultRigidBodyNum)
         mikatacontrol   = mikataControl()
 
-        arm = XArmAPI(self.xArmIpAddress)
-        self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
+        if isEnableArm:
+            arm = XArmAPI(self.xArmIpAddress)
+            self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
         # ----- Control flags ----- #
         isMoving = False
@@ -64,6 +65,10 @@ class RobotControlManager:
 
                 #     self.taskTime.append(time.perf_counter() - taskStartTime)
                 #     self.PrintProcessInfo()
+
+                #     if isEnableArm:
+                #         arm.disconnect()
+                #         mikatacontrol.ClosePort()
 
                 #     print('----- Finish task -----')
                 #     break
@@ -129,13 +134,14 @@ class RobotControlManager:
                         isMoving = False
                         print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "r" to reset xArm, or "q" to quit')
                     else:
-                        # ----- Send to Arms ----- #
-                        arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
-                        mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
-                        mikatacontrol.SendtomikataArm(mikataGoal)
+                        if isEnableArm:
+                            # ----- Send to Arms ----- #
+                            arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
+                            mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
+                            mikatacontrol.SendtomikataArm(mikataGoal)
 
                     # ----- If xArm error has occured ----- #
-                    if arm.has_err_warn:
+                    if isEnableArm and arm.has_err_warn:
                         isMoving    = False
                         self.errorCount += 1
                         self.taskTime.append(time.perf_counter() - taskStartTime)
@@ -147,13 +153,17 @@ class RobotControlManager:
                     keycode = input('Input > "q": quit, "r": Clean error and init arm, "s": start control \n')
                     # ----- Quit program ----- #
                     if keycode == 'q':
-                        arm.disconnect()
-                        mikatacontrol.ClosePort()
+                        if isEnableArm:
+                            arm.disconnect()
+                            mikatacontrol.ClosePort()
+
+                        self.PrintProcessInfo()
                         break
 
                     # ----- Reset xArm and gripper ----- #
                     elif keycode == 'r':
-                        self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
+                        if isEnableArm:
+                            self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
@@ -192,8 +202,9 @@ class RobotControlManager:
             self.taskTime.append(time.perf_counter() - taskStartTime)
             self.PrintProcessInfo()
 
-            arm.disconnect()
-            mikatacontrol.ClosePort()
+            if isEnableArm:
+                arm.disconnect()
+                mikatacontrol.ClosePort()
 
         except:
             print('----- Exception has occurred -----')

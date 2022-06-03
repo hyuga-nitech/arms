@@ -94,7 +94,7 @@ class MotionBehaviour:
         for i in range(self.RigidBodyNum):
             # ----- Position ----- #
             diffPos     = pos['RigidBody'+str(i+1)] - self.xBeforePositions['RigidBody'+str(i+1)]
-            weightedPos = diffPos * xRatio[i*2+1] + self.xWeightedPositions['RigidBody'+str(i+1)]
+            weightedPos = diffPos * xRatio[i*2] + self.xWeightedPositions['RigidBody'+str(i+1)]
             sharedPosition += weightedPos
 
             self.xWeightedPositions['RigidBody'+str(i+1)] = weightedPos
@@ -110,7 +110,7 @@ class MotionBehaviour:
             diffRot = np.dot(np.linalg.inv(mat4x4), currentRot)
             diffRotEuler = self.Quaternion2Euler(np.array(diffRot))
             
-            weightedDiffRotEuler = list(map(lambda x: x * xRatio[i*2+2] , diffRotEuler))
+            weightedDiffRotEuler = list(map(lambda x: x * xRatio[i*2+1] , diffRotEuler))
             weightedDiffRot = self.Euler2Quaternion(np.array(weightedDiffRotEuler))
 
             nqw, nqx, nqy, nqz = weightedDiffRot[3], weightedDiffRot[0], weightedDiffRot[1], weightedDiffRot[2]
@@ -144,7 +144,7 @@ class MotionBehaviour:
         for i in range(self.RigidBodyNum):
             # ----- Position ----- #
             diffPos     = pos['RigidBody'+str(i+1)] - self.mikataBeforePositions['RigidBody'+str(i+1)]
-            weightedPos = diffPos * mikataRatio[i+1] + self.mikataWeightedPositions['RigidBody'+str(i+1)]
+            weightedPos = diffPos * mikataRatio[i] + self.mikataWeightedPositions['RigidBody'+str(i+1)]
             sharedPosition += weightedPos
 
             self.mikataWeightedPositions['RigidBody'+str(i+1)] = weightedPos
