@@ -19,8 +19,9 @@ bendingSensorMin = 0
 bendingSensorMax = 850
 
 class MotionManager:
-    def __init__(self,defaultRigidBodyNum: int) ->None:
+    def __init__(self,defaultRigidBodyNum: int,bendingSensorNum: int) ->None:
         self.defaultRigidBodyNum     = defaultRigidBodyNum
+        self.bendingSensorNum        = bendingSensorNum
         self.InitBendingSensorValues = []
 
         self.optiTrackStreamingManager = OptiTrackStreamingManager(defaultRigidBodyNum=defaultRigidBodyNum)
@@ -34,13 +35,16 @@ class MotionManager:
         bendingSensorSerialComs = [addr for addr in settings if 'bendingSensorSerialComs' in addr[0]][0][1]
         bendingSensorSerialPorts =[addr for addr in settings if 'bendingSensorSerialPorts' in addr [0]][0][1]
 
-        bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs, port=bendingSensorSerialPorts)
-        self.bendingSensor = bendingSensorManager
+        self.bendingSensors  = []
 
-        # ----- Start receiving bending sensor value ----- #
-        bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
-        bendingSensorThread.setDaemon(True)
-        bendingSensorThread.start()
+        for i in range(bendingSensorNum):
+            bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs[i], port=bendingSensorSerialPorts[i])
+            self.bendingSensors.append(bendingSensorManager)
+
+            # ----- Start receiving bending sensor value ----- #
+            bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
+            bendingSensorThread.setDaemon(True)
+            bendingSensorThread.start()
         
         # ----- Set init value ----- #
         self.SetInitialBendingValue()
@@ -50,18 +54,22 @@ class MotionManager:
         Set init bending value
         """
         
-        self.InitBendingSensorValues    = self.bendingSensor.bendingValue
+        self.InitBendingSensorValues    = []
+
+        for i in range(self.bendingSensorNum):
+            self.InitBendingSensorValues.append(self.bendingSensors[i].bendingValue)
 
     def GripperControlValue(self,loopCount: int = 0):
-        GripperValue = 0
-        bendingVal = self.bendingSensor.bendingValue
-        bendingValueNorm = (bendingVal - bendingSensorMin) / (self.InitBendingSensorValues - bendingSensorMin) * (targetMax - targetMin) + targetMin
+        dictGripperValue = {}
+        for i in range(self.bendingSensorNum):
+            bendingVal = self.bendingSensors[i].bendingValue
+            bendingValueNorm = (bendingVal - bendingSensorMin) / (self.InitBendingSensorValues[i] - bendingSensorMin) * (targetMax - targetMin) + targetMin
 
-        if bendingValueNorm > targetMax:
-            bendingValueNorm = targetMax
-        GripperValue = bendingValueNorm
-        
-        return GripperValue
+            if bendingValueNorm > targetMax:
+                bendingValueNorm = targetMax
+            dictGripperValue['gripperValue'+str(i+1)] = bendingValueNorm
+    
+        return dictGripperValue
 
     def LocalPosition(self, loopCount: int = 0):
         dictPos = {}
