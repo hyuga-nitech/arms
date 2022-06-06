@@ -162,9 +162,6 @@ class MotionBehaviour:
         position: dict, numpy array
             Origin position
         """
-        # ----- numpy array to dict: position ----- #
-        if type(position) is np.ndarray:
-            position = self.NumpyArray2Dict(position)
         
         #print(position)
 
@@ -185,10 +182,6 @@ class MotionBehaviour:
             Rotation for inverse matrix calculation
         """
 
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
-        
         listRigidBody = [RigidBody for RigidBody in list(rotation.keys()) if 'RigidBody' in RigidBody]
         self.RigidBodyNum = len(listRigidBody)
 
@@ -241,10 +234,6 @@ class MotionBehaviour:
             [x, y, z, w]
         """
 
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
-        
         relativeRot = {}
         for i in range(self.RigidBodyNum):
             relativeRot['RigidBody'+str(i+1)] = np.dot(self.inversedMatrix['RigidBody'+str(i+1)], rotation['RigidBody'+str(i+1)])
