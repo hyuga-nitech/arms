@@ -1,6 +1,6 @@
 ﻿motiveServer,133.68.35.155
 motiveLocal,133.68.35.155
-bendingSensorSerialComs,COM3
+bendingSensorSerialComs,COM14
 bendingSensorSerialPorts,9600
 xArmIP,192.168.1.217
 mikataDEVICENAME,COM12
