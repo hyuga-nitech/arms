@@ -66,7 +66,7 @@ class MotionManager:
         dictGripperValue = {}
         for i in range(self.bendingSensorNum):
             bendingVal = self.bendingSensors[i].bendingValue
-            bendingValueNorm = (bendingSensorMax - bendingVal) / (bendingSensorMax - self.InitBendingSensorValues) * (targetMax - targetMin) + targetMin
+            bendingValueNorm = (bendingSensorMax - bendingVal) / (bendingSensorMax - self.InitBendingSensorValues[i]) * (targetMax - targetMin) + targetMin
 
             if bendingValueNorm > targetMax:
                 bendingValueNorm = targetMax

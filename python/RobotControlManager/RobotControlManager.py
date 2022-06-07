@@ -23,7 +23,7 @@ from FileIO.FileIO import FileIO
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
-defaultBendingSensorNum = 1
+defaultBendingSensorNum = 2
 xArmMovingLimit         = 100
 mikataMovingLimit       = 2000
 xRatio                  = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
@@ -116,7 +116,7 @@ class RobotControlManager:
                     dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
                     #gripperValue = sum(dictBendingValue.values()) / len(dictBendingValue)
                     gripperValue = 0
-                    for i in len(dictBendingValue):
+                    for i in range(defaultBendingSensorNum):
                         gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
 
 
@@ -203,9 +203,16 @@ class RobotControlManager:
                         # ----- Set mikata transform ----- #
                         mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
+                        # ----- Bending sensor ----- #
+                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                        #gripperValue = sum(dictBendingValue.values()) / len(dictBendingValue)
+                        gripperValue = 0
+                        for i in range(defaultBendingSensorNum):
+                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
+
                         beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
-                        beforeC5                               = mikatatransform.Degree2Current(motionManager.GripperControlValue(loopCount = self.loopCount))
+                        beforeC5                               = mikatatransform.Degree2Current(gripperValue)
 
                         motionManager.SetInitialBendingValue()
 
