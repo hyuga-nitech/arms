@@ -5,16 +5,26 @@
 # Summary:         RigidBody座標に基づくアーム座標の指令値計算
 # -----------------------------------------------------------------
 
+from turtle import pos
 import numpy as np
 import scipy.spatial.transform as scitransform
 import math
 
 class MotionBehaviour:
-    originPositions     = {}
-    inversedMatrix      = {}
+    originPositions         = {}
+    inversedMatrix          = {}
 
-    Positions           = {}
-    Rotations           = {}
+    Positions               = {}
+    Rotations               = {}
+
+    xBeforePositions        = {}
+    xWeightedPositions      = {}
+
+    xBeforeRotations        = {}
+    xWeightedRotations      = {}
+
+    mikataBeforePositions     = {}
+    mikataWeightedPositions   = {}
 
     def __init__(self,defaultRigidBodyNum: int = 3) -> None:
         for i in range(defaultRigidBodyNum):
@@ -22,8 +32,16 @@ class MotionBehaviour:
             self.inversedMatrix['RigidBody'+str(i+1)] = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
 
             self.Positions['RigidBody'+str(i+1)] = np.zeros(3)
-
             self.Rotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
+            
+            self.xBeforePositions['RigidBody'+str(i+1)] = np.zeros(3)
+            self.xWeightedPositions['RigidBody'+str(i+1)] = np.zeros(3)
+
+            self.xBeforeRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
+            self.xWeightedRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
+
+            self.mikataBeforePositions['RigidBody'+str(i+1)] = np.zeros(3)
+            self.mikataWeightedPositions['RigidBody'+str(i+1)] = np.zeros(3)
 
         self.RigidBodyNum = defaultRigidBodyNum
 
@@ -35,40 +53,103 @@ class MotionBehaviour:
         初期位置、初期回転角との差を利用する
         """
 
-        # ----- numpy array to dict: position ----- #
-        if type(position) is np.ndarray:
-            position = self.NumpyArray2Dict(position)
-        
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
+        Pos = self.GetRelativePosition(position)
+        Rot = self.GetRelativeRotation(rotation)
 
-        relativePos = position['RigidBody1'] - self.originPositions['RigidBody1']
-        relativeRot = self.GetRelativeRotation(rotation)
-        relativeRot1 = self.Quaternion2Euler(relativeRot['RigidBody1'])
+        relativePos = Pos['RigidBody1']
+        relativeRot = self.Quaternion2Euler(Rot['RigidBody1'])
 
-        return relativePos , relativeRot1
+        return relativePos , relativeRot
 
     def GetmikataArmTransform(self,position :dict,rotation: dict) :
         """
         Calculate the mikataArm transforms
-        Use  gap Position & relative Rotation
+        Use  relative Position & relative Rotation
 
         初期位置、初期回転角との差を利用する
         """
 
-        # ----- numpy array to dict: position ----- #
-        if type(position) is np.ndarray:
-            position = self.NumpyArray2Dict(position)
+        Pos = self.GetRelativePosition(position)
+
+        relativePos = Pos['RigidBody2']
+
+        return relativePos
+
+    def GetSharedxArmTransform(self,position: dict,rotation: dict, xRatio) :
+        """
+        Calculate the xArm transforms
+        Use relative Position & relative Rotation
+
+        前回位置、前回回転角との差を利用する
+        ※初期位置を使用してしまうと互いの剛体が引きずり合う
+        """
+
+        # ----- Shared transform ----- #
+        sharedPosition = [0, 0, 0]
+        sharedRotation_euler = [0, 0, 0]
+
+        pos = self.GetRelativePosition(position)
+        rot = self.GetRelativeRotation(rotation)
+
+        for i in range(self.RigidBodyNum):
+            # ----- Position ----- #
+            diffPos     = pos['RigidBody'+str(i+1)] - self.xBeforePositions['RigidBody'+str(i+1)]
+            weightedPos = diffPos * xRatio[i*2] + self.xWeightedPositions['RigidBody'+str(i+1)]
+            sharedPosition += weightedPos
+
+            self.xWeightedPositions['RigidBody'+str(i+1)] = weightedPos
+            self.xBeforePositions['RigidBody'+str(i+1)]   = pos['RigidBody'+str(i+1)]
+
+            # ----- Rotation ----- #
+            qw, qx, qy, qz = self.xBeforeRotations['RigidBody'+str(i+1)][3], self.xBeforeRotations['RigidBody'+str(i+1)][0], self.xBeforeRotations['RigidBody'+str(i+1)][1], self.xBeforeRotations['RigidBody'+str(i+1)][2]
+            mat4x4 = np.array([ [qw, qz, -qy, qx],
+                                [-qz, qw, qx, qy],
+                                [qy, -qx, qw, qz],
+                                [-qx,-qy, -qz, qw]])
+            currentRot = rot['RigidBody'+str(i+1)]
+            diffRot = np.dot(np.linalg.inv(mat4x4), currentRot)
+            diffRotEuler = self.Quaternion2Euler(np.array(diffRot))
+            
+            weightedDiffRotEuler = list(map(lambda x: x * xRatio[i*2+1] , diffRotEuler))
+            weightedDiffRot = self.Euler2Quaternion(np.array(weightedDiffRotEuler))
+
+            nqw, nqx, nqy, nqz = weightedDiffRot[3], weightedDiffRot[0], weightedDiffRot[1], weightedDiffRot[2]
+            neomat4x4 = np.array([[nqw, -nqz, nqy, nqx],
+                                    [nqz, nqw, -nqx, nqy],
+                                    [-nqy, nqx, nqw, nqz],
+                                    [-nqx,-nqy, -nqz, nqw]])
+            weightedRot = np.dot(neomat4x4,  self.xWeightedRotations['RigidBody'+str(i+1)])
+            sharedRotation_euler += self.Quaternion2Euler(weightedRot)
+
+            self.xWeightedRotations['RigidBody'+str(i+1)]  = weightedRot
+            self.xBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
         
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
+        return sharedPosition , sharedRotation_euler
 
-        gapPos = position['RigidBody2'] - position['RigidBody3']
-        relativeRot = self.GetRelativeRotation(rotation)
+    def GetSharedmikataArmTransform(self,position :dict,rotation: dict, mikataRatio) :
+        """
+        Calculate the mikataArm transforms
+        Use  relative Position & relative Rotation
 
-        return gapPos , relativeRot['RigidBody2']
+        前回位置、前回回転角との差を利用する
+        ※初期位置を使用してしまうと互いの剛体が引きずり合う
+        """
+
+        # ----- Shared transform ----- #
+        sharedPosition = [0, 0, 0]
+
+        pos = self.GetRelativePosition(position)
+
+        for i in range(self.RigidBodyNum):
+            # ----- Position ----- #
+            diffPos     = pos['RigidBody'+str(i+1)] - self.mikataBeforePositions['RigidBody'+str(i+1)]
+            weightedPos = diffPos * mikataRatio[i] + self.mikataWeightedPositions['RigidBody'+str(i+1)]
+            sharedPosition += weightedPos
+
+            self.mikataWeightedPositions['RigidBody'+str(i+1)] = weightedPos
+            self.mikataBeforePositions['RigidBody'+str(i+1)]   = pos['RigidBody'+str(i+1)]
+        
+        return sharedPosition
 
     def SetOriginPosition(self, position) -> None:
         """
@@ -79,9 +160,6 @@ class MotionBehaviour:
         position: dict, numpy array
             Origin position
         """
-        # ----- numpy array to dict: position ----- #
-        if type(position) is np.ndarray:
-            position = self.NumpyArray2Dict(position)
         
         #print(position)
 
@@ -102,10 +180,6 @@ class MotionBehaviour:
             Rotation for inverse matrix calculation
         """
 
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
-        
         listRigidBody = [RigidBody for RigidBody in list(rotation.keys()) if 'RigidBody' in RigidBody]
         self.RigidBodyNum = len(listRigidBody)
 
@@ -117,6 +191,29 @@ class MotionBehaviour:
                                 [-qx, qz, qw, qy],
                                 [-qz,-qx, -qy, qw]])
             self.inversedMatrix['RigidBody'+str(i+1)] = np.linalg.pinv(mat4x4)
+
+    def GetRelativePosition(self, position):
+        """
+        Get the relative position
+
+        Parameters
+        ----------
+        position: dict, numpy array
+            Position to compare with the origin position.
+            [x, y, z]
+        
+        Returns
+        ----------
+        relativePos: dict
+            Position relative to the origin position.
+            [x, y, z]
+        """
+
+        relativePos = {}
+        for i in range(self.RigidBodyNum):
+            relativePos['RigidBody'+str(i+1)] = position['RigidBody'+str(i+1)] - self.originPositions['RigidBody'+str(i+1)]
+        
+        return relativePos
 
     def GetRelativeRotation(self, rotation):
         """
@@ -135,10 +232,6 @@ class MotionBehaviour:
             [x, y, z, w]
         """
 
-        # ----- numpy array to dict: rotation ----- #
-        if type(rotation) is np.ndarray:
-            rotation = self.NumpyArray2Dict(rotation)
-        
         relativeRot = {}
         for i in range(self.RigidBodyNum):
             relativeRot['RigidBody'+str(i+1)] = np.dot(self.inversedMatrix['RigidBody'+str(i+1)], rotation['RigidBody'+str(i+1)])
@@ -231,3 +324,39 @@ class MotionBehaviour:
 
         rotEuler = np.array([tx, ty, tz])
         return rotEuler
+
+    def Euler2Quaternion(self, e):
+        """
+        Calculate the Quaternion from the Euler angle.
+
+        Parameters
+        ----------
+        e: np.ndarray
+            Euler.
+            [x, y, z]
+        
+        Returns
+        ----------
+        rotQuat: np.ndarray
+            Quaternion
+            [x, y, z, w]
+        """
+
+        roll = np.deg2rad(e[0])
+        pitch = np.deg2rad(e[1])
+        yaw = np.deg2rad(e[2])
+
+        cosRoll = np.cos(roll/2.0)
+        sinRoll = np.sin(roll / 2.0)
+        cosPitch = np.cos(pitch / 2.0)
+        sinPitch = np.sin(pitch / 2.0)
+        cosYaw = np.cos(yaw / 2.0)
+        sinYaw = np.sin(yaw / 2.0)
+
+        q0 = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw
+        q1 = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw
+        q2 = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw
+        q3 = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw
+
+        rotQuat = [q1, q2, q3, q0]
+        return rotQuat
