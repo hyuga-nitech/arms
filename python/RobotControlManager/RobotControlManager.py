@@ -16,14 +16,19 @@ from xArm.xArmTransform import xArmTransform
 from mikataArm.mikataArmTransform import mikataTransform
 from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
+from Recorder.DataRecordManager import DataRecordManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 
 # ----- Setting: Number ----- #
-defaultRigidBodyNum = 3
-xArmMovingLimit     = 100
-mikataMovingLimit   = 2000
+defaultRigidBodyNum     = 2
+defaultBendingSensorNum = 2
+xArmMovingLimit         = 100
+mikataMovingLimit       = 2000
+xRatio                  = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+mikataRatio             = [0.8,0.2]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+gripperRatio            = [0.5,0.5]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -33,7 +38,7 @@ class RobotControlManager:
         xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
         self.xArmIpAddress = xArmIP
 
-    def SendDataToRobot(self,executionTime: int = 120):
+    def SendDataToRobot(self,executionTime: int = 120, isExportData: bool = True, isEnableArm: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
@@ -41,17 +46,20 @@ class RobotControlManager:
         taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
-        Behaviour       = MotionBehaviour(defaultRigidBodyNum)
-        xArmtransform   = xArmTransform()
-        mikatatransform = mikataTransform()
-        motionManager   = MotionManager(defaultRigidBodyNum)
-        mikatacontrol   = mikataControl()
+        Behaviour         = MotionBehaviour(defaultRigidBodyNum)
+        xArmtransform     = xArmTransform()
+        mikatatransform   = mikataTransform()
+        motionManager     = MotionManager(defaultRigidBodyNum, defaultBendingSensorNum)
+        mikatacontrol     = mikataControl()
+        dataRecordManager = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
 
-        arm = XArmAPI(self.xArmIpAddress)
-        self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
+        if isEnableArm:
+            arm = XArmAPI(self.xArmIpAddress)
+            self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
         # ----- Control flags ----- #
         isMoving = False
+        isRatio  = True
 
         try:
             while True:
@@ -61,6 +69,14 @@ class RobotControlManager:
 
                 #     self.taskTime.append(time.perf_counter() - taskStartTime)
                 #     self.PrintProcessInfo()
+
+                #     # ----- Export recorded data ----- #
+                #     if isExportData:
+                #         dataRecordManager.ExportSelf()
+
+                #     if isEnableArm:
+                #         arm.disconnect()
+                #         mikatacontrol.ClosePort()
 
                 #     print('----- Finish task -----')
                 #     break
@@ -73,9 +89,14 @@ class RobotControlManager:
 
                     # ----- (for Debug) ----- #
                     # print('localPosition:',localPosition)
-                
-                    xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
-                    mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(localPosition,localRotation)
+
+                    if isRatio:
+                        xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xRatio)
+                        mikataPosition                  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataRatio)
+                    else:
+                        xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
+                        mikataPosition                  = Behaviour.GetmikataArmTransform(localPosition,localRotation)
+
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -92,7 +113,12 @@ class RobotControlManager:
                     # print('mikataTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
 
                     # ----- Bending sensor ----- #
-                    gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    #gripperValue = sum(dictBendingValue.values()) / len(dictBendingValue)
+                    gripperValue = 0
+                    for i in range(defaultBendingSensorNum):
+                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
+
 
                     # ----- Calculate mikata Current ----- #
                     mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
@@ -121,13 +147,17 @@ class RobotControlManager:
                         isMoving = False
                         print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "r" to reset xArm, or "q" to quit')
                     else:
-                        # ----- Send to Arms ----- #
-                        arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
-                        mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
-                        mikatacontrol.SendtomikataArm(mikataGoal)
+                        if isEnableArm:
+                            # ----- Send to Arms ----- #
+                            arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
+                            mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
+                            mikatacontrol.SendtomikataArm(mikataGoal)
+
+                    # ----- Data recording ----- #
+                    dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
 
                     # ----- If xArm error has occured ----- #
-                    if arm.has_err_warn:
+                    if isEnableArm and arm.has_err_warn:
                         isMoving    = False
                         self.errorCount += 1
                         self.taskTime.append(time.perf_counter() - taskStartTime)
@@ -139,24 +169,30 @@ class RobotControlManager:
                     keycode = input('Input > "q": quit, "r": Clean error and init arm, "s": start control \n')
                     # ----- Quit program ----- #
                     if keycode == 'q':
-                        arm.disconnect()
-                        mikatacontrol.ClosePort()
+                        if isEnableArm:
+                            arm.disconnect()
+                            mikatacontrol.ClosePort()
+
+                        self.PrintProcessInfo()
                         break
 
                     # ----- Reset xArm and gripper ----- #
                     elif keycode == 'r':
-                        self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
-                        # self.InitRobotArm(arm, transform)
-                        # self.InitGripper(arm)
+                        if isEnableArm:
+                            self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
                         
-                        xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-                        mikataPosition,mikataRotation   = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-
+                        if isRatio:
+                            xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xRatio)
+                            mikataPosition                  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataRatio)
+                        else:
+                            xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+                            mikataPosition                  = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+                        
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
 
@@ -167,9 +203,16 @@ class RobotControlManager:
                         # ----- Set mikata transform ----- #
                         mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
+                        # ----- Bending sensor ----- #
+                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                        #gripperValue = sum(dictBendingValue.values()) / len(dictBendingValue)
+                        gripperValue = 0
+                        for i in range(defaultBendingSensorNum):
+                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
+
                         beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
-                        beforeC5                               = mikatatransform.Degree2Current(motionManager.GripperControlValue(loopCount = self.loopCount))
+                        beforeC5                               = mikatatransform.Degree2Current(gripperValue)
 
                         motionManager.SetInitialBendingValue()
 
@@ -181,9 +224,13 @@ class RobotControlManager:
 
             self.taskTime.append(time.perf_counter() - taskStartTime)
             self.PrintProcessInfo()
+            
+            if isExportData:
+                dataRecordManager.ExportSelf()
 
-            arm.disconnect()
-            mikatacontrol.ClosePort()
+            if isEnableArm:
+                arm.disconnect()
+                mikatacontrol.ClosePort()
 
         except:
             print('----- Exception has occurred -----')

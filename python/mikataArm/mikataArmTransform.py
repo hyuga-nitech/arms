@@ -88,7 +88,7 @@ class mikataTransform:
         c3 = D2C.Degree2Current(d3)
         c4 = D2C.Degree2Current(d4)
 
-        print('r,phi,theta = ',r,' ',phi,' ',theta,' d1,d2,d3,d4 = ',d1,' ',d2,' ',d3,' ',d4)
+        # print('r,phi,theta = ',r,' ',phi,' ',theta,' d1,d2,d3,d4 = ',d1,' ',d2,' ',d3,' ',d4)
 
         return c1,c2,c3,c4
 
