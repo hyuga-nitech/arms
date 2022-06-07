@@ -123,7 +123,6 @@ class MotionBehaviour:
 
             self.xWeightedRotations['RigidBody'+str(i+1)]  = weightedRot
             self.xBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
-
         
         return sharedPosition , sharedRotation_euler
 
@@ -149,7 +148,6 @@ class MotionBehaviour:
 
             self.mikataWeightedPositions['RigidBody'+str(i+1)] = weightedPos
             self.mikataBeforePositions['RigidBody'+str(i+1)]   = pos['RigidBody'+str(i+1)]
-
         
         return sharedPosition
 
