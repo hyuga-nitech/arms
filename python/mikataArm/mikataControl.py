@@ -14,7 +14,7 @@ class mikataControl:
         self.ADDR_TORQUE_ENABLE          = 64
         self.ADDR_GOAL_POSITION          = 116
         self.ADDR_PRESENT_POSITION       = 132
-        self.BAUDRATE                    = 115200
+        self.BAUDRATE                    = 1000000
         #DXL_MINIMUM_POSITION_VALUE  = 0         # Refer to the Minimum Position Limit of product eManual
         #DXL_MAXIMUM_POSITION_VALUE  = 4095      # Refer to the Maximum Position Limit of product eManual
 
