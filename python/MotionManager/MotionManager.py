@@ -32,13 +32,16 @@ class MotionManager:
         from FileIO.FileIO import FileIO
         fileIO = FileIO()
         settings = fileIO.Read('settings.csv',',')
-        bendingSensorSerialComs = [addr for addr in settings if 'bendingSensorSerialComs' in addr[0]][0][1]
-        bendingSensorSerialPorts =[addr for addr in settings if 'bendingSensorSerialPorts' in addr [0]][0][1]
+        bendingSensorCom1 = [addr for addr in settings if 'bendingSensorCom1' in addr[0]][0][1]
+        bendingSensorCom2 = [addr for addr in settings if 'bendingSensorCom2' in addr[0]][0][1]
+        self.bendingSensorSerialPorts =[addr for addr in settings if 'bendingSensorSerialPorts' in addr [0]][0][1]
+
+        self.bendingSensorip = [bendingSensorCom1,bendingSensorCom2]
 
         self.bendingSensors  = []
 
         for i in range(bendingSensorNum):
-            bendingSensorManager = BendingSensorManager(ip=bendingSensorSerialComs[i], port=bendingSensorSerialPorts[i])
+            bendingSensorManager = BendingSensorManager(ip=self.bendingSensorip[i], port=self.bendingSensorSerialPorts)
             self.bendingSensors.append(bendingSensorManager)
 
             # ----- Start receiving bending sensor value ----- #
