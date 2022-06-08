@@ -41,6 +41,8 @@ class mikataControl:
         self.portHandler = PortHandler(self.DEVICENAME)
         self.packetHandler = PacketHandler(self.PROTOCOL_VERSION)
 
+        self.dxl_goal_position = []
+
 
     def OpenPort(self):
         # Open Port
@@ -67,14 +69,20 @@ class mikataControl:
             print("Failed to open the port")
             quit()
         
-    def SendtomikataArm(self,mikataGoal):
-        self.dxl_goal_position = mikataGoal
-        for j in range(len(self.DXL_ID)):
-            self.dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[j], self.ADDR_GOAL_POSITION, self.dxl_goal_position[j])
-            if self.dxl_comm_result != COMM_SUCCESS:
-                print("%s" % self.packetHandler.getTxRxResult(self.dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % self.packetHandler.getRxPacketError(dxl_error))
+    def SendtomikataArm(self):
+        try:
+            while True:
+                for i in range(len(self.DXL_ID)):
+                    self.dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_GOAL_POSITION, self.dxl_goal_position[i])
+                    if self.dxl_comm_result != COMM_SUCCESS:
+                        # print("%s" % self.packetHandler.getTxRxResult(self.dxl_comm_result))
+                        pass
+                    elif dxl_error != 0:
+                        # print("%s" % self.packetHandler.getRxPacketError(dxl_error))
+                        pass
+
+        except KeyboardInterrupt:
+            print('KeyboardInterrupt >> Stop: SendtomikataArm')
 
     def ClosePort(self):
         self.portHandler.closePort()

@@ -150,8 +150,7 @@ class RobotControlManager:
                         if isEnableArm:
                             # ----- Send to Arms ----- #
                             arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
-                            mikataGoal = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
-                            mikatacontrol.SendtomikataArm(mikataGoal)
+                            mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
@@ -205,7 +204,6 @@ class RobotControlManager:
 
                         # ----- Bending sensor ----- #
                         dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                        #gripperValue = sum(dictBendingValue.values()) / len(dictBendingValue)
                         gripperValue = 0
                         for i in range(defaultBendingSensorNum):
                             gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
@@ -262,8 +260,10 @@ class RobotControlManager:
         # ----- mikata Arm ----- #
         mikatacontrol.OpenPort()
         if isSetInitPosition:
-            __initCurrent = mikatatransform.GetmikataInitialTransform()
-            mikatacontrol.SendtomikataArm(__initCurrent)
+            mikatacontrol.dxl_goal_position = mikatatransform.GetmikataInitialTransform()
+            mikataThread = threading.Thread(target=mikatacontrol.SendtomikataArm)
+            mikataThread.setDaemon(True)
+            mikataThread.start()
         print('Initialized > mikataArm')
 
     def PrintProcessInfo(self):
