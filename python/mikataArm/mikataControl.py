@@ -36,7 +36,7 @@ class mikataControl:
         self.TORQUE_DISABLE              = 0     # Value for disabling the torque
         self.DXL_MOVING_STATUS_THRESHOLD = 20    # Dynamixel moving status threshold
 
-        self.mikataLoopKill = False
+        self.mikataLoopAlive = True
 
         # ----- setup: port & packet ----- #
 
@@ -73,7 +73,7 @@ class mikataControl:
         
     def SendtomikataArm(self):
         try:
-            while True:
+            while mikataLoopAlive:
                 for i in range(len(self.DXL_ID)):
                     self.dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_GOAL_POSITION, self.dxl_goal_position[i])
                     if self.dxl_comm_result != COMM_SUCCESS:
@@ -85,9 +85,6 @@ class mikataControl:
 
         except KeyboardInterrupt:
             print('KeyboardInterrupt >> Stop: SendtomikataArm')
-
-        except self.mikataLoopKill:
-            print('mikataLoopKill >> Stop: SendtomikataArm')
 
     def ClosePort(self):
         self.portHandler.closePort()
