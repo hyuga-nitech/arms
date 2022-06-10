@@ -170,6 +170,7 @@ class RobotControlManager:
                     if keycode == 'q':
                         if isEnableArm:
                             arm.disconnect()
+                            mikatacontrol.mikataLoopKill = True
                             mikatacontrol.ClosePort()
 
                         self.PrintProcessInfo()
@@ -178,6 +179,7 @@ class RobotControlManager:
                     # ----- Reset xArm and gripper ----- #
                     elif keycode == 'r':
                         if isEnableArm:
+                            mikatacontrol.mikataLoopKill = True
                             self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
                     # ----- Start streaming ----- #
@@ -228,6 +230,7 @@ class RobotControlManager:
 
             if isEnableArm:
                 arm.disconnect()
+                mikatacontrol.mikataLoopKill = True
                 mikatacontrol.ClosePort()
 
         except:
@@ -260,6 +263,7 @@ class RobotControlManager:
         # ----- mikata Arm ----- #
         mikatacontrol.OpenPort()
         if isSetInitPosition:
+            mikatacontrol.mikataLoopKill = False
             mikatacontrol.dxl_goal_position = mikatatransform.GetmikataInitialTransform()
             mikataThread = threading.Thread(target=mikatacontrol.SendtomikataArm)
             mikataThread.setDaemon(True)
