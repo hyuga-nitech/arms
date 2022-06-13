@@ -20,6 +20,7 @@ from Recorder.DataRecordManager import DataRecordManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
+from python.VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
@@ -150,6 +151,10 @@ class RobotControlManager:
                             # ----- Send to Arms ----- #
                             arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
+
+                    # ----- Vibrotactile Feedback ----- #
+                    if defaultRigidBodyNum == 2:
+                        VibrotactileFeedbackManager.forShared(localPosition, localRotation, xRatio, mikataRatio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, dictBendingValue)

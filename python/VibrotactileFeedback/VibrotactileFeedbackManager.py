@@ -15,14 +15,14 @@ import math
 from MotionManager.MotionManager import MotionManager
 from MotionFilter.MotionFilter import MotionFilter
 from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
-from python.MotionBehaviour.MotionBehaviour import MotionBehaviour
+from MotionBehaviour.MotionBehaviour import MotionBehaviour
 
 class VibrotactileFeedbackManager:
     def __init__(self, condition: str = ''):
         # ----- Find audio device indexes ----- #
         audioDeviceIndexes = AudioDeviceIndexes()
         ListIndexNum = audioDeviceIndexes.Find(host_api='Windows DirectSound', name='Sound Blaster Play! 3')
-        ListIndexNum = [4,5]
+        # ListIndexNum = [4,5]
         OutputDeviceNum = len(ListIndexNum)
         print(ListIndexNum)
 
