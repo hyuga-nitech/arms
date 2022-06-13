@@ -141,28 +141,29 @@ class VibrotactileFeedbackManager:
         self.listRigidBodyRot1.append(get_pos_1_filt[3:7])
         self.listRigidBodyRot2.append(get_pos_2_filt[3:7])
 
-        velPosP1 = np.linalg.norm((np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt))
-        velPosP2 = np.linalg.norm((np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt))
+        if len(self.listRigidBodyPos1) == 2:
+            velPosP1 = np.linalg.norm((np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt))
+            velPosP2 = np.linalg.norm((np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt))
 
-        velRotP1 = np.linalg.norm((np.diff(self.listRigidBodyRot1, n=1, axis=0)/self.dt))
-        velRotP2 = np.linalg.norm((np.diff(self.listRigidBodyRot2, n=1, axis=0)/self.dt))
+            velRotP1 = np.linalg.norm((np.diff(self.listRigidBodyRot1, n=1, axis=0)/self.dt))
+            velRotP2 = np.linalg.norm((np.diff(self.listRigidBodyRot2, n=1, axis=0)/self.dt))
 
-        p_r_gain = 0
-        vel_gain = 1.0
-        fb_vel_1 = (velPosP1+velRotP1*p_r_gain)*vel_gain
-        fb_vel_2 = (velPosP2+velRotP2*p_r_gain)*vel_gain
+            p_r_gain = 0
+            vel_gain = 1.0
+            fb_vel_1 = (velPosP1+velRotP1*p_r_gain)*vel_gain
+            fb_vel_2 = (velPosP2+velRotP2*p_r_gain)*vel_gain
 
-        if self.condition == 'A':
-                self.data_out_1 = 0
-                self.data_out_2 = 0
-        elif self.condition == 'B':
-            self.data_out_1 = fb_vel_1 * (xratio[0] + mikataratio[0])
-            self.data_out_2 = fb_vel_2 * (xratio[2] + mikataratio[1])
-        else:
-                print('!!!condition-error!!!')
+            if self.condition == 'A':
+                    self.data_out_1 = 0
+                    self.data_out_2 = 0
+            elif self.condition == 'B':
+                self.data_out_1 = fb_vel_1 * (xratio[0] + mikataratio[0])
+                self.data_out_2 = fb_vel_2 * (xratio[2] + mikataratio[1])
+            else:
+                    print('!!!condition-error!!!')
 
-        del self.listRigidBodyPos1[0]
-        del self.listRigidBodyPos2[0]
+            del self.listRigidBodyPos1[0]
+            del self.listRigidBodyPos2[0]
 
-        del self.listRigidBodyRot1[0]
-        del self.listRigidBodyRot2[0]
+            del self.listRigidBodyRot1[0]
+            del self.listRigidBodyRot2[0]

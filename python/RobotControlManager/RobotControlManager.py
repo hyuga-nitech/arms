@@ -20,7 +20,7 @@ from Recorder.DataRecordManager import DataRecordManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
-from python.VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
+from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
@@ -47,12 +47,13 @@ class RobotControlManager:
         taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
-        Behaviour         = MotionBehaviour(defaultRigidBodyNum)
-        xArmtransform     = xArmTransform()
-        mikatatransform   = mikataTransform()
-        motionManager     = MotionManager(defaultRigidBodyNum, defaultBendingSensorNum)
-        mikatacontrol     = mikataControl()
-        dataRecordManager = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
+        Behaviour           = MotionBehaviour(defaultRigidBodyNum)
+        xArmtransform       = xArmTransform()
+        mikatatransform     = mikataTransform()
+        motionManager       = MotionManager(defaultRigidBodyNum, defaultBendingSensorNum)
+        mikatacontrol       = mikataControl()
+        dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
+        vibrotactileManager = VibrotactileFeedbackManager()
 
         if isEnableArm:
             arm = XArmAPI(self.xArmIpAddress)
@@ -154,7 +155,7 @@ class RobotControlManager:
 
                     # ----- Vibrotactile Feedback ----- #
                     if defaultRigidBodyNum == 2:
-                        VibrotactileFeedbackManager.forShared(localPosition, localRotation, xRatio, mikataRatio)
+                        vibrotactileManager.forShared(localPosition, localRotation, xRatio, mikataRatio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
