@@ -73,7 +73,7 @@ class mikataControl:
         
     def SendtomikataArm(self):
         try:
-            while mikataLoopAlive:
+            while True:
                 for i in range(len(self.DXL_ID)):
                     self.dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_GOAL_POSITION, self.dxl_goal_position[i])
                     if self.dxl_comm_result != COMM_SUCCESS:

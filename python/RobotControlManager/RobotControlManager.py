@@ -114,7 +114,6 @@ class RobotControlManager:
 
                     # ----- Bending sensor ----- #
                     dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                    #gripperValue = sum(dictBendingValue.values()) / len(dictBendingValue)
                     gripperValue = 0
                     for i in range(defaultBendingSensorNum):
                         gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
@@ -165,23 +164,25 @@ class RobotControlManager:
                     self.loopCount += 1
 
                 else:
-                    keycode = input('Input > "q": quit, "r": Clean error and init arm, "s": start control \n')
+                    keycode = input('Input > "q": quit, "s": start control \n')
+
+                    # ----- FIX ME !!! ----- #
+                    # "r": Clean error and init arm, can't use because of "Port is in Use" error.
+
+
                     # ----- Quit program ----- #
                     if keycode == 'q':
                         if isEnableArm:
                             arm.disconnect()
-                            mikatacontrol.mikataLoopAlive = False
                             mikatacontrol.ClosePort()
 
                         self.PrintProcessInfo()
                         break
 
-                    # ----- Reset xArm and gripper ----- #
-                    elif keycode == 'r':
-                        if isEnableArm:
-                            mikatacontrol.mikataLoopAlive = False
-                            mikatacontrol.ClosePort()
-                            self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
+                    # # ----- Reset xArm and gripper ----- #
+                    # elif keycode == 'r':
+                    #     if isEnableArm:
+                    #         self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
@@ -231,7 +232,6 @@ class RobotControlManager:
 
             if isEnableArm:
                 arm.disconnect()
-                mikatacontrol.mikataLoopAlive = False
                 mikatacontrol.ClosePort()
 
         except:
@@ -264,7 +264,6 @@ class RobotControlManager:
         # ----- mikata Arm ----- #
         mikatacontrol.OpenPort()
         if isSetInitPosition:
-            mikatacontrol.mikataLoopAlive = True
             mikatacontrol.dxl_goal_position = mikatatransform.GetmikataInitialTransform()
             mikataThread = threading.Thread(target=mikatacontrol.SendtomikataArm)
             mikataThread.setDaemon(True)
