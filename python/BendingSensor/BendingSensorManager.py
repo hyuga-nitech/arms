@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------
 # Author:          Hyuga Suzuki
-# Original Author: Takayoshi Hagiwara (KMD)
+# Original Author: Takumi Katagiri (Nagoya Institute of Technology), Takayoshi Hagiwara (KMD)
 # Created:         2022/5/20
 # Summary:         BendingSensorの値を取得（シリアル通信）
 # -----------------------------------------------------------------
