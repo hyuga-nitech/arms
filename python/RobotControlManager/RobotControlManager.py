@@ -26,7 +26,7 @@ from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbac
 defaultRigidBodyNum     = 2
 defaultBendingSensorNum = 2
 xArmMovingLimit         = 100
-mikataMovingLimit       = 2000
+mikataMovingLimit       = 1000
 xRatio                  = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
 mikataRatio             = [0.8,0.2]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 gripperRatio            = [0.5,0.5]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
