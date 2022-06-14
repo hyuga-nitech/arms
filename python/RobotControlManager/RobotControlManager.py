@@ -85,12 +85,8 @@ class RobotControlManager:
 
                 if isMoving:
                     # ----- Get transform data ----- #
-                    # ---------- Start control process timer ---------- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
-
-                    # ----- (for Debug) ----- #
-                    # print('localPosition:',localPosition)
 
                     if isRatio:
                         xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xRatio)
@@ -109,10 +105,6 @@ class RobotControlManager:
 
                     # ----- Set mikata transform ----- #
                     mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
-
-                    # ----- (for Debug) ----- #
-                    # print('xArmTransform:',xArmtransform.x,' ', xArmtransform.y,' ', xArmtransform.z)
-                    # print('mikataTransform:',mikatatransform.x,' ', mikatatransform.y,' ', mikatatransform.z)
 
                     # ----- Bending sensor ----- #
                     dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -263,7 +255,6 @@ class RobotControlManager:
             robotArm.reset(wait=True)
         print('Initialized > xArm')
 
-        robotArm.motion_enable(enable=True)
         robotArm.set_mode(1)
         robotArm.set_state(state=0)
 
