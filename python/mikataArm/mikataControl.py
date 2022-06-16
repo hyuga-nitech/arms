@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------
 # Author:          Hyuga Suzuki
 # Created:         2022/5/24
-# Summary:         mikataArm制御クラス（win用）
+# Summary:         mikataArm制御クラス
 # -----------------------------------------------------------------
 
 from dynamixel_sdk import * # Uses Dynamixel SDK library

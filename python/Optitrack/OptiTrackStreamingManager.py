@@ -18,7 +18,7 @@ class OptiTrackStreamingManager:
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]
     rotation = {}	# dict { 'RigidBodyN': [x, y, z, w]}. 
     
-    def __init__(self,defaultRigidBodyNum: int = 3): #RigidBody1 is for xArm , RigidBody2 & 3 is for mikataArm. if you need some additional RigidBodys , use after RigidBody4.
+    def __init__(self,defaultRigidBodyNum: int = 1): 
         for i in range(defaultRigidBodyNum):
             self.position['RigidBody'+str(i+1)] = np.zeros(3)
             self.rotation['RigidBody'+str(i+1)] = np.zeros(4)

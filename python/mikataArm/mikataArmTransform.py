@@ -55,7 +55,7 @@ class mikataTransform:
 
         r     = math.sqrt(self.posX * self.posX + self.posY * self.posY + self.posZ * self.posZ )
         phi   = math.degrees(math.atan2(self.posY ,self.posX ))
-        theta = -1 * math.degrees(math.atan2(self.posZ , math.sqrt(self.posX * self.posX + self.posY * self.posY )))
+        theta = math.degrees(math.atan2(self.posZ , math.sqrt(self.posX * self.posX + self.posY * self.posY )))
 
         # R limit
         if(r > self.__maxR):
