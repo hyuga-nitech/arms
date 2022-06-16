@@ -30,8 +30,11 @@ class AudioDeviceIndexes:
             if host_dict['name'] == host_api:
                 for device_index in range(0, host_dict['deviceCount']):
                     device_dict = p.get_device_info_by_host_api_device_index(host_index, device_index)
-                    if ('Speakers' in device_dict['name']) and (name in device_dict['name']):
+                    if ('スピーカー' in device_dict['name']) and (name in device_dict['name']):
                         ListIndexNum.append(device_dict['index'])
+
+        if len(ListIndexNum) == 0:
+            print('サウンドカードが見つかりません')
 
         return ListIndexNum
 

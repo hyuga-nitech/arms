@@ -15,8 +15,8 @@ from BendingSensor.BendingSensorManager import BendingSensorManager
 # ----- Numeric range remapping ----- #
 targetMin        = 200
 targetMax        = 240
-bendingSensorMin = 1600
-bendingSensorMax = 2400
+bendingSensorClose = [2400,2500]
+bendingSensorOpen = [1600,2000]
 
 class MotionManager:
     def __init__(self,defaultRigidBodyNum: int,bendingSensorNum: int) ->None:
@@ -66,7 +66,10 @@ class MotionManager:
         dictGripperValue = {}
         for i in range(self.bendingSensorNum):
             bendingVal = self.bendingSensors[i].bendingValue
-            bendingValueNorm = (bendingSensorMax - bendingVal) / (bendingSensorMax - self.InitBendingSensorValues[i]) * (targetMax - targetMin) + targetMin
+            if bendingSensorClose[i] < bendingSensorOpen[i]:
+                bendingValueNorm = (bendingVal - bendingSensorClose[i]) / (self.InitBendingSensorValues[i] - bendingSensorClose[i]) * (targetMax - targetMin) + targetMin
+            elif bendingSensorClose[i] > bendingSensorOpen[i]:
+                bendingValueNorm = (bendingSensorClose[i] - bendingVal) / (bendingSensorClose[i] - self.InitBendingSensorValues[i]) * (targetMax - targetMin) + targetMin
 
             if bendingValueNorm > targetMax:
                 bendingValueNorm = targetMax
