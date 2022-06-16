@@ -37,7 +37,7 @@ class MotionBehaviour:
 
         Pos = self.GetRelativePosition(position)
 
-        relativePos = Pos['RigidBody2']
+        relativePos = Pos['RigidBody1']
 
         return relativePos
 

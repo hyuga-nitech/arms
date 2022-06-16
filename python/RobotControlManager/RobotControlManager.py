@@ -105,7 +105,7 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Data recording ----- #
-                    dataRecordManager.Record(localPosition)
+                    dataRecordManager.Record(localPosition, BendingValue)
 
                     self.loopCount += 1
 

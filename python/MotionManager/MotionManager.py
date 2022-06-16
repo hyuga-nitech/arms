@@ -19,7 +19,7 @@ bendingSensorClose = 2400
 bendingSensorOpen = 1600
 
 class MotionManager:
-    def __init__(self,defaultRigidBodyNum: int,bendingSensorNum: int) ->None:
+    def __init__(self,defaultRigidBodyNum: int,bendingSensorNum: int = 1) ->None:
         self.defaultRigidBodyNum     = defaultRigidBodyNum
         self.bendingSensorNum        = bendingSensorNum
         self.InitBendingSensorValues = []
@@ -59,7 +59,7 @@ class MotionManager:
         bendingVal = self.bendingSensors.bendingValue
         if bendingSensorClose < bendingSensorOpen:
             bendingValueNorm = (bendingVal - bendingSensorClose) / (self.InitBendingSensorValues - bendingSensorClose) * (targetMax - targetMin) + targetMin
-        elif bendingSensorClose[1] > bendingSensorOpen[1]:
+        elif bendingSensorClose > bendingSensorOpen:
             bendingValueNorm = (bendingSensorClose - bendingVal) / (bendingSensorClose - self.InitBendingSensorValues) * (targetMax - targetMin) + targetMin
 
         if bendingValueNorm > targetMax:

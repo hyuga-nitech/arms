@@ -32,7 +32,7 @@ class mikataTransform:
     c1,c2,c3,c4 = 0,0,0,0
 
     # ----- Initial Position ----- #
-    __initX, __initY, __initZ = 100,0,0
+    __initX, __initY, __initZ = 300,0,0
 
     # ----- Initial limitation ----- #
     # __initd1, __initd2, __initd3, __initd4 = 270, 260, 100, 180
@@ -76,7 +76,7 @@ class mikataTransform:
             theta = self.__minTheta
 
         # Motor's Kinematics
-        d1 = 270 - phi
+        d1 = 270 + phi
         d2 = 260 - theta - math.degrees(math.acos(r/2/150))
         d3 = 100 + (180 - 2 * math.degrees(math.asin(r/2/150)))
         d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150)))
@@ -104,7 +104,7 @@ class mikataTransform:
     def GetmikataInitialTransform(self):
         __initr     = math.sqrt(self.__initX * self.__initX + self.__initY * self.__initY + self.__initZ * self.__initZ )
         __initphi   = math.degrees(math.atan2(self.__initY ,self.__initX ))
-        __inittheta = -1 * math.degrees(math.atan2(self.__initZ , math.sqrt(self.__initX * self.__initX + self.__initY * self.__initY )))
+        __inittheta = math.degrees(math.atan2(self.__initZ , math.sqrt(self.__initX * self.__initX + self.__initY * self.__initY )))
 
         # R limit
         if(__initr > self.__maxR):
@@ -125,7 +125,7 @@ class mikataTransform:
             __inittheta = self.__minTheta
 
         # Motor's Kinematics
-        self.__initd1 = 270 - __initphi
+        self.__initd1 = 270 + __initphi
         self.__initd2 = 260 - __inittheta - math.degrees(math.acos(__initr/2/150))
         self.__initd3 = 100 + (180 - 2 * math.degrees(math.asin(__initr/2/150)))
         self.__initd4 = 180 + __inittheta + math.degrees(math.acos(__initr/2/150)) - (180 - 2 * math.degrees(math.asin(__initr/2/150)))

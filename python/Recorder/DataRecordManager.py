@@ -43,7 +43,7 @@ class DataRecordManager:
             self.dictPosition['RigidBody'+str(i+1)].append(position['RigidBody'+str(i+1)])
 
         for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)].append(bendingSensor['gripperValue'+str(i+1)])
+            self.dictGripperValue['gripperValue'+str(i+1)].append(bendingSensor)
 
     def ExportSelf(self, dirPath: str = 'ExportData'):
         """
