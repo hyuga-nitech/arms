@@ -7,7 +7,6 @@
 
 from turtle import pos
 import numpy as np
-import scipy.spatial.transform as scitransform
 import math
 
 class MotionBehaviour:
@@ -26,7 +25,7 @@ class MotionBehaviour:
     mikataBeforePositions     = {}
     mikataWeightedPositions   = {}
 
-    def __init__(self,defaultRigidBodyNum: int = 3) -> None:
+    def __init__(self,defaultRigidBodyNum: int = 2) -> None:
         for i in range(defaultRigidBodyNum):
             self.originPositions['RigidBody'+str(i+1)] = np.zeros(3)
             self.inversedMatrix['RigidBody'+str(i+1)] = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
