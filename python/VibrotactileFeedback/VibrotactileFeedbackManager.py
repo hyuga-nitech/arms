@@ -183,26 +183,27 @@ class VibrotactileFeedbackManager:
         self.listRigidBodyPos1.append(get_pos_1_filt[0:3])
         self.listRigidBodyPos2.append(get_pos_2_filt[0:3])
 
-        if len(self.listRigitBodyPos1)== 2:
+        if len(self.listRigidBodyPos1)== 2:
             velPosP1 = np.linalg.norm((np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt))
             listvelPosP2 = (np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt)
 
-            vel_gain = 1.0
-            fb_vel_1 = velPosP1 * vel_gain
+            vel_gain1 = 1.0
+            vel_gain2 = 2.5
+            fb_vel_1 = velPosP1 * vel_gain1
 
-            if listvelPosP2[2] >= 0:
-                fb_vel_2 = listvelPosP2[2] * vel_gain
+            if listvelPosP2[0][2] >= 0:
+                fb_vel_2 = listvelPosP2[0][2] * vel_gain2
                 fb_vel_3 = 0
             else:
                 fb_vel_2 = 0
-                fb_vel_3 = listvelPosP2[2] * vel_gain
+                fb_vel_3 = listvelPosP2[0][2] * vel_gain2
 
-            if listvelPosP2[0] >= 0:
-                fb_vel_4 = listvelPosP2[2] * vel_gain
+            if listvelPosP2[0][0] >= 0:
+                fb_vel_4 = listvelPosP2[0][0] * vel_gain2
                 fb_vel_5 = 0
             else:
                 fb_vel_4 = 0
-                fb_vel_5 = listvelPosP2[2] * vel_gain
+                fb_vel_5 = listvelPosP2[0][0] * vel_gain2
 
             self.data_out_1 = fb_vel_1
             self.data_out_2 = fb_vel_2

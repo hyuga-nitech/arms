@@ -12,8 +12,13 @@ class mikataControl:
         # ----- setting:dynamixel ----- #
 
         self.ADDR_TORQUE_ENABLE          = 64
+        self.ADDR_PROFILE_ACCELERATION   = 108
+        self.ADDR_PROFILE_VELOCITY       = 112
         self.ADDR_GOAL_POSITION          = 116
         self.ADDR_PRESENT_POSITION       = 132
+
+        self.prflAcc                     = 10000
+        self.prflVel                     = 10000
         self.BAUDRATE                    = 1000000
         #DXL_MINIMUM_POSITION_VALUE  = 0         # Refer to the Minimum Position Limit of product eManual
         #DXL_MAXIMUM_POSITION_VALUE  = 4095      # Refer to the Maximum Position Limit of product eManual
@@ -53,6 +58,19 @@ class mikataControl:
             if self.portHandler.setBaudRate(self.BAUDRATE):
                 print("Succeeded to change the baudrate")
 
+                for i in range(len(self.DXL_ID)):
+                    self.dxl_comm_result, self.dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_PROFILE_ACCELERATION, self.prflAcc)
+                    if self.dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % self.packetHandler.getTxRxResult(self.dxl_comm_result))
+                    elif self.dxl_error != 0:
+                        print("%s" % self.packetHandler.getRxPacketError(self.dxl_error))
+
+                    self.dxl_comm_result, self.dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_PROFILE_VELOCITY, self.prflVel)
+                    if self.dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % self.packetHandler.getTxRxResult(self.dxl_comm_result))
+                    elif self.dxl_error != 0:
+                        print("%s" % self.packetHandler.getRxPacketError(self.dxl_error))
+                    
                 # Enable Dynamixel Torque
                 for i in range(len(self.DXL_ID)):
                     self.dxl_comm_result, self.dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_TORQUE_ENABLE, self.TORQUE_ENABLE)
