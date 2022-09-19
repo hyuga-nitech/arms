@@ -11,6 +11,7 @@ import numpy as np
 from scipy import signal
 import winsound
 import math
+import time
 
 from MotionManager.MotionManager import MotionManager
 from MotionFilter.MotionFilter import MotionFilter
@@ -18,16 +19,12 @@ from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 
 class VibrotactileFeedbackManager:
-    def __init__(self, condition: str = ''):
+    def __init__(self):
         # ----- Find audio device indexes ----- #
         audioDeviceIndexes = AudioDeviceIndexes()
         ListIndexNum = audioDeviceIndexes.Find(host_api='Windows DirectSound', name='Sound Blaster Play! 3')
-        # ListIndexNum = [4,5]
         OutputDeviceNum = len(ListIndexNum)
         print(ListIndexNum)
-
-        # self.condition = condition
-        self.condition = 'B'
 
         self.Behaviour = MotionBehaviour()
     
@@ -191,19 +188,21 @@ class VibrotactileFeedbackManager:
             vel_gain2 = 2.5
             fb_vel_1 = velPosP1 * vel_gain1
 
+            #FB2:左、FB3:右、FB4:前、FB5:後
+            
             if listvelPosP2[0][2] >= 0:
                 fb_vel_2 = listvelPosP2[0][2] * vel_gain2
                 fb_vel_3 = 0
             else:
                 fb_vel_2 = 0
-                fb_vel_3 = listvelPosP2[0][2] * vel_gain2
+                fb_vel_3 = -1 * listvelPosP2[0][2] * vel_gain2
 
             if listvelPosP2[0][0] >= 0:
                 fb_vel_4 = listvelPosP2[0][0] * vel_gain2
                 fb_vel_5 = 0
             else:
                 fb_vel_4 = 0
-                fb_vel_5 = listvelPosP2[0][0] * vel_gain2
+                fb_vel_5 = -1 * listvelPosP2[0][0] * vel_gain2
 
             self.data_out_1 = fb_vel_1
             self.data_out_2 = fb_vel_2
@@ -213,3 +212,43 @@ class VibrotactileFeedbackManager:
 
             del self.listRigidBodyPos1[0]
             del self.listRigidBodyPos2[0]
+    
+    def forAudioCheck(self):
+        try:
+            print('Start')
+            while True:
+                for num in range(3):
+                    self.data_out_1 = 50
+                    time.sleep(0.5)
+                    self.data_out_1 = 0
+                    time.sleep(0.5)
+                
+                self.data_out_1 = 50
+                print('out 1')
+                time.sleep(1)
+                self.data_out_1 = 0
+
+                self.data_out_2 = 50
+                print('out 2')
+                time.sleep(1)
+                self.data_out_2 = 0
+
+                self.data_out_3 = 50
+                print('out 3')
+                time.sleep(1)
+                self.data_out_3 = 0
+
+                self.data_out_4 = 50
+                print('out 4')
+                time.sleep(1)
+                self.data_out_4 = 0
+
+                self.data_out_5 = 50
+                print('out 5')
+                time.sleep(1)
+                self.data_out_5 = 0
+
+                time.sleep(1)
+
+        except KeyboardInterrupt:
+            print('Finish')
