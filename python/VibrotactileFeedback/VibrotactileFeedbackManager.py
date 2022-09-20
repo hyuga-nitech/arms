@@ -223,27 +223,27 @@ class VibrotactileFeedbackManager:
                     self.data_out_1 = 0
                     time.sleep(0.5)
                 
-                self.data_out_1 = 50
+                self.data_out_1 = 150
                 print('out 1')
                 time.sleep(1)
                 self.data_out_1 = 0
 
-                self.data_out_2 = 50
+                self.data_out_2 = 150
                 print('out 2')
                 time.sleep(1)
                 self.data_out_2 = 0
 
-                self.data_out_3 = 50
+                self.data_out_3 = 150
                 print('out 3')
                 time.sleep(1)
                 self.data_out_3 = 0
 
-                self.data_out_4 = 50
+                self.data_out_4 = 150
                 print('out 4')
                 time.sleep(1)
                 self.data_out_4 = 0
 
-                self.data_out_5 = 50
+                self.data_out_5 = 150
                 print('out 5')
                 time.sleep(1)
                 self.data_out_5 = 0
