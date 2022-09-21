@@ -159,7 +159,7 @@ class VibrotactileFeedbackManager:
             del self.listRigidBodyRot1[0]
             del self.listRigidBodyRot2[0]
 
-    def forPhantom(self, position: dict, rotation: dict, xratio, mikataratio):
+    def forPhantomOnly1(self, position: dict, rotation: dict, xratio, mikataratio):
         posRigidBody1 = position['RigidBody1'] * 1000
         posRigidBody2 = position['RigidBody2'] * 1000
         rotRigidBody1 = np.rad2deg(self.Behaviour.Quaternion2Euler(rotation['RigidBody1']))
@@ -213,42 +213,175 @@ class VibrotactileFeedbackManager:
             del self.listRigidBodyPos1[0]
             del self.listRigidBodyPos2[0]
     
-    def forAudioCheck(self):
-        try:
-            print('Start')
-            while True:
-                for num in range(3):
-                    self.data_out_1 = 50
-                    time.sleep(0.5)
+    def forPhantom(self, position: dict, rotation: dict, xratio, mikataratio):
+        posRigidBody1 = position['RigidBody1'] * 1000
+        posRigidBody2 = position['RigidBody2'] * 1000
+        rotRigidBody1 = np.rad2deg(self.Behaviour.Quaternion2Euler(rotation['RigidBody1']))
+        rotRigidBody2 = np.rad2deg(self.Behaviour.Quaternion2Euler(rotation['RigidBody2']))
+
+        self.get_pos_1_box.append(np.concatenate([posRigidBody1, rotRigidBody1], 0))
+        get_pos_1_filt = self.filter_FB.lowpass2(self.get_pos_1_box, self.get_pos_1_filt_box)
+        self.get_pos_1_filt_box.append(get_pos_1_filt)
+        del self.get_pos_1_box[0]
+        del self.get_pos_1_filt_box[0]
+
+        self.get_pos_2_box.append(np.concatenate([posRigidBody2, rotRigidBody2]))
+        get_pos_2_filt = self.filter_FB.lowpass2(self.get_pos_2_box, self.get_pos_2_filt_box)
+        self.get_pos_2_filt_box.append(get_pos_2_filt)
+        del self.get_pos_2_box[0]
+        del self.get_pos_2_filt_box[0]
+
+        self.listRigidBodyPos1.append(get_pos_1_filt[0:3])
+        self.listRigidBodyPos2.append(get_pos_2_filt[0:3])
+
+        if len(self.listRigidBodyPos1)== 2:
+            listvelPosP1 = (np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt)
+            listvelPosP2 = (np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt)
+
+            vel_gain1 = 2.5
+            vel_gain2 = 2.5
+
+            #FB1:左、FB2:右、FB3:前、FB4:後
+            
+            if listvelPosP1[0][2] >= 0:
+                fb_vel_1 = listvelPosP1[0][2] * vel_gain1
+                fb_vel_2 = 0
+            else:
+                fb_vel_1 = 0
+                fb_vel_2 = -1 * listvelPosP1[0][2] * vel_gain1
+
+            if listvelPosP1[0][0] >= 0:
+                fb_vel_3 = listvelPosP1[0][0] * vel_gain1
+                fb_vel_4 = 0
+            else:
+                fb_vel_3 = 0
+                fb_vel_4 = -1 * listvelPosP1[0][0] * vel_gain1
+
+            #FB5:左、FB6:右、FB7:前、FB8:後
+            
+            if listvelPosP2[0][2] >= 0:
+                fb_vel_5 = listvelPosP2[0][2] * vel_gain2
+                fb_vel_6 = 0
+            else:
+                fb_vel_5 = 0
+                fb_vel_6 = -1 * listvelPosP2[0][2] * vel_gain2
+
+            if listvelPosP2[0][0] >= 0:
+                fb_vel_7 = listvelPosP2[0][0] * vel_gain2
+                fb_vel_8 = 0
+            else:
+                fb_vel_7 = 0
+                fb_vel_8 = -1 * listvelPosP2[0][0] * vel_gain2
+
+            self.data_out_1 = fb_vel_1
+            self.data_out_2 = fb_vel_2
+            self.data_out_3 = fb_vel_3
+            self.data_out_4 = fb_vel_4
+            self.data_out_5 = fb_vel_5
+            self.data_out_6 = fb_vel_6
+            self.data_out_7 = fb_vel_7
+            self.data_out_8 = fb_vel_8
+
+            del self.listRigidBodyPos1[0]
+            del self.listRigidBodyPos2[0]
+    
+    def forAudioCheck(self,mode):
+        if mode == 'A':
+            try:
+                print('Start')
+                while True:
+                    for num in range(3):
+                        self.data_out_1 = 150
+                        time.sleep(0.5)
+                        self.data_out_1 = 0
+                        time.sleep(0.5)
+                    
+                    self.data_out_1 = 150
+                    print('out 1')
+                    time.sleep(1)
                     self.data_out_1 = 0
-                    time.sleep(0.5)
-                
-                self.data_out_1 = 150
-                print('out 1')
-                time.sleep(1)
-                self.data_out_1 = 0
 
-                self.data_out_2 = 150
-                print('out 2')
-                time.sleep(1)
-                self.data_out_2 = 0
+                    self.data_out_2 = 150
+                    print('out 2')
+                    time.sleep(1)
+                    self.data_out_2 = 0
 
-                self.data_out_3 = 150
-                print('out 3')
-                time.sleep(1)
-                self.data_out_3 = 0
+                    self.data_out_3 = 150
+                    print('out 3')
+                    time.sleep(1)
+                    self.data_out_3 = 0
 
-                self.data_out_4 = 150
-                print('out 4')
-                time.sleep(1)
-                self.data_out_4 = 0
+                    self.data_out_4 = 150
+                    print('out 4')
+                    time.sleep(1)
+                    self.data_out_4 = 0
 
-                self.data_out_5 = 150
-                print('out 5')
-                time.sleep(1)
-                self.data_out_5 = 0
+                    self.data_out_5 = 150
+                    print('out 5')
+                    time.sleep(1)
+                    self.data_out_5 = 0
 
-                time.sleep(1)
+                    self.data_out_6 = 150
+                    print('out 6')
+                    time.sleep(1)
+                    self.data_out_6 = 0
 
-        except KeyboardInterrupt:
-            print('Finish')
+                    self.data_out_7 = 150
+                    print('out 7')
+                    time.sleep(1)
+                    self.data_out_7 = 0
+
+                    self.data_out_8 = 150
+                    print('out 8')
+                    time.sleep(1)
+                    self.data_out_8 = 0
+
+                    time.sleep(1)
+
+            except KeyboardInterrupt:
+                print('Finish')
+        
+        elif mode == 'B':
+            try:
+                print('Start')
+                while True:
+                    for num in range(3):
+                        self.data_out_1 = 150
+                        self.data_out_5 = 150
+                        time.sleep(0.5)
+                        self.data_out_1 = 0
+                        self.data_out_5 = 0
+                        time.sleep(0.5)
+                    
+                    self.data_out_1 = 150
+                    self.data_out_5 = 150
+                    print('out 1,5')
+                    time.sleep(1)
+                    self.data_out_1 = 0
+                    self.data_out_5 = 0
+
+                    self.data_out_2 = 150
+                    self.data_out_6 = 150
+                    print('out 2,6')
+                    time.sleep(1)
+                    self.data_out_2 = 0
+                    self.data_out_6 = 0
+
+                    self.data_out_3 = 150
+                    self.data_out_7 = 150
+                    print('out 3,7')
+                    time.sleep(1)
+                    self.data_out_3 = 0
+                    self.data_out_7 = 0
+
+                    self.data_out_4 = 150
+                    self.data_out_8 = 150
+                    print('out 4,8')
+                    time.sleep(1)
+                    self.data_out_4 = 0
+                    self.data_out_8 = 0
+
+                    time.sleep(1)
+
+            except KeyboardInterrupt:
+                print('Finish')
