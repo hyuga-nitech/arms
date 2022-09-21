@@ -111,6 +111,18 @@ class VibrotactileFeedbackManager:
         out_data_5 = ((503.0463*math.exp((self.data_out_5*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
         return (out_data_5, pyaudio.paContinue)
 
+    def callback6(self, in_data, frame_count, time_info, status):
+        out_data_6 = ((503.0463*math.exp((self.data_out_6*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        return (out_data_5, pyaudio.paContinue)
+
+    def callback7(self, in_data, frame_count, time_info, status):
+        out_data_7 = ((503.0463*math.exp((self.data_out_7*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        return (out_data_5, pyaudio.paContinue)
+
+    def callback8(self, in_data, frame_count, time_info, status):
+        out_data_8 = ((503.0463*math.exp((self.data_out_8*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        return (out_data_5, pyaudio.paContinue)
+
     def close(self):
         self.p.terminate()
 
@@ -190,19 +202,19 @@ class VibrotactileFeedbackManager:
 
             #FB2:左、FB3:右、FB4:前、FB5:後
             
-            if listvelPosP2[0][2] >= 0:
-                fb_vel_2 = listvelPosP2[0][2] * vel_gain2
+            if listvelPosP2[0][0] >= 0:
+                fb_vel_2 = listvelPosP2[0][0] * vel_gain2
                 fb_vel_3 = 0
             else:
                 fb_vel_2 = 0
-                fb_vel_3 = -1 * listvelPosP2[0][2] * vel_gain2
+                fb_vel_3 = -1 * listvelPosP2[0][0] * vel_gain2
 
-            if listvelPosP2[0][0] >= 0:
-                fb_vel_4 = listvelPosP2[0][0] * vel_gain2
+            if listvelPosP2[0][2] >= 0:
+                fb_vel_4 = listvelPosP2[0][2] * vel_gain2
                 fb_vel_5 = 0
             else:
                 fb_vel_4 = 0
-                fb_vel_5 = -1 * listvelPosP2[0][0] * vel_gain2
+                fb_vel_5 = -1 * listvelPosP2[0][2] * vel_gain2
 
             self.data_out_1 = fb_vel_1
             self.data_out_2 = fb_vel_2
@@ -243,35 +255,35 @@ class VibrotactileFeedbackManager:
 
             #FB1:左、FB2:右、FB3:前、FB4:後
             
-            if listvelPosP1[0][2] >= 0:
-                fb_vel_1 = listvelPosP1[0][2] * vel_gain1
+            if listvelPosP1[0][0] >= 0:
+                fb_vel_1 = listvelPosP1[0][0] * vel_gain1
                 fb_vel_2 = 0
             else:
                 fb_vel_1 = 0
-                fb_vel_2 = -1 * listvelPosP1[0][2] * vel_gain1
+                fb_vel_2 = -1 * listvelPosP1[0][0] * vel_gain1
 
-            if listvelPosP1[0][0] >= 0:
-                fb_vel_3 = listvelPosP1[0][0] * vel_gain1
+            if listvelPosP1[0][2] >= 0:
+                fb_vel_3 = listvelPosP1[0][2] * vel_gain1
                 fb_vel_4 = 0
             else:
                 fb_vel_3 = 0
-                fb_vel_4 = -1 * listvelPosP1[0][0] * vel_gain1
+                fb_vel_4 = -1 * listvelPosP1[0][2] * vel_gain1
 
             #FB5:左、FB6:右、FB7:前、FB8:後
             
-            if listvelPosP2[0][2] >= 0:
-                fb_vel_5 = listvelPosP2[0][2] * vel_gain2
+            if listvelPosP2[0][0] >= 0:
+                fb_vel_5 = listvelPosP2[0][0] * vel_gain2
                 fb_vel_6 = 0
             else:
                 fb_vel_5 = 0
-                fb_vel_6 = -1 * listvelPosP2[0][2] * vel_gain2
+                fb_vel_6 = -1 * listvelPosP2[0][0] * vel_gain2
 
-            if listvelPosP2[0][0] >= 0:
-                fb_vel_7 = listvelPosP2[0][0] * vel_gain2
+            if listvelPosP2[0][2] >= 0:
+                fb_vel_7 = listvelPosP2[0][2] * vel_gain2
                 fb_vel_8 = 0
             else:
                 fb_vel_7 = 0
-                fb_vel_8 = -1 * listvelPosP2[0][0] * vel_gain2
+                fb_vel_8 = -1 * listvelPosP2[0][2] * vel_gain2
 
             self.data_out_1 = fb_vel_1
             self.data_out_2 = fb_vel_2
