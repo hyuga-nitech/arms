@@ -113,15 +113,15 @@ class VibrotactileFeedbackManager:
 
     def callback6(self, in_data, frame_count, time_info, status):
         out_data_6 = ((503.0463*math.exp((self.data_out_6*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
-        return (out_data_5, pyaudio.paContinue)
+        return (out_data_6, pyaudio.paContinue)
 
     def callback7(self, in_data, frame_count, time_info, status):
         out_data_7 = ((503.0463*math.exp((self.data_out_7*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
-        return (out_data_5, pyaudio.paContinue)
+        return (out_data_7, pyaudio.paContinue)
 
     def callback8(self, in_data, frame_count, time_info, status):
         out_data_8 = ((503.0463*math.exp((self.data_out_8*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
-        return (out_data_5, pyaudio.paContinue)
+        return (out_data_8, pyaudio.paContinue)
 
     def close(self):
         self.p.terminate()
