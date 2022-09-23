@@ -19,17 +19,14 @@ class SliderManager:
         self.receive()
 
     def receive(self):
-        global slider_xratio
-        global slider_mikataratio
-
         while True:
             try:
                 line = self.slider_serial.readline()
                 data = line.decode('utf-8').rstrip('\n')
                 data = int(data)
-                slider_xratio = [0.5+(data/4095)/2,0.5+(data/4095)/2,0.5-(data/4095)/2,0.5-(data/4095)/2] #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-                slider_mikataratio = [0.5-(data/4095)/2,0.5+(data/4095)/2] #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+                self.slider_xratio = [0.5+(data/4095)/2,0.5+(data/4095)/2,0.5-(data/4095)/2,0.5-(data/4095)/2] #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+                self.slider_mikataratio = [0.5-(data/4095)/2,0.5+(data/4095)/2] #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
             except:
-                slider_xratio = [0.75,0.75,0.25,0.25]
-                slider_mikataratio = [0.25,0.75]
+                self.slider_xratio = [0.75,0.75,0.25,0.25]
+                self.slider_mikataratio = [0.25,0.75]

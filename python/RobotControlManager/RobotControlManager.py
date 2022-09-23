@@ -37,6 +37,8 @@ class RobotControlManager:
         dat = fileIO.Read('settings.csv',',')
         xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
         self.xArmIpAddress = xArmIP
+        SliderPort = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
+        self.SliderPort = SliderPort
 
     def SendDataToRobot(self,executionTime: int = 120, isExportData: bool = True, isEnableArm: bool = True):
         # ----- Process info ----- #
@@ -53,7 +55,7 @@ class RobotControlManager:
         mikatacontrol       = mikataControl()
         dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
-        slidermanager       = SliderManager()
+        slidermanager       = SliderManager(self.SliderPort)
 
         if isEnableArm:
             arm = XArmAPI(self.xArmIpAddress)
@@ -90,6 +92,9 @@ class RobotControlManager:
                     # ----- Get transform data ----- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
+
+                    slider_xratio = slidermanager.slider_xratio
+                    slider_mikataratio = slidermanager.slider_mikataratio
 
                     if isRatio:
                         xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
@@ -183,6 +188,9 @@ class RobotControlManager:
                     elif keycode == 's':
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
+
+                        slider_xratio = slidermanager.slider_xratio
+                        slider_mikataratio = slidermanager.slider_mikataratio
                         
                         if isRatio:
                             xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
