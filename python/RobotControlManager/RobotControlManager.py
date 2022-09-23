@@ -24,12 +24,12 @@ from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbac
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
-defaultBendingSensorNum = 2
+defaultBendingSensorNum = 1
 xArmMovingLimit         = 100
 mikataMovingLimit       = 1000
-xRatio                  = [0.2,0.2,0.8,0.8]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-mikataRatio             = [0.8,0.2]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
-gripperRatio            = [0.5,0.5]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
+xRatio                  = [1,1,0,0]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+mikataRatio             = [0,1]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+gripperRatio            = [1]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -62,6 +62,9 @@ class RobotControlManager:
         # ----- Control flags ----- #
         isMoving = False
         isRatio  = True
+        self.FBmode   = "B"
+        # "A":FB each others diffPos of hand
+        # "B":FB with Phantom Sensation
 
         try:
             while True:
@@ -146,8 +149,11 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-                    if defaultRigidBodyNum == 2:
+
+                    if self.FBmode == "A":
                         vibrotactileManager.forShared(localPosition, localRotation, xRatio, mikataRatio)
+                    elif self.FBmode == "B":
+                        vibrotactileManager.forPhantom(localPosition, localRotation, xRatio, mikataRatio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, dictBendingValue)

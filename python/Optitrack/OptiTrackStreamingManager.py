@@ -18,19 +18,10 @@ class OptiTrackStreamingManager:
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]
     rotation = {}	# dict { 'RigidBodyN': [x, y, z, w]}. 
     
-    def __init__(self,defaultRigidBodyNum: int = 3): #RigidBody1 is for xArm , RigidBody2 & 3 is for mikataArm. if you need some additional RigidBodys , use after RigidBody4.
+    def __init__(self,defaultRigidBodyNum: int = 3): #RigidBody1 is for xArm , RigidBody2 is for mikataArm. if you need some additional RigidBodys , use after RigidBody4.
         for i in range(defaultRigidBodyNum):
             self.position['RigidBody'+str(i+1)] = np.zeros(3)
             self.rotation['RigidBody'+str(i+1)] = np.zeros(4)
-        
-        from FileIO.FileIO import FileIO
-        fileIO = FileIO()
-        settings = fileIO.Read('settings.csv',',')
-        serverIP = [addr for addr in settings if 'motiveServer' in addr[0]][0][1]
-        localIP =[addr for addr in settings if 'motiveLocal' in addr [0]][0][1]
-
-        self.serverAddress = serverIP
-        self.localAddress = localIP
 
     # This is a callback function that gets connected to the NatNet client and called once per mocap frame.
     def receive_new_frame(self, data_dict):
