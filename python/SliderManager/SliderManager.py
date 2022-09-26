@@ -5,7 +5,6 @@
 # -----------------------------------------------------------------
 
 import serial
-import threading
 
 class SliderManager:
     def __init__(self, port):
@@ -16,10 +15,6 @@ class SliderManager:
         except:
             print('Failed to connect to the slider')
             pass
-
-            SliderThread = threading.Thread(target=self.receive)
-            SliderThread.setDaemon(True)
-            SliderThread.start()
 
     def receive(self):
         while True:

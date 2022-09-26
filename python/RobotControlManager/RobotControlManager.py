@@ -57,6 +57,12 @@ class RobotControlManager:
         vibrotactileManager = VibrotactileFeedbackManager()
         slidermanager       = SliderManager(self.SliderPort)
 
+
+        SliderThread = threading.Thread(target=slidermanager.receive)
+        SliderThread.setDaemon(True)
+        SliderThread.start()
+
+
         if isEnableArm:
             arm = XArmAPI(self.xArmIpAddress)
             self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
