@@ -30,7 +30,7 @@ class VibrotactileFeedbackManager:
     
         self.p = pyaudio.PyAudio()
         self.format = pyaudio.paInt16
-        self.channels = 1
+        self.channels = 2
         self.rate = 44100
         self.amp = 30
 
@@ -89,38 +89,35 @@ class VibrotactileFeedbackManager:
         self.data_out_5 = 0
     
     def callback1(self, in_data, frame_count, time_info, status):
-        out_data_1 = ((503.0463*math.exp((self.data_out_1*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_1 = [((503.0463*math.exp((self.data_out_1*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_9*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_1, pyaudio.paContinue)
 
-
     def callback2(self, in_data, frame_count, time_info, status):
-        out_data_2 = ((503.0463*math.exp((self.data_out_2*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_2 = [((503.0463*math.exp((self.data_out_2*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_10*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_2, pyaudio.paContinue)
 
-
     def callback3(self, in_data, frame_count, time_info, status):
-        out_data_3 = ((503.0463*math.exp((self.data_out_3*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_3 = [((503.0463*math.exp((self.data_out_3*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_11*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_3, pyaudio.paContinue)
 
-
     def callback4(self, in_data, frame_count, time_info, status):
-        out_data_4 = ((503.0463*math.exp((self.data_out_4*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_4 = [((503.0463*math.exp((self.data_out_4*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_12*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_4, pyaudio.paContinue)
 
     def callback5(self, in_data, frame_count, time_info, status):
-        out_data_5 = ((503.0463*math.exp((self.data_out_5*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_5 = [((503.0463*math.exp((self.data_out_5*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_13*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_5, pyaudio.paContinue)
 
     def callback6(self, in_data, frame_count, time_info, status):
-        out_data_6 = ((503.0463*math.exp((self.data_out_6*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_6 = [((503.0463*math.exp((self.data_out_6*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_14*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_6, pyaudio.paContinue)
 
     def callback7(self, in_data, frame_count, time_info, status):
-        out_data_7 = ((503.0463*math.exp((self.data_out_7*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_7 = [((503.0463*math.exp((self.data_out_7*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_15*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_7, pyaudio.paContinue)
 
     def callback8(self, in_data, frame_count, time_info, status):
-        out_data_8 = ((503.0463*math.exp((self.data_out_8*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_8 = [((503.0463*math.exp((self.data_out_8*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_16*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
         return (out_data_8, pyaudio.paContinue)
 
     def close(self):
@@ -250,8 +247,8 @@ class VibrotactileFeedbackManager:
             listvelPosP1 = (np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt)
             listvelPosP2 = (np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt)
 
-            vel_gain1 = 5
-            vel_gain2 = 5
+            vel_gain1 = 10
+            vel_gain2 = 10
 
             #FB1:左、FB2:右、FB3:前、FB4:後
             
@@ -285,14 +282,25 @@ class VibrotactileFeedbackManager:
                 fb_vel_7 = 0
                 fb_vel_8 = -1 * listvelPosP2[0][2] * vel_gain2
 
-            self.data_out_1 = fb_vel_1
-            self.data_out_2 = fb_vel_2
-            self.data_out_3 = fb_vel_3
-            self.data_out_4 = fb_vel_4
-            self.data_out_5 = fb_vel_5
-            self.data_out_6 = fb_vel_6
-            self.data_out_7 = fb_vel_7
-            self.data_out_8 = fb_vel_8
+            #FeedBack about xArm
+            self.data_out_1 = fb_vel_1 * xratio[0]
+            self.data_out_2 = fb_vel_2 * xratio[0]
+            self.data_out_3 = fb_vel_3 * xratio[0]
+            self.data_out_4 = fb_vel_4 * xratio[0]
+            self.data_out_5 = fb_vel_5 * xratio[2]
+            self.data_out_6 = fb_vel_6 * xratio[2]
+            self.data_out_7 = fb_vel_7 * xratio[2]
+            self.data_out_8 = fb_vel_8 * xratio[2]
+
+            #FeedBack about mikata
+            self.data_out_9 = fb_vel_1 * mikataratio[0]
+            self.data_out_10 = fb_vel_2 * mikataratio[0]
+            self.data_out_11 = fb_vel_3 * mikataratio[0]
+            self.data_out_12 = fb_vel_4 * mikataratio[0]
+            self.data_out_13 = fb_vel_5 * mikataratio[1]
+            self.data_out_14 = fb_vel_6 * mikataratio[1]
+            self.data_out_15 = fb_vel_7 * mikataratio[1]
+            self.data_out_16 = fb_vel_8 * mikataratio[1]
 
             del self.listRigidBodyPos1[0]
             del self.listRigidBodyPos2[0]
