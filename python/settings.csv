@@ -3,4 +3,4 @@ bendingSensorCom2,COM15
 bendingSensorSerialPorts,115200
 xArmIP,192.168.1.217
 mikataDEVICENAME,COM4
-sliderPort,COM10
+SliderPort,COM10
