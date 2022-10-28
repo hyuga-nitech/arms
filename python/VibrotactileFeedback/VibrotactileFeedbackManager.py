@@ -34,7 +34,7 @@ class VibrotactileFeedbackManager:
         self.rate = 44100
         self.amp = 30
 
-        self.freq = 200
+        self.freq = 190
         self.CHUNK = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.CHUNK) * float(self.freq) / float(self.rate))
 
@@ -82,43 +82,74 @@ class VibrotactileFeedbackManager:
         self.listRigidBodyRot1 = []
         self.listRigidBodyRot2 = []
 
-        self.data_out_1 = 0
-        self.data_out_2 = 0
-        self.data_out_3 = 0
-        self.data_out_4 = 0
-        self.data_out_5 = 0
-    
+        self.data_out_1,self.data_out_2,self.data_out_3,self.data_out_4 = 0
+        self.data_out_5,self.data_out_6,self.data_out_7,self.data_out_8 = 0
+        self.data_out_9,self.data_out_10,self.data_out_11,self.data_out_12 = 0
+        self.data_out_13,self.data_out_14,self.data_out_15,self.data_out_16 = 0
+
     def callback1(self, in_data, frame_count, time_info, status):
-        out_data_1 = [((503.0463*math.exp((self.data_out_1*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_9*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_1, pyaudio.paContinue)
+        out_data_1 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_1[0] = ((503.0463*math.exp((self.data_out_1*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_1[1] = ((503.0463*math.exp((self.data_out_9*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_1 = np.reshape(out_data_1.T,(int(self.CHUNK) * self.channels))
+        out_data_1_buff = out_data_1.astype(np.int16).tostring()
+        return (out_data_1_buff, pyaudio.paContinue)
 
     def callback2(self, in_data, frame_count, time_info, status):
-        out_data_2 = [((503.0463*math.exp((self.data_out_2*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_10*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_2, pyaudio.paContinue)
+        out_data_2 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_2[0] = ((503.0463*math.exp((self.data_out_2*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_2[1] = ((503.0463*math.exp((self.data_out_10*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_2 = np.reshape(out_data_2.T,(int(self.CHUNK) * self.channels))
+        out_data_2_buff = out_data_2.astype(np.int16).tostring()
+        return (out_data_2_buff, pyaudio.paContinue)
 
     def callback3(self, in_data, frame_count, time_info, status):
-        out_data_3 = [((503.0463*math.exp((self.data_out_3*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_11*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_3, pyaudio.paContinue)
+        out_data_3 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_3[0] = ((503.0463*math.exp((self.data_out_3*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_3[1] = ((503.0463*math.exp((self.data_out_11*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_3 = np.reshape(out_data_3.T,(int(self.CHUNK) * self.channels))
+        out_data_3_buff = out_data_3.astype(np.int16).tostring()
+        return (out_data_3_buff, pyaudio.paContinue)
 
     def callback4(self, in_data, frame_count, time_info, status):
-        out_data_4 = [((503.0463*math.exp((self.data_out_4*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_12*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_4, pyaudio.paContinue)
+        out_data_4 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_4[0] = ((503.0463*math.exp((self.data_out_4*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_4[1] = ((503.0463*math.exp((self.data_out_12*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_4 = np.reshape(out_data_4.T,(int(self.CHUNK) * self.channels))
+        out_data_4_buff = out_data_4.astype(np.int16).tostring()
+        return (out_data_4_buff, pyaudio.paContinue)
 
     def callback5(self, in_data, frame_count, time_info, status):
-        out_data_5 = [((503.0463*math.exp((self.data_out_5*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_13*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_5, pyaudio.paContinue)
+        out_data_5 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_5[0] = ((503.0463*math.exp((self.data_out_5*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_5[1] = ((503.0463*math.exp((self.data_out_13*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_5 = np.reshape(out_data_5.T,(int(self.CHUNK) * self.channels))
+        out_data_5_buff = out_data_5.astype(np.int16).tostring()
+        return (out_data_5_buff, pyaudio.paContinue)
 
     def callback6(self, in_data, frame_count, time_info, status):
-        out_data_6 = [((503.0463*math.exp((self.data_out_6*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_14*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_6, pyaudio.paContinue)
+        out_data_6 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_6[0] = ((503.0463*math.exp((self.data_out_6*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_6[1] = ((503.0463*math.exp((self.data_out_14*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_6 = np.reshape(out_data_6.T,(int(self.CHUNK) * self.channels))
+        out_data_6_buff = out_data_6.astype(np.int16).tostring()
+        return (out_data_6_buff, pyaudio.paContinue)
 
     def callback7(self, in_data, frame_count, time_info, status):
-        out_data_7 = [((503.0463*math.exp((self.data_out_7*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_15*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_7, pyaudio.paContinue)
+        out_data_7 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_7[0] = ((503.0463*math.exp((self.data_out_7*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_7[1] = ((503.0463*math.exp((self.data_out_15*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_7 = np.reshape(out_data_7.T,(int(self.CHUNK) * self.channels))
+        out_data_7_buff = out_data_7.astype(np.int16).tostring()
+        return (out_data_7_buff, pyaudio.paContinue)
 
     def callback8(self, in_data, frame_count, time_info, status):
-        out_data_8 = [((503.0463*math.exp((self.data_out_8*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16),((503.0463*math.exp((self.data_out_16*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)]
-        return (out_data_8, pyaudio.paContinue)
+        out_data_8 = np.zeros((self.channels,int(self.CHUNK)))
+        out_data_8[0] = ((503.0463*math.exp((self.data_out_8*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_8[1] = ((503.0463*math.exp((self.data_out_16*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
+        out_data_8 = np.reshape(out_data_8.T,(int(self.CHUNK) * self.channels))
+        out_data_8_buff = out_data_8.astype(np.int16).tostring()
+        return (out_data_8_buff, pyaudio.paContinue)
 
     def close(self):
         self.p.terminate()
@@ -168,60 +199,6 @@ class VibrotactileFeedbackManager:
             del self.listRigidBodyRot1[0]
             del self.listRigidBodyRot2[0]
 
-    def forPhantomOnly1(self, position: dict, rotation: dict, xratio, mikataratio):
-        posRigidBody1 = position['RigidBody1'] * 1000
-        posRigidBody2 = position['RigidBody2'] * 1000
-        rotRigidBody1 = np.rad2deg(self.Behaviour.Quaternion2Euler(rotation['RigidBody1']))
-        rotRigidBody2 = np.rad2deg(self.Behaviour.Quaternion2Euler(rotation['RigidBody2']))
-
-        self.get_pos_1_box.append(np.concatenate([posRigidBody1, rotRigidBody1], 0))
-        get_pos_1_filt = self.filter_FB.lowpass2(self.get_pos_1_box, self.get_pos_1_filt_box)
-        self.get_pos_1_filt_box.append(get_pos_1_filt)
-        del self.get_pos_1_box[0]
-        del self.get_pos_1_filt_box[0]
-
-        self.get_pos_2_box.append(np.concatenate([posRigidBody2, rotRigidBody2]))
-        get_pos_2_filt = self.filter_FB.lowpass2(self.get_pos_2_box, self.get_pos_2_filt_box)
-        self.get_pos_2_filt_box.append(get_pos_2_filt)
-        del self.get_pos_2_box[0]
-        del self.get_pos_2_filt_box[0]
-
-        self.listRigidBodyPos1.append(get_pos_1_filt[0:3])
-        self.listRigidBodyPos2.append(get_pos_2_filt[0:3])
-
-        if len(self.listRigidBodyPos1)== 2:
-            velPosP1 = np.linalg.norm((np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt))
-            listvelPosP2 = (np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt)
-
-            vel_gain1 = 1.0
-            vel_gain2 = 2.5
-            fb_vel_1 = velPosP1 * vel_gain1
-
-            #FB2:左、FB3:右、FB4:前、FB5:後
-            
-            if listvelPosP2[0][0] >= 0:
-                fb_vel_2 = listvelPosP2[0][0] * vel_gain2
-                fb_vel_3 = 0
-            else:
-                fb_vel_2 = 0
-                fb_vel_3 = -1 * listvelPosP2[0][0] * vel_gain2
-
-            if listvelPosP2[0][2] >= 0:
-                fb_vel_4 = listvelPosP2[0][2] * vel_gain2
-                fb_vel_5 = 0
-            else:
-                fb_vel_4 = 0
-                fb_vel_5 = -1 * listvelPosP2[0][2] * vel_gain2
-
-            self.data_out_1 = fb_vel_1
-            self.data_out_2 = fb_vel_2
-            self.data_out_3 = fb_vel_3
-            self.data_out_4 = fb_vel_4
-            self.data_out_5 = fb_vel_5
-
-            del self.listRigidBodyPos1[0]
-            del self.listRigidBodyPos2[0]
-    
     def forPhantom(self, position: dict, rotation: dict, xratio, mikataratio):
         posRigidBody1 = position['RigidBody1'] * 1000
         posRigidBody2 = position['RigidBody2'] * 1000
