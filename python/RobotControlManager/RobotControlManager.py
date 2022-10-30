@@ -7,9 +7,7 @@
 
 import time
 import threading
-import numpy as np
 from xarm.wrapper import XArmAPI
-from ctypes import windll
 
 # ----- Custom class ----- #
 from xArm.xArmTransform import xArmTransform
@@ -17,7 +15,6 @@ from mikataArm.mikataArmTransform import mikataTransform
 from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
-from BendingSensor.BendingSensorManager import BendingSensorManager
 from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
@@ -76,24 +73,6 @@ class RobotControlManager:
 
         try:
             while True:
-                # if time.perf_counter() - taskStartTime > executionTime:
-                #     # ----- Exit processing after task time elapses ----- #
-                #     isMoving    = False
-
-                #     self.taskTime.append(time.perf_counter() - taskStartTime)
-                #     self.PrintProcessInfo()
-
-                #     # ----- Export recorded data ----- #
-                #     if isExportData:
-                #         dataRecordManager.ExportSelf()
-
-                #     if isEnableArm:
-                #         arm.disconnect()
-                #         mikatacontrol.ClosePort()
-
-                #     print('----- Finish task -----')
-                #     break
-
                 if isMoving:
                     # ----- Get transform data ----- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
@@ -146,13 +125,13 @@ class RobotControlManager:
 
                     if abs(xArmdiffX) > xArmMovingLimit or abs(xArmdiffY) > xArmMovingLimit or abs(xArmdiffZ) > xArmMovingLimit:
                         isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred in xArm. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> A rapid movement has occurred in xArm. Please enter "q" to quit')
                     elif abs(mikatadiffC1) > mikataMovingLimit or abs(mikatadiffC2) > mikataMovingLimit or abs(mikatadiffC3) > mikataMovingLimit or abs(mikatadiffC4) > mikataMovingLimit:
                         isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred in mikataArm. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> A rapid movement has occurred in mikataArm. Please enter "q" to quit')
                     elif abs(mikatadiffC5) > mikataMovingLimit:
                         isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "q" to quit')
                     else:
                         if isEnableArm:
                             # ----- Send to Arms ----- #
@@ -174,7 +153,7 @@ class RobotControlManager:
                         isMoving    = False
                         self.errorCount += 1
                         self.taskTime.append(time.perf_counter() - taskStartTime)
-                        print('[ERROR] >> xArm Error has occured. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> xArm Error has occured. Please enter "q" to quit')
 
                     self.loopCount += 1
 

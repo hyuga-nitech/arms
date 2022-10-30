@@ -39,7 +39,7 @@ class VibrotactileFeedbackManager:
         self.sin = np.sin(2.0 * np.pi * np.arange(self.CHUNK) * float(self.freq) / float(self.rate))
 
         # ----- Initialize the parameter of data_out according as OutputDeviceNum ----- #
-        for i in range(OutputDeviceNum):
+        for i in range(2 * OutputDeviceNum):    # note: 2 is for stereo
             data_out_command = 'self.data_out_' + str(i+1) + '= 0.0'
             exec(data_out_command)
 

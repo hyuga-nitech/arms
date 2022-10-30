@@ -11,21 +11,9 @@ class BendingSensorManager:
 
     bendingValue = 0
     
-    def __init__(self, ip, port) -> None:
-        self.ip             = ip
-        self.port           = port
-        self.bufsize        = 4096
-        self.bendingValue   = 425
-
-        self.serialObject = serial.Serial(ip,port)
-        nonUsed = self.serialObject.readline()
-
-        """
-        self.ser1 = serial.Serial("COM3",9600)
-        self.not_used1 = self.ser1.readline()
-        self.ser2 = serial.Serial("COM2",9600)
-        self.not_used2 = self.ser2.readline()
-        """
+    def __init__(self, port, baudrate) -> None:
+        
+        self.serialObject = serial.Serial(port,baudrate)
     
     def StartReceiving(self):
         """

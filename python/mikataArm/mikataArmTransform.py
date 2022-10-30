@@ -81,12 +81,10 @@ class mikataTransform:
         d3 = 100 + (180 - 2 * math.degrees(math.asin(r/2/150)))
         d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150)))
 
-        D2C = mikataTransform()
-
-        c1 = D2C.Degree2Current(d1)
-        c2 = D2C.Degree2Current(d2)
-        c3 = D2C.Degree2Current(d3)
-        c4 = D2C.Degree2Current(d4)
+        c1 = self.Degree2Current(d1)
+        c2 = self.Degree2Current(d2)
+        c3 = self.Degree2Current(d3)
+        c4 = self.Degree2Current(d4)
 
         # print('r,phi,theta = ',r,' ',phi,' ',theta,' d1,d2,d3,d4 = ',d1,' ',d2,' ',d3,' ',d4)
 

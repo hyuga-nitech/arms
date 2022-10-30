@@ -52,11 +52,9 @@ class mikataControl:
     def OpenPort(self):
         # Open Port
         if self.portHandler.openPort():
-            print("Succeeded to open the port")
 
             # Set Baudrate
             if self.portHandler.setBaudRate(self.BAUDRATE):
-                print("Succeeded to change the baudrate")
 
                 for i in range(len(self.DXL_ID)):
                     self.dxl_comm_result, self.dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_PROFILE_ACCELERATION, self.prflAcc)
@@ -79,7 +77,7 @@ class mikataControl:
                     elif self.dxl_error != 0:
                         print("%s" % self.packetHandler.getRxPacketError(self.dxl_error))
                     else:
-                        print("Dynamixel:ID%01d has been successfully connected",i)
+                        pass
             else:
                 print("Failed to change the baudrate")
                 quit()
@@ -93,10 +91,10 @@ class mikataControl:
                 for i in range(len(self.DXL_ID)):
                     self.dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID[i], self.ADDR_GOAL_POSITION, self.dxl_goal_position[i])
                     if self.dxl_comm_result != COMM_SUCCESS:
-                        # print("%s" % self.packetHandler.getTxRxResult(self.dxl_comm_result))
+                        print("%s" % self.packetHandler.getTxRxResult(self.dxl_comm_result))
                         pass
                     elif dxl_error != 0:
-                        # print("%s" % self.packetHandler.getRxPacketError(dxl_error))
+                        print("%s" % self.packetHandler.getRxPacketError(dxl_error))
                         pass
 
         except KeyboardInterrupt:

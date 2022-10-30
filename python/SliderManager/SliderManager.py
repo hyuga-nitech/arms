@@ -10,7 +10,6 @@ class SliderManager:
     def __init__(self, port):
         try:
             self.slider_serial = serial.Serial(port, 115200, timeout=0.1)
-            print('Successfully connected to the slider')
 
         except:
             print('Failed to connect to the slider')
