@@ -23,7 +23,7 @@ from SliderManager.SliderManager import SliderManager
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
 defaultBendingSensorNum = 1
-xArmMovingLimit         = 100
+xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
 gripperRatio            = [1]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
 
@@ -32,12 +32,10 @@ class RobotControlManager:
         fileIO = FileIO()
 
         dat = fileIO.Read('settings.csv',',')
-        xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
-        self.xArmIpAddress = xArmIP
-        SliderPort = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
-        self.SliderPort = SliderPort
+        self.xArmIpAddress = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
+        self.SliderPort = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
 
-    def SendDataToRobot(self,executionTime: int = 120, isExportData: bool = True, isEnableArm: bool = True):
+    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
