@@ -5,7 +5,6 @@
 # Summary:         RigidBody座標の取得
 # -----------------------------------------------------------------
 
-from curses import baudrate
 import threading
 import numpy as np
 
@@ -35,14 +34,14 @@ class MotionManager:
         settings = fileIO.Read('settings.csv',',')
         bendingSensorPort1 = [addr for addr in settings if 'bendingSensorPort1' in addr[0]][0][1]
         bendingSensorPort2 = [addr for addr in settings if 'bendingSensorPort2' in addr[0]][0][1]
-        self.bendingSensorSerialbaudrate = [addr for addr in settings if 'bendingSensorSerialPorts' in addr [0]][0][1]
+        self.bendingSensorSerialBaudrate = [addr for addr in settings if 'bendingSensorSerialBaudrate' in addr [0]][0][1]
 
         self.bendingSensorPort = [bendingSensorPort1,bendingSensorPort2]
 
         self.bendingSensors  = []
 
         for i in range(bendingSensorNum):
-            bendingSensorManager = BendingSensorManager(port=self.bendingSensorPort[i], baudrate=self.bendingSensorSerialbaudrate)
+            bendingSensorManager = BendingSensorManager(port=self.bendingSensorPort[i], baudrate=self.bendingSensorSerialBaudrate)
             self.bendingSensors.append(bendingSensorManager)
 
             # ----- Start receiving bending sensor value ----- #

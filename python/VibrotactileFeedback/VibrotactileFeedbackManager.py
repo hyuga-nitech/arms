@@ -82,11 +82,6 @@ class VibrotactileFeedbackManager:
         self.listRigidBodyRot1 = []
         self.listRigidBodyRot2 = []
 
-        self.data_out_1,self.data_out_2,self.data_out_3,self.data_out_4 = 0
-        self.data_out_5,self.data_out_6,self.data_out_7,self.data_out_8 = 0
-        self.data_out_9,self.data_out_10,self.data_out_11,self.data_out_12 = 0
-        self.data_out_13,self.data_out_14,self.data_out_15,self.data_out_16 = 0
-
     def callback1(self, in_data, frame_count, time_info, status):
         out_data_1 = np.zeros((self.channels,int(self.CHUNK)))
         out_data_1[0] = ((503.0463*math.exp((self.data_out_1*self.amp*0.00008)/0.3752)-500) * self.sin).astype(np.int16)
