@@ -31,7 +31,7 @@ class RobotControlManager:
 
         dat = fileIO.Read('settings.csv',',')
         self.xArmIpAddress = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
-        self.SliderPort = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
+        self.SliderPort    = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
 
     def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True):
         # ----- Process info ----- #
@@ -70,21 +70,21 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
-                    slider_xratio = slidermanager.slider_xratio
+                    slider_xratio      = slidermanager.slider_xratio
                     slider_mikataratio = slidermanager.slider_mikataratio
 
-                    xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
-                    mikataPosition                  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,slider_mikataratio)
+                    xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
+                    mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,slider_mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
 
                     # ----- Set xArm transform ----- #
-                    xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
+                    xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], xArmPosition[0], xArmPosition[1]
                     xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                     # ----- Set mikata transform ----- #
-                    mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                    mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                     # ----- Bending sensor ----- #
                     gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -94,16 +94,17 @@ class RobotControlManager:
                     mikataC5                               = mikatatransform.Degree2Current(gripperValue)
 
                     # ----- Safety Check -----#
-                    xArmdiffX = xArmtransform.x - beforeX
-                    xArmdiffY = xArmtransform.y - beforeY
-                    xArmdiffZ = xArmtransform.z - beforeZ
-                    beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
-
+                    xArmdiffX    = xArmtransform.x - beforeX
+                    xArmdiffY    = xArmtransform.y - beforeY
+                    xArmdiffZ    = xArmtransform.z - beforeZ
+                    
                     mikatadiffC1 = mikataC1 - beforeC1
                     mikatadiffC2 = mikataC2 - beforeC2
                     mikatadiffC3 = mikataC3 - beforeC3
                     mikatadiffC4 = mikataC4 - beforeC4
                     mikatadiffC5 = mikataC5 - beforeC5
+
+                    beforeX , beforeY , beforeZ                      = xArmtransform.x, xArmtransform.y, xArmtransform.z
                     beforeC1, beforeC2, beforeC3, beforeC4, beforeC5 = mikataC1, mikataC2, mikataC3, mikataC4, mikataC5
 
                     if abs(xArmdiffX) > xArmMovingLimit or abs(xArmdiffY) > xArmMovingLimit or abs(xArmdiffZ) > xArmMovingLimit:
@@ -153,30 +154,30 @@ class RobotControlManager:
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
 
-                        slider_xratio = slidermanager.slider_xratio
+                        slider_xratio      = slidermanager.slider_xratio
                         slider_mikataratio = slidermanager.slider_mikataratio
                         
-                        xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
-                        mikataPosition                  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_mikataratio)
+                        xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
+                        mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
 
                         # ----- Set xArm transform ----- #
-                        xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
-                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
+                        xArmtransform.x   , xArmtransform.y    , xArmtransform.z   = xArmPosition[2], xArmPosition[0], xArmPosition[1]
+                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                         # ----- Set mikata transform ----- #
-                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                        mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                         # ----- Bending sensor ----- #
                         gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
 
-                        beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
+                        beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
                         beforeC5                               = mikatatransform.Degree2Current(gripperValue)
 
-                        isMoving    = True
+                        isMoving = True
                         taskStartTime = time.perf_counter()
 
         except KeyboardInterrupt:
