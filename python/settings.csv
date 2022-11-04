@@ -1,4 +1,5 @@
 bendingSensorPort1,COM7
+bendingSensorPort2,COM3
 bendingSensorSerialBaudrate,115200
 xArmIP,192.168.1.217
 mikataDEVICENAME,COM4

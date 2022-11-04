@@ -22,10 +22,8 @@ from SliderManager.SliderManager import SliderManager
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
-defaultBendingSensorNum = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-gripperRatio            = [1]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -46,7 +44,7 @@ class RobotControlManager:
         Behaviour           = MotionBehaviour(defaultRigidBodyNum)
         xArmtransform       = xArmTransform()
         mikatatransform     = mikataTransform()
-        motionManager       = MotionManager(defaultRigidBodyNum, defaultBendingSensorNum)
+        motionManager       = MotionManager(defaultRigidBodyNum)
         mikatacontrol       = mikataControl()
         dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
@@ -64,10 +62,6 @@ class RobotControlManager:
 
         # ----- Control flags ----- #
         isMoving = False
-        isRatio  = True
-        self.FBmode   = "B"
-        # "A":FB each others diffPos of hand
-        # "B":FB with Phantom Sensation
 
         try:
             while True:
@@ -79,13 +73,8 @@ class RobotControlManager:
                     slider_xratio = slidermanager.slider_xratio
                     slider_mikataratio = slidermanager.slider_mikataratio
 
-                    if isRatio:
-                        xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
-                        mikataPosition                  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,slider_mikataratio)
-                    else:
-                        xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
-                        mikataPosition                  = Behaviour.GetmikataArmTransform(localPosition,localRotation)
-
+                    xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
+                    mikataPosition                  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,slider_mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -98,11 +87,7 @@ class RobotControlManager:
                     mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                     # ----- Bending sensor ----- #
-                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                    gripperValue = 0
-                    for i in range(defaultBendingSensorNum):
-                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
-
+                    gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
 
                     # ----- Calculate mikata Current ----- #
                     mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
@@ -137,14 +122,10 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-
-                    if self.FBmode == "A":
-                        vibrotactileManager.forShared(localPosition, localRotation, slider_xratio, slider_mikataratio)
-                    elif self.FBmode == "B":
-                        vibrotactileManager.forPhantom(localPosition, localRotation, slider_xratio, slider_mikataratio)
+                    vibrotactileManager.forPhantom(localPosition, localRotation, slider_xratio, slider_mikataratio)
 
                     # ----- Data recording ----- #
-                    dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
+                    dataRecordManager.Record(localPosition, localRotation, gripperValue)
 
                     # ----- If xArm error has occured ----- #
                     if isEnableArm and arm.has_err_warn:
@@ -175,12 +156,8 @@ class RobotControlManager:
                         slider_xratio = slidermanager.slider_xratio
                         slider_mikataratio = slidermanager.slider_mikataratio
                         
-                        if isRatio:
-                            xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
-                            mikataPosition                  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_mikataratio)
-                        else:
-                            xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-                            mikataPosition                  = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+                        xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
+                        mikataPosition                  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
@@ -193,16 +170,11 @@ class RobotControlManager:
                         mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                         # ----- Bending sensor ----- #
-                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                        gripperValue = 0
-                        for i in range(defaultBendingSensorNum):
-                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
+                        gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
 
                         beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
                         beforeC5                               = mikatatransform.Degree2Current(gripperValue)
-
-                        motionManager.SetInitialBendingValue()
 
                         isMoving    = True
                         taskStartTime = time.perf_counter()

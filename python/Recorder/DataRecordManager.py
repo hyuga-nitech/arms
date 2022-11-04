@@ -44,8 +44,7 @@ class DataRecordManager:
             self.dictPosition['RigidBody'+str(i+1)].append(position['RigidBody'+str(i+1)])
             self.dictRotation['RigidBody'+str(i+1)].append(rotation['RigidBody'+str(i+1)])
 
-        for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)].append(bendingSensor['gripperValue'+str(i+1)])
+        self.dictGripperValue['gripperValue'].append(bendingSensor)
 
     def ExportSelf(self, dirPath: str = 'ExportData'):
         """
@@ -72,9 +71,8 @@ class DataRecordManager:
             fileIO.ExportAsCSV(npRigidBodyTransform, dirPath, 'Transform_RigidBody_'+str(i+1), transformHeader)
 
         print('Writing: Gripper value...')
-        for i in tqdm.tqdm(range(self.bendingSensorNum), ncols=150):
-            npBendingSensorValue = np.array(self.dictGripperValue['gripperValue'+str(i+1)])
+        npBendingSensorValue = np.array(self.dictGripperValue['gripperValue'])
 
-            fileIO.ExportAsCSV(npBendingSensorValue, dirPath, 'GripperValue_'+str(i+1), bendingSensorHeader)
+        fileIO.ExportAsCSV(npBendingSensorValue, dirPath, 'GripperValue', bendingSensorHeader)
 
         print('---------- Export completed ----------\n')            
