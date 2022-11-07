@@ -23,8 +23,7 @@ class DataRecordManager:
             self.dictPosition['RigidBody'+str(i+1)] = []
             self.dictRotation['RigidBody'+str(i+1)] = []
 
-        for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)] = []
+        self.dictGripperValue['gripperValue'] = []
 
     def Record(self, position, rotation, bendingSensor):
         """
