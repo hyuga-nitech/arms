@@ -80,11 +80,11 @@ class RobotControlManager:
                     mikataPosition = mikataPosition * 1000
 
                     # ----- Set xArm transform ----- #
-                    xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], xArmPosition[0], xArmPosition[1]
-                    xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
+                    xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], -1 * xArmPosition[1], -1 * xArmPosition[0]
+                    xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], -1 * xArmRotation[1], -1 * xArmRotation[0]
 
                     # ----- Set mikata transform ----- #
-                    mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                    mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], -1 * mikataPosition[1], -1 * mikataPosition[0]
 
                     # ----- Bending sensor ----- #
                     gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -164,11 +164,11 @@ class RobotControlManager:
                         mikataPosition = mikataPosition * 1000
 
                         # ----- Set xArm transform ----- #
-                        xArmtransform.x   , xArmtransform.y    , xArmtransform.z   = xArmPosition[2], xArmPosition[0], xArmPosition[1]
-                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw = xArmRotation[2], xArmRotation[0], xArmRotation[1]
+                        xArmtransform.x   , xArmtransform.y    , xArmtransform.z   = xArmPosition[2], -1 * xArmPosition[1], -1 * xArmPosition[0]
+                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw = xArmRotation[2], -1 * xArmRotation[1], -1 * xArmRotation[0]
 
                         # ----- Set mikata transform ----- #
-                        mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                        mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], -1 * mikataPosition[1], -1 * mikataPosition[0]
 
                         # ----- Bending sensor ----- #
                         gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
