@@ -219,8 +219,8 @@ class VibrotactileFeedbackManager:
             listvelPosP1 = (np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt)
             listvelPosP2 = (np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt)
 
-            vel_gain1 = 10
-            vel_gain2 = 10
+            vel_gain1 = 5
+            vel_gain2 = 5
 
             #FB1:左、FB2:右、FB3:前、FB4:後
             
