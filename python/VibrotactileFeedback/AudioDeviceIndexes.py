@@ -34,8 +34,9 @@ class AudioDeviceIndexes:
                     # for debug option
                     # print(device_dict)
 
-                    if ('スピーカー' in device_dict['name']) and (name in device_dict['name']):
-                        ListIndexNum.append(device_dict['index'])
+                    for si in range(2,9):
+                        if ('スピーカー' in device_dict['name']) and (name in device_dict['name']) and ((str(si)+'- ') in device_dict['name']):
+                            ListIndexNum.append(device_dict['index'])
 
         if len(ListIndexNum) == 0:
             print('サウンドカードが見つかりません')
