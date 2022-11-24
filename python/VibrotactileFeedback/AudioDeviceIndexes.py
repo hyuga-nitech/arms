@@ -23,6 +23,7 @@ class AudioDeviceIndexes:
             Device name
         """
         p = pyaudio.PyAudio()
+        ListIndexNumbefore = []
         ListIndexNum = []
 
         for host_index in range(0, p.get_host_api_count()):
@@ -34,9 +35,15 @@ class AudioDeviceIndexes:
                     # for debug option
                     # print(device_dict)
 
-                    for si in range(2,9):
-                        if ('スピーカー' in device_dict['name']) and (name in device_dict['name']) and ((str(si)+'- ') in device_dict['name']):
-                            ListIndexNum.append(device_dict['index'])
+                    if ('スピーカー' in device_dict['name']) and (name in device_dict['name']):
+                        ListIndexNumbefore.append(device_index)
+
+                for soundi in range(2,10):
+                    for gained_index in ListIndexNumbefore:
+                        gained_dict = p.get_device_info_by_host_api_device_index(host_index, gained_index)
+
+                        if ((str(soundi) + '- ') in gained_dict['name']):
+                            ListIndexNum.append(gained_dict['index'])
 
         if len(ListIndexNum) == 0:
             print('サウンドカードが見つかりません')
