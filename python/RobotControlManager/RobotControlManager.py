@@ -33,7 +33,10 @@ class RobotControlManager:
         self.xArmIpAddress = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
         self.SliderPort    = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
 
-    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True):
+        self.xratio      = [1,1,0,0]
+        self.mikataratio = [0,1]
+
+    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = False):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
@@ -48,13 +51,12 @@ class RobotControlManager:
         mikatacontrol       = mikataControl()
         dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
-        slidermanager       = SliderManager(self.SliderPort)
 
-
-        SliderThread = threading.Thread(target=slidermanager.receive)
-        SliderThread.setDaemon(True)
-        SliderThread.start()
-
+        if isSlider:
+            slidermanager       = SliderManager(self.SliderPort)
+            SliderThread = threading.Thread(target=slidermanager.receive)
+            SliderThread.setDaemon(True)
+            SliderThread.start()
 
         if isEnableArm:
             arm = XArmAPI(self.xArmIpAddress)
@@ -70,11 +72,16 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
-                    slider_xratio      = slidermanager.slider_xratio
-                    slider_mikataratio = slidermanager.slider_mikataratio
+                    if isSlider:
+                        xratio      = slidermanager.slider_xratio
+                        mikataratio = slidermanager.slider_mikataratio
 
-                    xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
-                    mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,slider_mikataratio)
+                    else:
+                        xratio = self.xratio
+                        mikataratio = self.mikataratio
+
+                    xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
+                    mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -123,7 +130,7 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-                    vibrotactileManager.forPhantom(localPosition, localRotation, slider_xratio, slider_mikataratio)
+                    vibrotactileManager.forPhantom(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, gripperValue)
@@ -154,11 +161,16 @@ class RobotControlManager:
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
 
-                        slider_xratio      = slidermanager.slider_xratio
-                        slider_mikataratio = slidermanager.slider_mikataratio
+                        if isSlider:
+                            xratio      = slidermanager.slider_xratio
+                            mikataratio = slidermanager.slider_mikataratio
+
+                        else:
+                            xratio = self.xratio
+                            mikataratio = self.mikataratio
                         
-                        xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
-                        mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_mikataratio)
+                        xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
+                        mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
