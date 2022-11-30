@@ -7,9 +7,7 @@
 
 import time
 import threading
-import numpy as np
 from xarm.wrapper import XArmAPI
-from ctypes import windll
 
 # ----- Custom class ----- #
 from xArm.xArmTransform import xArmTransform
@@ -17,29 +15,25 @@ from mikataArm.mikataArmTransform import mikataTransform
 from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
-from BendingSensor.BendingSensorManager import BendingSensorManager
 from MotionManager.MotionManager import MotionManager
 from FileIO.FileIO import FileIO
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
+from SliderManager.SliderManager import SliderManager
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
-defaultBendingSensorNum = 1
-xArmMovingLimit         = 100
+xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-xRatio                  = [1,1,0,0]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-mikataRatio             = [0,1]  #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
-gripperRatio            = [1]  #[BendingSensor1-to-mikataGripper,BendingSensor2-to-mikataGripper]
 
 class RobotControlManager:
     def __init__(self) ->None:
         fileIO = FileIO()
 
         dat = fileIO.Read('settings.csv',',')
-        xArmIP = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
-        self.xArmIpAddress = xArmIP
+        self.xArmIpAddress = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
+        self.SliderPort    = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
 
-    def SendDataToRobot(self,executionTime: int = 120, isExportData: bool = True, isEnableArm: bool = True):
+    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
@@ -50,10 +44,17 @@ class RobotControlManager:
         Behaviour           = MotionBehaviour(defaultRigidBodyNum)
         xArmtransform       = xArmTransform()
         mikatatransform     = mikataTransform()
-        motionManager       = MotionManager(defaultRigidBodyNum, defaultBendingSensorNum)
+        motionManager       = MotionManager(defaultRigidBodyNum)
         mikatacontrol       = mikataControl()
         dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
+        slidermanager       = SliderManager(self.SliderPort)
+
+
+        SliderThread = threading.Thread(target=slidermanager.receive)
+        SliderThread.setDaemon(True)
+        SliderThread.start()
+
 
         if isEnableArm:
             arm = XArmAPI(self.xArmIpAddress)
@@ -61,87 +62,60 @@ class RobotControlManager:
 
         # ----- Control flags ----- #
         isMoving = False
-        isRatio  = True
-        self.FBmode   = "B"
-        # "A":FB each others diffPos of hand
-        # "B":FB with Phantom Sensation
 
         try:
             while True:
-                # if time.perf_counter() - taskStartTime > executionTime:
-                #     # ----- Exit processing after task time elapses ----- #
-                #     isMoving    = False
-
-                #     self.taskTime.append(time.perf_counter() - taskStartTime)
-                #     self.PrintProcessInfo()
-
-                #     # ----- Export recorded data ----- #
-                #     if isExportData:
-                #         dataRecordManager.ExportSelf()
-
-                #     if isEnableArm:
-                #         arm.disconnect()
-                #         mikatacontrol.ClosePort()
-
-                #     print('----- Finish task -----')
-                #     break
-
                 if isMoving:
                     # ----- Get transform data ----- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
-                    if isRatio:
-                        xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xRatio)
-                        mikataPosition                  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataRatio)
-                    else:
-                        xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(localPosition,localRotation)
-                        mikataPosition                  = Behaviour.GetmikataArmTransform(localPosition,localRotation)
+                    slider_xratio      = slidermanager.slider_xratio
+                    slider_mikataratio = slidermanager.slider_mikataratio
 
+                    xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,slider_xratio)
+                    mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,slider_mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
 
                     # ----- Set xArm transform ----- #
-                    xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
+                    xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], xArmPosition[0], xArmPosition[1]
                     xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                     # ----- Set mikata transform ----- #
-                    mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                    mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                     # ----- Bending sensor ----- #
-                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                    gripperValue = 0
-                    for i in range(defaultBendingSensorNum):
-                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
-
+                    gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
 
                     # ----- Calculate mikata Current ----- #
                     mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
                     mikataC5                               = mikatatransform.Degree2Current(gripperValue)
 
                     # ----- Safety Check -----#
-                    xArmdiffX = xArmtransform.x - beforeX
-                    xArmdiffY = xArmtransform.y - beforeY
-                    xArmdiffZ = xArmtransform.z - beforeZ
-                    beforeX, beforeY, beforeZ = xArmtransform.x, xArmtransform.y, xArmtransform.z
-
+                    xArmdiffX    = xArmtransform.x - beforeX
+                    xArmdiffY    = xArmtransform.y - beforeY
+                    xArmdiffZ    = xArmtransform.z - beforeZ
+                    
                     mikatadiffC1 = mikataC1 - beforeC1
                     mikatadiffC2 = mikataC2 - beforeC2
                     mikatadiffC3 = mikataC3 - beforeC3
                     mikatadiffC4 = mikataC4 - beforeC4
                     mikatadiffC5 = mikataC5 - beforeC5
+
+                    beforeX , beforeY , beforeZ                      = xArmtransform.x, xArmtransform.y, xArmtransform.z
                     beforeC1, beforeC2, beforeC3, beforeC4, beforeC5 = mikataC1, mikataC2, mikataC3, mikataC4, mikataC5
 
                     if abs(xArmdiffX) > xArmMovingLimit or abs(xArmdiffY) > xArmMovingLimit or abs(xArmdiffZ) > xArmMovingLimit:
                         isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred in xArm. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> A rapid movement has occurred in xArm. Please enter "q" to quit')
                     elif abs(mikatadiffC1) > mikataMovingLimit or abs(mikatadiffC2) > mikataMovingLimit or abs(mikatadiffC3) > mikataMovingLimit or abs(mikatadiffC4) > mikataMovingLimit:
                         isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred in mikataArm. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> A rapid movement has occurred in mikataArm. Please enter "q" to quit')
                     elif abs(mikatadiffC5) > mikataMovingLimit:
                         isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> A rapid movement has occurred in mikataArm Gripper. Please enter "q" to quit')
                     else:
                         if isEnableArm:
                             # ----- Send to Arms ----- #
@@ -149,30 +123,22 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-
-                    if self.FBmode == "A":
-                        vibrotactileManager.forShared(localPosition, localRotation, xRatio, mikataRatio)
-                    elif self.FBmode == "B":
-                        vibrotactileManager.forPhantom(localPosition, localRotation, xRatio, mikataRatio)
+                    vibrotactileManager.forPhantom(localPosition, localRotation, slider_xratio, slider_mikataratio)
 
                     # ----- Data recording ----- #
-                    dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
+                    dataRecordManager.Record(localPosition, localRotation, gripperValue)
 
                     # ----- If xArm error has occured ----- #
                     if isEnableArm and arm.has_err_warn:
                         isMoving    = False
                         self.errorCount += 1
                         self.taskTime.append(time.perf_counter() - taskStartTime)
-                        print('[ERROR] >> xArm Error has occured. Please enter "r" to reset xArm, or "q" to quit')
+                        print('[ERROR] >> xArm Error has occured. Please enter "q" to quit')
 
                     self.loopCount += 1
 
                 else:
                     keycode = input('Input > "q": quit, "s": start control \n')
-
-                    # ----- FIX ME !!! ----- #
-                    # "r": Clean error and init arm, can't use because of "Port is in Use" error.
-
 
                     # ----- Quit program ----- #
                     if keycode == 'q':
@@ -183,46 +149,35 @@ class RobotControlManager:
                         self.PrintProcessInfo()
                         break
 
-                    # # ----- Reset xArm and gripper ----- #
-                    # elif keycode == 'r':
-                    #     if isEnableArm:
-                    #         self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
-
                     # ----- Start streaming ----- #
                     elif keycode == 's':
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
+
+                        slider_xratio      = slidermanager.slider_xratio
+                        slider_mikataratio = slidermanager.slider_mikataratio
                         
-                        if isRatio:
-                            xArmPosition,xArmRotation       = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xRatio)
-                            mikataPosition                  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataRatio)
-                        else:
-                            xArmPosition,xArmRotation       = Behaviour.GetxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
-                            mikataPosition                  = Behaviour.GetmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation())
+                        xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_xratio)
+                        mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),slider_mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
 
                         # ----- Set xArm transform ----- #
-                        xArmtransform.x, xArmtransform.y, xArmtransform.z           = xArmPosition[2], xArmPosition[0], xArmPosition[1]
-                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[0], xArmRotation[1]
+                        xArmtransform.x   , xArmtransform.y    , xArmtransform.z   = xArmPosition[2], xArmPosition[0], xArmPosition[1]
+                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw = xArmRotation[2], xArmRotation[0], xArmRotation[1]
 
                         # ----- Set mikata transform ----- #
-                        mikatatransform.x, mikatatransform.y, mikatatransform.z     = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                        mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                         # ----- Bending sensor ----- #
-                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                        gripperValue = 0
-                        for i in range(defaultBendingSensorNum):
-                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * gripperRatio[i]
+                        gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
 
-                        beforeX, beforeY, beforeZ              = xArmtransform.x, xArmtransform.y, xArmtransform.z
+                        beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
                         beforeC5                               = mikatatransform.Degree2Current(gripperValue)
 
-                        motionManager.SetInitialBendingValue()
-
-                        isMoving    = True
+                        isMoving = True
                         taskStartTime = time.perf_counter()
 
         except KeyboardInterrupt:
@@ -284,3 +239,4 @@ class RobotControlManager:
             print('Task time\t > ', ttask, '[s]')
         print('Error count\t > ', self.errorCount)
         print('------------------------')
+        

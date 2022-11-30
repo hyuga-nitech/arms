@@ -18,7 +18,7 @@ class OptiTrackStreamingManager:
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]
     rotation = {}	# dict { 'RigidBodyN': [x, y, z, w]}. 
     
-    def __init__(self,defaultRigidBodyNum: int = 3): #RigidBody1 is for xArm , RigidBody2 is for mikataArm. if you need some additional RigidBodys , use after RigidBody4.
+    def __init__(self,defaultRigidBodyNum: int = 2):
         for i in range(defaultRigidBodyNum):
             self.position['RigidBody'+str(i+1)] = np.zeros(3)
             self.rotation['RigidBody'+str(i+1)] = np.zeros(4)
@@ -56,10 +56,6 @@ class OptiTrackStreamingManager:
         if 'RigidBody'+str(new_id) in self.position:
             self.position['RigidBody'+str(new_id)] = np.array(position)
             self.rotation['RigidBody'+str(new_id)] = np.array(rotation)
-        
-        if new_id == 4:
-            self.position['endEffector'] = np.array(position)
-            self.rotation['endEffector'] = np.array(rotation)
 
     def stream_run(self):
         streamingClient = NatNetClient.NatNetClient(serverIP=self.serverAddress, localIP=self.localAddress)

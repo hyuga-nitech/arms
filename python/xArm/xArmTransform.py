@@ -2,6 +2,7 @@
 # Author:   Takayoshi Hagiwara (KMD)
 # Created:  2021/8/12
 # Summary:  xArmの初期値、限界値の設定
+#           ロボットへ送る指令へのフィルター役
 # -----------------------------------------------------------------
 
 from math import pi
@@ -29,27 +30,6 @@ class xArmTransform:
 
     def __init__(self):
         pass
-    
-    def SetInitialTransform(self, initX, initY, initZ, initRoll, initPitch, initYaw):
-        """
-        Set the initial position and rotation.
-        If this function is not called after the class is instantiated, the initial values of the member variables of this class will be used.
-
-        Parameters
-        ----------
-        initX, initY, initZ: float
-            Initial position.
-        initRoll, initPitch, initYaw: float
-            Initial rotation.
-        """
-
-        self.__initX = initX
-        self.__initY = initY
-        self.__initZ = initZ
-
-        self.__initRoll     = initRoll
-        self.__initPitch    = initPitch
-        self.__initYaw      = initYaw
 
     def GetInitialTransform(self):
         """
@@ -58,49 +38,6 @@ class xArmTransform:
 
         return self.__initX, self.__initY, self.__initZ, self.__initRoll, self.__initPitch, self.__initYaw
     
-    def SetMinimumLimitation(self, minX, minY, minZ, minRoll, minPitch, minYaw):
-        """
-        Set the lower limit of the position and rotation.
-        If this function is not called after the class is instantiated, the initial values of the member variables of this class will be used.
-
-        Parameters
-        ----------
-        minX, minY, minZ: float
-            Lower limit of the position.
-        minRoll, minPitch, minYaw: float
-            Lower limit of the rotation.
-        """
-
-        self.__minX = minX
-        self.__minY = minY
-        self.__minZ = minZ
-
-        self.__minRoll  = minRoll
-        self.__minPitch = minPitch
-        self.__minYaw   = minYaw
-    
-    def SetMaximumLimitation(self, maxX, maxY, maxZ, maxRoll, maxPitch, maxYaw):
-        """
-        Set the upper limit of the position and rotation.
-        If this function is not called after the class is instantiated, the initial values of the member variables of this class will be used.
-
-        Parameters
-        ----------
-        maxX, maxY, maxZ: float
-            Upper limit of the position.
-        maxRoll, maxPitch, maxYaw: float
-            Upper limit of the rotation.
-        """
-
-        self.__maxX = maxX
-        self.__maxY = maxY
-        self.__maxZ = maxZ
-
-        self.__maxRoll  = maxRoll
-        self.__maxPitch = maxPitch
-        self.__maxYaw   = maxYaw
-    
-
     def Transform(self, posMagnification = 1, rotMagnification = 1, isLimit = True, isOnlyPosition = False):
         """
         Calculate the position and rotation to be sent to xArm.
