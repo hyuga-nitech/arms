@@ -36,6 +36,8 @@ class RobotControlManager:
         self.xratio      = [1,1,0,0]
         self.mikataratio = [0,1]
 
+        self.FBmode = 2     # 1:forshare, 2:forphantom
+
     def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = False):
         # ----- Process info ----- #
         self.loopCount      = 0
@@ -130,7 +132,10 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-                    vibrotactileManager.forPhantom(localPosition, localRotation, xratio, mikataratio)
+                    if self.FBmode == 1:
+                        vibrotactileManager.forShared(localPosition, localRotation, xratio, mikataratio)
+                    elif self.FBmode == 2:
+                        vibrotactileManager.forPhantom(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, gripperValue)
