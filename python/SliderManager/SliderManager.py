@@ -25,5 +25,6 @@ class SliderManager:
                 self.slider_mikataratio = [0.5-(data/4095)/2,0.5+(data/4095)/2] #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
             except:
+                print('Failed to read slider value')
                 self.slider_xratio = [0.75,0.75,0.25,0.25]
                 self.slider_mikataratio = [0.25,0.75]
