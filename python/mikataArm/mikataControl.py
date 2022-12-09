@@ -19,7 +19,7 @@ class mikataControl:
 
         self.prflAcc                     = 10000
         self.prflVel                     = 10000
-        self.BAUDRATE                    = 115200
+        self.BAUDRATE                    = 1000000
         #DXL_MINIMUM_POSITION_VALUE  = 0         # Refer to the Minimum Position Limit of product eManual
         #DXL_MAXIMUM_POSITION_VALUE  = 4095      # Refer to the Maximum Position Limit of product eManual
 
