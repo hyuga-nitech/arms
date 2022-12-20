@@ -5,7 +5,6 @@
 #           ロボットへ送る指令へのフィルター役
 # -----------------------------------------------------------------
 
-from math import pi
 import numpy as np
 
 class xArmTransform:

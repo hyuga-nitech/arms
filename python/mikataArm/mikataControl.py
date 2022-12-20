@@ -5,10 +5,9 @@
 # -----------------------------------------------------------------
 
 from dynamixel_sdk import * # Uses Dynamixel SDK library
-from FileIO.FileIO import FileIO
 
 class mikataControl:
-    def __init__(self):
+    def __init__(self,mikataPort):
         # ----- setting:dynamixel ----- #
 
         self.ADDR_TORQUE_ENABLE          = 64
@@ -31,9 +30,7 @@ class mikataControl:
         # Use the actual port assigned to the U2D2.
         # ex) Windows: "COM*", Linux: "/dev/ttyUSB*", Mac: "/dev/tty.usbserial-*"
 
-        self.fileIO = FileIO()
-        self.settings = self.fileIO.Read('settings.csv',',')
-        self.DEVICENAME = [addr for addr in self.settings if 'mikataDEVICENAME' in addr[0]][0][1]
+        self.DEVICENAME = mikataPort
 
         self.DXL_ID                      = [1,2,3,4,5]
 

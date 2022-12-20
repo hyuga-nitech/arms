@@ -38,7 +38,7 @@ class AudioDeviceIndexes:
                     if ('スピーカー' in device_dict['name']) and (name in device_dict['name']):
                         ListIndexNumbefore.append(device_index)
 
-                for soundi in range(2,10):
+                for soundi in range(2,5):
                     for gained_index in ListIndexNumbefore:
                         gained_dict = p.get_device_info_by_host_api_device_index(host_index, gained_index)
 

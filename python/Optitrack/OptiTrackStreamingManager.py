@@ -5,7 +5,6 @@
 # Summary:         OptiTrackからのストリーミング管理マネージャー
 # -----------------------------------------------------------------
 
-from threading import local
 from Optitrack import NatNetClient
 import numpy as np
 

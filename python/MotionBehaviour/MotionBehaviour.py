@@ -5,7 +5,6 @@
 # Summary:         RigidBody座標に基づくアーム座標の指令値計算
 # -----------------------------------------------------------------
 
-from turtle import pos
 import numpy as np
 import math
 

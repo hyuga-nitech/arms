@@ -7,6 +7,7 @@
 
 import time
 import threading
+import json as js
 from xarm.wrapper import XArmAPI
 
 # ----- Custom class ----- #
@@ -16,27 +17,20 @@ from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
-from FileIO.FileIO import FileIO
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 from SliderManager.SliderManager import SliderManager
 
 # ----- Setting: Number ----- #
 defaultRigidBodyNum     = 2
+bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
+FBmode                  = 2     # 1:forshare, 2:forphantom
 
 class RobotControlManager:
     def __init__(self) ->None:
-        fileIO = FileIO()
-
-        dat = fileIO.Read('settings.csv',',')
-        self.xArmIpAddress = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
-        self.SliderPort    = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
-
-        self.xratio      = [1,1,0,0]
-        self.mikataratio = [0,1]
-
-        self.FBmode = 2     # 1:forshare, 2:forphantom
+        Parameter_f = open("parameter.json","r")
+        self.Parameter_js = js.load(Parameter_f)
 
     def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = False):
         # ----- Process info ----- #
@@ -49,19 +43,19 @@ class RobotControlManager:
         Behaviour           = MotionBehaviour(defaultRigidBodyNum)
         xArmtransform       = xArmTransform()
         mikatatransform     = mikataTransform()
-        motionManager       = MotionManager(defaultRigidBodyNum)
-        mikatacontrol       = mikataControl()
+        motionManager       = MotionManager(defaultRigidBodyNum,bendingSensorNum,self.Parameter_js["BendingSensorPorts"],self.Parameter_js["BendingSensorBaudrates"])
+        mikatacontrol       = mikataControl(self.Parameter_js["mikataArmPort"])
         dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
 
         if isSlider:
-            slidermanager       = SliderManager(self.SliderPort)
+            slidermanager = SliderManager(self.Parameter_js["SliderPort"])
             SliderThread = threading.Thread(target=slidermanager.receive)
             SliderThread.setDaemon(True)
             SliderThread.start()
 
         if isEnableArm:
-            arm = XArmAPI(self.xArmIpAddress)
+            arm = XArmAPI(self.Parameter_js["xArmIP"])
             self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
         # ----- Control flags ----- #
@@ -79,8 +73,8 @@ class RobotControlManager:
                         mikataratio = slidermanager.slider_mikataratio
 
                     else:
-                        xratio = self.xratio
-                        mikataratio = self.mikataratio
+                        xratio = self.Parameter_js["xRatio"]
+                        mikataratio = self.Parameter_js["mikataRatio"]
 
                     xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                     mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
@@ -96,7 +90,10 @@ class RobotControlManager:
                     mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                     # ----- Bending sensor ----- #
-                    gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    gripperValue = 0
+                    for i in len(dictBendingValue):
+                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                     # ----- Calculate mikata Current ----- #
                     mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
@@ -138,7 +135,7 @@ class RobotControlManager:
                         vibrotactileManager.forPhantom(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
-                    dataRecordManager.Record(localPosition, localRotation, gripperValue)
+                    dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
 
                     # ----- If xArm error has occured ----- #
                     if isEnableArm and arm.has_err_warn:
@@ -171,8 +168,8 @@ class RobotControlManager:
                             mikataratio = slidermanager.slider_mikataratio
 
                         else:
-                            xratio = self.xratio
-                            mikataratio = self.mikataratio
+                            xratio = self.Parameter_js["xRatio"]
+                            mikataratio = self.Parameter_js["mikataRatio"]
                         
                         xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
                         mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
@@ -188,7 +185,10 @@ class RobotControlManager:
                         mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[0], mikataPosition[1]
 
                         # ----- Bending sensor ----- #
-                        gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                        gripperValue = 0
+                        for i in len(dictBendingValue):
+                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                         beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
