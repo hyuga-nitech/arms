@@ -130,9 +130,9 @@ class RobotControlManager:
 
                     # ----- Vibrotactile Feedback ----- #
                     if self.FBmode == 1:
-                        vibrotactileManager.forShared(localPosition, localRotation, xratio, mikataratio)
+                        vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
                     elif self.FBmode == 2:
-                        vibrotactileManager.forPhantom(localPosition, localRotation, xratio, mikataratio)
+                        vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
