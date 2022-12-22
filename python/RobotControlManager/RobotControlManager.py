@@ -92,7 +92,7 @@ class RobotControlManager:
                     # ----- Bending sensor ----- #
                     dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
                     gripperValue = 0
-                    for i in len(dictBendingValue):
+                    for i in range(bendingSensorNum):
                         gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                     # ----- Calculate mikata Current ----- #
@@ -129,9 +129,9 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-                    if self.FBmode == 1:
+                    if FBmode == 1:
                         vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
-                    elif self.FBmode == 2:
+                    elif FBmode == 2:
                         vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
@@ -187,7 +187,7 @@ class RobotControlManager:
                         # ----- Bending sensor ----- #
                         dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
                         gripperValue = 0
-                        for i in len(dictBendingValue):
+                        for i in range(bendingSensorNum):
                             gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                         beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z

@@ -1,8 +1,8 @@
 {
-    "xArmIP":"192.168.1.233",
+    "xArmIP":"192.168.1.217",
     "mikataArmPort":"COM4",
     "BendingSensorPorts":["COM7","COM3"],
-    "BendingSensorBaudrate":["115200","115200"],
+    "BendingSensorBaudrates":["115200","115200"],
     "SliderPort":"COM10",
 
     "xRatio":[1,1,0,0],
