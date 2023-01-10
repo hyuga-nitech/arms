@@ -13,7 +13,7 @@ from Optitrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 
 # ----- Numeric range remapping ----- #
-targetMin        = 200
+targetMin        = 170
 targetMax        = 240
 bendingSensorClose = 0
 bendingSensorOpen = 1

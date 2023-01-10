@@ -25,7 +25,7 @@ defaultRigidBodyNum     = 2
 bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-FBmode                  = 2     # 1:forshare, 2:forphantom
+FBmode                  = 1     # 1:FBArms, 2:FBeach
 
 class RobotControlManager:
     def __init__(self) ->None:
