@@ -32,7 +32,7 @@ class mikataTransform:
     c1,c2,c3,c4 = 0,0,0,0
 
     # ----- Initial Position ----- #
-    __initX, __initY, __initZ = 100,0,0
+    __initX, __initY, __initZ = 160,0,0
 
     # ----- Initial limitation ----- #
     # __initd1, __initd2, __initd3, __initd4 = 270, 260, 100, 180
