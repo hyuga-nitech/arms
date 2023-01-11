@@ -73,7 +73,7 @@ class DataRecordManager:
 
         print('Writing: Gripper value...')
         for i in tqdm.tqdm(range(self.bendingSensorNum), ncols=150):
-            npBendingSensorValue = np.array(self.dictGripperValue['gripperValue'+str(i+1)])
+            npBendingSensorValue = [np.array(self.dictGripperValue['gripperValue'+str(i+1)])]
             fileIO.ExportAsCSV(npBendingSensorValue, dirPath, name+'_GripperValue_'+str(i+1), bendingSensorHeader)
 
         print('---------- Export completed ----------\n') 
