@@ -26,6 +26,7 @@ bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
 FBmode                  = 1     # 1:FBArms, 2:FBeach
+filename                = "name"
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -204,7 +205,7 @@ class RobotControlManager:
             self.PrintProcessInfo()
             
             if isExportData:
-                dataRecordManager.ExportSelf()
+                dataRecordManager.ExportSelf(filename)
 
             if isEnableArm:
                 arm.disconnect()
