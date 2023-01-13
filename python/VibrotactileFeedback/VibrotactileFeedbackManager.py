@@ -29,7 +29,7 @@ class VibrotactileFeedbackManager:
         self.rate = 44100
         self.amp = 30
 
-        self.freq = 190
+        self.freq = 75
         self.CHUNK = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.CHUNK) * float(self.freq) / float(self.rate))
 
