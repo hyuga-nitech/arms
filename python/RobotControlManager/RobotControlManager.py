@@ -21,12 +21,16 @@ from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbac
 from SliderManager.SliderManager import SliderManager
 
 # ----- Setting: Number ----- #
+FBmode                  = 1     #0:None, 1:FBEach, 2:FBArms
+
+isTypeFilename          = 1
+filename                = "Test" #defaultname
+
 defaultRigidBodyNum     = 2
 bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-FBmode                  = 1     # 1:FBArms, 2:FBeach
-filename                = "name"
+
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -131,9 +135,9 @@ class RobotControlManager:
 
                     # ----- Vibrotactile Feedback ----- #
                     if FBmode == 1:
-                        vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
-                    elif FBmode == 2:
                         vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
+                    elif FBmode == 2:
+                        vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
@@ -148,6 +152,16 @@ class RobotControlManager:
                     self.loopCount += 1
 
                 else:
+                    if isTypeFilename == 1:
+                        if FBmode == 0:
+                            strFB = 'None'
+                        elif FBmode == 1:
+                            strFB = 'Each'
+                        elif FBmode == 2:
+                            strFB = 'Arms'
+                        
+                        filename = input('Filename?      (Current FBmode = ' + strFB + ' )')
+                    
                     keycode = input('Input > "q": quit, "s": start control \n')
 
                     # ----- Quit program ----- #
