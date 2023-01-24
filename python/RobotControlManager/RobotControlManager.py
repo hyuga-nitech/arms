@@ -156,7 +156,8 @@ class RobotControlManager:
                         vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
-                    dataRecordManager.Record(localPosition, localRotation, dictBendingValue)
+                    Time = time.perf_counter()
+                    dataRecordManager.Record(Time, localPosition, localRotation, dictBendingValue)
 
                     # ----- If xArm error has occured ----- #
                     if isEnableArm and arm.has_err_warn:

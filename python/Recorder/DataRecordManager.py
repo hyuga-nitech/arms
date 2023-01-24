@@ -14,6 +14,7 @@ class DataRecordManager:
     dictPosition = {}
     dictRotation = {}
     dictGripperValue = {}
+    listTime = []
 
     def __init__(self, RigidBodyNum: int = 2, bendingSensorNum: int = 1) -> None:
         self.RigidBodyNum       = RigidBodyNum
@@ -26,7 +27,7 @@ class DataRecordManager:
         for i in range(bendingSensorNum):
             self.dictGripperValue['gripperValue'+str(i+1)] = []
 
-    def Record(self, position, rotation, bendingSensor):
+    def Record(self, time, position, rotation, bendingSensor):
         """
         Record the data.
 
@@ -39,6 +40,7 @@ class DataRecordManager:
         bendingSensor: dict
             Bending Sensor values
         """
+        self.listTime.append([time])
 
         for i in range(self.RigidBodyNum):
             self.dictPosition['RigidBody'+str(i+1)].append(position['RigidBody'+str(i+1)])
@@ -63,17 +65,21 @@ class DataRecordManager:
         bendingSensorHeader = ['bendingValue']
 
         print('\n---------- DataRecordManager.ExportSelf ----------')
+        print('Making: Time axis list...')
+        npTime = np.array(self.listTime)
+
         print('Writing: RigidBody transform...')
         for i in tqdm.tqdm(range(self.RigidBodyNum), ncols=150):
             npPosition = np.array(self.dictPosition['RigidBody'+str(i+1)])
             npRotation = np.array(self.dictRotation['RigidBody'+str(i+1)])
-            npRigidBodyTransform = np.concatenate([npPosition, npRotation], axis=1)
+            npRigidBodyTransform = np.concatenate([npTime, npPosition, npRotation], axis=1)
 
             fileIO.ExportAsCSV(npRigidBodyTransform, dirPath, name+'_Transform_RigidBody_'+str(i+1), transformHeader)
 
         print('Writing: Gripper value...')
         for i in tqdm.tqdm(range(self.bendingSensorNum), ncols=150):
-            npBendingSensorValue = [np.array(self.dictGripperValue['gripperValue'+str(i+1)])]
+            npGripper = np.array(self.dictGripperValue['gripperValue'+str(i+1)])
+            npBendingSensorValue = np.concatenate([npTime, npGripper], axis=1)
             fileIO.ExportAsCSV(npBendingSensorValue, dirPath, name+'_GripperValue_'+str(i+1), bendingSensorHeader)
 
         print('---------- Export completed ----------\n') 
