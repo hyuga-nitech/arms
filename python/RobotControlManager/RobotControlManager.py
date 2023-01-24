@@ -177,7 +177,7 @@ class RobotControlManager:
                         elif FBmode == 2:
                             strFB = 'Arms'
                         
-                        filename = input('Filename?      (Current FBmode = ' + strFB + ' )')
+                        filename = input('Filename?   (Current FBmode = ' + strFB + ')  :')
                     
                     keycode = input('Input > "q": quit, "s": start control \n')
 
