@@ -47,7 +47,7 @@ class DataRecordManager:
             self.dictRotation['RigidBody'+str(i+1)].append(rotation['RigidBody'+str(i+1)])
 
         for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)].append(bendingSensor['gripperValue'+str(i+1)])
+            self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor['gripperValue'+str(i+1)]])
 
     def ExportSelf(self, name, dirPath: str = 'ExportData'):
         """
@@ -61,8 +61,8 @@ class DataRecordManager:
 
         fileIO = FileIO()
 
-        transformHeader = ['x','y','z','qx','qy','qz','qw']
-        bendingSensorHeader = ['bendingValue']
+        transformHeader = ['time','x','y','z','qx','qy','qz','qw']
+        bendingSensorHeader = ['time','bendingValue']
 
         print('\n---------- DataRecordManager.ExportSelf ----------')
         print('Making: Time axis list...')
