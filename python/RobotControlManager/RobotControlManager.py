@@ -30,7 +30,7 @@ defaultRigidBodyNum     = 2
 bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-
+executionTime           = 120
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -68,6 +68,22 @@ class RobotControlManager:
 
         try:
             while True:
+                if time.perf_counter() - taskStartTime > executionTime:
+                    isMoving = False
+
+                    self.taskTime.append(time.perf_counter() - taskStartTime)
+                    self.PrintProcessInfo()
+                    
+                    if isExportData:
+                        dataRecordManager.ExportSelf(filename)
+
+                    if isEnableArm:
+                        arm.disconnect()
+                        mikatacontrol.ClosePort()
+
+                    print('----- Finish Task -----')
+                    break
+
                 if isMoving:
                     # ----- Get transform data ----- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
