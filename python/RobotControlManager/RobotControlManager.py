@@ -68,7 +68,7 @@ class RobotControlManager:
 
         try:
             while True:
-                if time.perf_counter() - taskStartTime > executionTime:
+                if isMoving and (time.perf_counter() - taskStartTime > executionTime):
                     isMoving = False
 
                     self.taskTime.append(time.perf_counter() - taskStartTime)
