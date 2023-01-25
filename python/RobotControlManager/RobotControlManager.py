@@ -8,7 +8,7 @@
 import time
 import threading
 import json as js
-from xarm.wrapper import XArmAPI
+from xArm.wrapper import XArmAPI
 
 # ----- Custom class ----- #
 from xArmTransform.xArmTransform import xArmTransform
