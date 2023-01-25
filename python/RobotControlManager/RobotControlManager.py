@@ -11,7 +11,7 @@ import json as js
 from xarm.wrapper import XArmAPI
 
 # ----- Custom class ----- #
-from xArm.xArmTransform import xArmTransform
+from xArmTransform.xArmTransform import xArmTransform
 from mikataArm.mikataArmTransform import mikataTransform
 from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
