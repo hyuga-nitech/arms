@@ -21,8 +21,12 @@ from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbac
 from SliderManager.SliderManager import SliderManager
 
 # ----- Setting: Number ----- #
+PairID                  = 1
+Switch                  = 0     #0:Off,  1:On
 FBmode                  = 1     #0:None, 1:FBEach, 2:FBArms
 
+# ----- Advanced Setting ----- #
+isSwitchRatio           = 1
 isTypeFilename          = 1
 filename                = "Test" #defaultname
 
@@ -31,6 +35,11 @@ bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
 executionTime           = 120
+
+NoSwitchedxRatio        = [1,1,0,0]
+NoSwitchedmikataRatio   = [0,1]
+SwitchedxRatio          = [0,0,1,1]
+SwitchedmikataRatio     = [1,0]
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -92,6 +101,14 @@ class RobotControlManager:
                     if isSlider:
                         xratio      = slidermanager.slider_xratio
                         mikataratio = slidermanager.slider_mikataratio
+
+                    elif isSwitchRatio:
+                        if Switch:
+                            xratio      = SwitchedxRatio
+                            mikataratio = SwitchedmikataRatio
+                        elif Switch == 0:
+                            xratio      = NoSwitchedxRatio
+                            mikataratio = NoSwitchedmikataRatio
 
                     else:
                         xratio = self.Parameter_js["xRatio"]
@@ -176,8 +193,13 @@ class RobotControlManager:
                             strFB = 'Each'
                         elif FBmode == 2:
                             strFB = 'Arms'
+
+                        if Switch == 0:
+                            strSW = 'Off'
+                        elif Switch == 1:
+                            strSW = 'On'
                         
-                        filename = input('Filename?   (Current FBmode = ' + strFB + ')  :')
+                        filename = input('(Current Mode : PairID = ' + str(PairID) + ' , Switch = ' + strSW + ' , FeedBack = ' + strFB + ')\n(suggestion: H' + str(PairID) + strSW + strFB + ')Filename?:')
                     
                     keycode = input('Input > "q": quit, "s": start control \n')
 
@@ -198,6 +220,15 @@ class RobotControlManager:
                         if isSlider:
                             xratio      = slidermanager.slider_xratio
                             mikataratio = slidermanager.slider_mikataratio
+
+                        
+                        elif isSwitchRatio:
+                            if Switch:
+                                xratio      = SwitchedxRatio
+                                mikataratio = SwitchedmikataRatio
+                            elif Switch == 0:
+                                xratio      = NoSwitchedxRatio
+                                mikataratio = NoSwitchedmikataRatio
 
                         else:
                             xratio = self.Parameter_js["xRatio"]
