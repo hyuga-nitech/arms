@@ -534,24 +534,14 @@ ControllerErrorCodeMap = {
             'desc': ''
         }
     },
-    18: {
-        'en': {
-            'title': 'Force Torque Sensor Communication Error',
-            'desc': 'Please check whether the force torque sensor is installed.'
-        },
-        'cn': {
-            'title': '力矩传感器通信失败',
-            'desc': '请检查力矩传感器是否安装'
-        }
-    },
     19: {
         'en': {
-            'title': 'End Effector Communication Error',
-            'desc': 'Please check whether end effector is installed and the baud rate setting is correct'
+            'title': 'Gripper Communication Error',
+            'desc': 'Please check whether gripper is installed and the baud rate setting is correct'
         },
         'cn': {
-            'title': '末端工具通信失败',
-            'desc': '请检查末端工具是否安装，波特率设置是否正确'
+            'title': '机械爪通信失败',
+            'desc': '请检查机械爪是否安装，波特率设置是否正确'
         }
     },
     21: {
@@ -732,16 +722,6 @@ ControllerErrorCodeMap = {
         'cn': {
             'title': '电源板主从IC通信异常',
             'desc': '请联系技术支持。'
-        }
-    },
-    40: {
-        'en': {
-            'title': 'No IK available',
-            'desc': ''
-        },
-        'cn': {
-            'title': '没有可用的IK',
-            'desc': ''
         }
     },
     50: {
@@ -1359,7 +1339,7 @@ class ServoError(BaseCode):
 
 class GripperError(BaseCode):
     def __init__(self, code, status=0):
-        self._code_map = GripperErrorCodeMap
+        self._code_map = GripperError
         super(GripperError, self).__init__(code, status=status)
 
 

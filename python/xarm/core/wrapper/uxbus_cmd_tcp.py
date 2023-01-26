@@ -10,7 +10,7 @@
 
 import time
 from ..utils import convert
-from .uxbus_cmd import UxbusCmd, lock_require
+from .uxbus_cmd import UxbusCmd
 from ..config.x_config import XCONF
 
 
@@ -35,9 +35,8 @@ class UxbusCmdTcp(UxbusCmd):
         self.arm_port = arm_port
         self.bus_flag = TX2_BUS_FLAG_MIN
         self.prot_flag = TX2_PROT_CON
-        self.TX2_PROT_CON = TX2_PROT_CON
         self._has_err_warn = False
-        self._last_comm_time = time.monotonic()
+        self._last_comm_time = time.time()
 
     @property
     def has_err_warn(self):
@@ -46,17 +45,6 @@ class UxbusCmdTcp(UxbusCmd):
     @has_err_warn.setter
     def has_err_warn(self, value):
         self._has_err_warn = value
-
-    @lock_require
-    def set_prot_flag(self, prot_flag):
-        if self.prot_flag != prot_flag or self.TX2_PROT_CON != prot_flag:
-            self.prot_flag = prot_flag
-            self.TX2_PROT_CON = prot_flag
-            print('change prot_flag to {}'.format(self.prot_flag))
-        return 0
-    
-    def get_prot_flag(self):
-        return self.prot_flag
 
     def check_xbus_prot(self, data, funcode):
         num = convert.bytes_to_u16(data[0:2])
@@ -72,7 +60,7 @@ class UxbusCmdTcp(UxbusCmd):
             bus_flag -= 1
         if num != bus_flag:
             return XCONF.UxbusState.ERR_NUM
-        if prot != self.TX2_PROT_CON:
+        if prot != TX2_PROT_CON:
             return XCONF.UxbusState.ERR_PROT
         if fun != funcode:
             return XCONF.UxbusState.ERR_FUN
@@ -95,17 +83,16 @@ class UxbusCmdTcp(UxbusCmd):
     def send_pend(self, funcode, num, timeout):
         ret = [0] * 320 if num == -1 else [0] * (num + 1)
         ret[0] = XCONF.UxbusState.ERR_TOUT
-        expired = time.monotonic() + timeout
-        while time.monotonic() < expired:
-            remaining = expired - time.monotonic()
+        expired = time.time() + timeout
+        while time.time() < expired:
+            remaining = expired - time.time()
             rx_data = self.arm_port.read(remaining)
             if rx_data != -1 and len(rx_data) > 7:
-                self._last_comm_time = time.monotonic()
+                self._last_comm_time = time.time()
                 if self._debug:
                     debug_log_datas(rx_data, label='recv({})'.format(funcode))
-                code = self.check_xbus_prot(rx_data, funcode)
-                if code in [0, XCONF.UxbusState.ERR_CODE, XCONF.UxbusState.WAR_CODE, XCONF.UxbusState.STATE_NOT_READY]:
-                    ret[0] = code
+                ret[0] = self.check_xbus_prot(rx_data, funcode)
+                if ret[0] in [0, XCONF.UxbusState.ERR_CODE, XCONF.UxbusState.WAR_CODE, XCONF.UxbusState.STATE_NOT_READY]:
                     num = (convert.bytes_to_u16(rx_data[4:6]) - 2) if num == -1 else num
                     ret = ret[:num + 1] if len(ret) <= num + 1 else [ret[0]] * (num + 1)
                     length = len(rx_data) - 8
@@ -114,8 +101,7 @@ class UxbusCmdTcp(UxbusCmd):
                             break
                         ret[i + 1] = rx_data[i + 8]
                     return ret
-                elif code != XCONF.UxbusState.ERR_NUM:
-                    ret[0] = code
+                elif ret[0] != XCONF.UxbusState.ERR_NUM:
                     return ret
             else:
                 time.sleep(0.001)
