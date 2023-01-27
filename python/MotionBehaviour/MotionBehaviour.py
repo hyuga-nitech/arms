@@ -24,6 +24,9 @@ class MotionBehaviour:
     mikataBeforePositions     = {}
     mikataWeightedPositions   = {}
 
+    mikataBeforeRotations        = {}
+    mikataWeightedRotations      = {}
+
     def __init__(self,defaultRigidBodyNum: int = 2) -> None:
         for i in range(defaultRigidBodyNum):
             self.originPositions['RigidBody'+str(i+1)] = np.zeros(3)
@@ -135,8 +138,10 @@ class MotionBehaviour:
 
         # ----- Shared transform ----- #
         sharedPosition = [0, 0, 0]
+        sharedRotation_euler = [0, 0, 0]
 
         pos = self.GetRelativePosition(position)
+        rot = self.GetRelativeRotation(rotation)
 
         for i in range(self.RigidBodyNum):
             # ----- Position ----- #
@@ -146,8 +151,32 @@ class MotionBehaviour:
 
             self.mikataWeightedPositions['RigidBody'+str(i+1)] = weightedPos
             self.mikataBeforePositions['RigidBody'+str(i+1)]   = pos['RigidBody'+str(i+1)]
+
+            # ----- Rotation ----- #
+            qw, qx, qy, qz = self.mikataBeforeRotations['RigidBody'+str(i+1)][3], self.mikataBeforeRotations['RigidBody'+str(i+1)][0], self.mikataBeforeRotations['RigidBody'+str(i+1)][1], self.mikataBeforeRotations['RigidBody'+str(i+1)][2]
+            mat4x4 = np.array([ [qw, qz, -qy, qx],
+                                [-qz, qw, qx, qy],
+                                [qy, -qx, qw, qz],
+                                [-qx,-qy, -qz, qw]])
+            currentRot = rot['RigidBody'+str(i+1)]
+            diffRot = np.dot(np.linalg.inv(mat4x4), currentRot)
+            diffRotEuler = self.Quaternion2Euler(np.array(diffRot))
+            
+            weightedDiffRotEuler = list(map(lambda x: x * mikataRatio[i] , diffRotEuler))
+            weightedDiffRot = self.Euler2Quaternion(np.array(weightedDiffRotEuler))
+
+            nqw, nqx, nqy, nqz = weightedDiffRot[3], weightedDiffRot[0], weightedDiffRot[1], weightedDiffRot[2]
+            neomat4x4 = np.array([[nqw, -nqz, nqy, nqx],
+                                    [nqz, nqw, -nqx, nqy],
+                                    [-nqy, nqx, nqw, nqz],
+                                    [-nqx,-nqy, -nqz, nqw]])
+            weightedRot = np.dot(neomat4x4,  self.mikataWeightedRotations['RigidBody'+str(i+1)])
+            sharedRotation_euler += self.Quaternion2Euler(weightedRot)
+
+            self.mikataWeightedRotations['RigidBody'+str(i+1)]  = weightedRot
+            self.mikataBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
         
-        return sharedPosition
+        return sharedPosition, sharedRotation_euler
 
     def SetOriginPosition(self, position) -> None:
         """

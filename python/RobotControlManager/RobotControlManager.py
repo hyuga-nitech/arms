@@ -114,8 +114,8 @@ class RobotControlManager:
                         xratio = self.Parameter_js["xRatio"]
                         mikataratio = self.Parameter_js["mikataRatio"]
 
-                    xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
-                    mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
+                    xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
+                    mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -126,6 +126,7 @@ class RobotControlManager:
 
                     # ----- Set mikata transform ----- #
                     mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                    mikatatransform.pitch                                       = mikataRotation[0]
 
                     # ----- Bending sensor ----- #
                     dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -234,8 +235,8 @@ class RobotControlManager:
                             xratio = self.Parameter_js["xRatio"]
                             mikataratio = self.Parameter_js["mikataRatio"]
                         
-                        xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
-                        mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
+                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
+                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
@@ -246,6 +247,7 @@ class RobotControlManager:
 
                         # ----- Set mikata transform ----- #
                         mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                        mikatatransform.pitch                                       = mikataRotation[0]
 
                         # ----- Bending sensor ----- #
                         dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
