@@ -75,6 +75,21 @@ class RobotControlManager:
         # ----- Control flags ----- #
         isMoving = False
 
+        if isTypeFilename == 1:
+            if FBmode == 0:
+                strFB = 'None'
+            elif FBmode == 1:
+                strFB = 'Each'
+            elif FBmode == 2:
+                strFB = 'Arms'
+
+            if Switch == 0:
+                strSW = 'Off'
+            elif Switch == 1:
+                strSW = 'On'
+            
+        filename = 'H' + str(PairID) + strSW + strFB
+
         try:
             while True:
                 if isMoving and (time.perf_counter() - taskStartTime > executionTime):
@@ -187,22 +202,8 @@ class RobotControlManager:
                     self.loopCount += 1
 
                 else:
-                    if isTypeFilename == 1:
-                        if FBmode == 0:
-                            strFB = 'None'
-                        elif FBmode == 1:
-                            strFB = 'Each'
-                        elif FBmode == 2:
-                            strFB = 'Arms'
-
-                        if Switch == 0:
-                            strSW = 'Off'
-                        elif Switch == 1:
-                            strSW = 'On'
-                        
-                        filename = input('(Current Mode : PairID = ' + str(PairID) + ' , Switch = ' + strSW + ' , FeedBack = ' + strFB + ')\n(suggestion: H' + str(PairID) + strSW + strFB + ')Filename?:')
-                    
-                    keycode = input('Input > "q": quit, "s": start control \n')
+                    print('Cullent OutputFilename = ' + filename)
+                    keycode = input('Input > "q": quit, "s": start control, "r": rename Outputfile \n')
 
                     # ----- Quit program ----- #
                     if keycode == 'q':
@@ -212,6 +213,11 @@ class RobotControlManager:
 
                         self.PrintProcessInfo()
                         break
+
+                    # ----- Rename ----- #
+                    elif keycode == 'r':
+                        filename = input('(Current Mode : PairID = ' + str(PairID) + ' , Switch = ' + strSW + ' , FeedBack = ' + strFB + ')\nFilename?:')
+                        continue
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
