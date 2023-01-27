@@ -44,6 +44,9 @@ class MotionBehaviour:
             self.mikataBeforePositions['RigidBody'+str(i+1)] = np.zeros(3)
             self.mikataWeightedPositions['RigidBody'+str(i+1)] = np.zeros(3)
 
+            self.mikataBeforeRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
+            self.mikataWeightedRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
+
         self.RigidBodyNum = defaultRigidBodyNum
 
     def GetxArmTransform(self,position: dict,rotation: dict) :
