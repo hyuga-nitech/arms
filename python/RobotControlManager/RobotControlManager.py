@@ -24,6 +24,7 @@ from SliderManager.SliderManager import SliderManager
 PairID                  = 1
 Switch                  = 0     #0:Off,  1:On
 FBmode                  = 1     #0:None, 1:FBEach, 2:FBArms
+TaskNum                 = 1
 
 # ----- Advanced Setting ----- #
 isSwitchRatio           = 1
@@ -88,7 +89,7 @@ class RobotControlManager:
             elif Switch == 1:
                 strSW = 'On'
             
-        filename = 'H' + str(PairID) + strSW + strFB
+        filename = 'H' + str(PairID) + strSW + strFB + str(TaskNum)
 
         try:
             while True:
