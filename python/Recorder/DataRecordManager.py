@@ -14,6 +14,7 @@ class DataRecordManager:
     dictPosition = {}
     dictRotation = {}
     dictGripperValue = {}
+    listTime = []
 
     def __init__(self, RigidBodyNum: int = 2, bendingSensorNum: int = 1) -> None:
         self.RigidBodyNum       = RigidBodyNum
@@ -23,9 +24,10 @@ class DataRecordManager:
             self.dictPosition['RigidBody'+str(i+1)] = []
             self.dictRotation['RigidBody'+str(i+1)] = []
 
-        self.dictGripperValue['gripperValue'] = []
+        for i in range(bendingSensorNum):
+            self.dictGripperValue['gripperValue'+str(i+1)] = []
 
-    def Record(self, position, rotation, bendingSensor):
+    def Record(self, time, position, rotation, bendingSensor):
         """
         Record the data.
 
@@ -38,14 +40,16 @@ class DataRecordManager:
         bendingSensor: dict
             Bending Sensor values
         """
+        self.listTime.append([time])
 
         for i in range(self.RigidBodyNum):
             self.dictPosition['RigidBody'+str(i+1)].append(position['RigidBody'+str(i+1)])
             self.dictRotation['RigidBody'+str(i+1)].append(rotation['RigidBody'+str(i+1)])
 
-        self.dictGripperValue['gripperValue'].append(bendingSensor)
+        for i in range(self.bendingSensorNum):
+            self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor['gripperValue'+str(i+1)]])
 
-    def ExportSelf(self, dirPath: str = 'ExportData'):
+    def ExportSelf(self, name, dirPath: str = 'ExportData'):
         """
         Export the data recorded in DataRecordManager as CSV format.
 
@@ -57,21 +61,26 @@ class DataRecordManager:
 
         fileIO = FileIO()
 
-        transformHeader = ['x','y','z','qx','qy','qz','qw']
-        bendingSensorHeader = ['bendingValue']
+        transformHeader = ['time','x','y','z','qx','qy','qz','qw']
+        bendingSensorHeader = ['time','bendingValue']
 
         print('\n---------- DataRecordManager.ExportSelf ----------')
+        print('Making: Time axis list...')
+        npTime = np.array(self.listTime)
+
         print('Writing: RigidBody transform...')
         for i in tqdm.tqdm(range(self.RigidBodyNum), ncols=150):
             npPosition = np.array(self.dictPosition['RigidBody'+str(i+1)])
             npRotation = np.array(self.dictRotation['RigidBody'+str(i+1)])
-            npRigidBodyTransform = np.concatenate([npPosition, npRotation], axis=1)
+            npRigidBodyTransform = np.concatenate([npTime, npPosition, npRotation], axis=1)
 
-            fileIO.ExportAsCSV(npRigidBodyTransform, dirPath, 'Transform_RigidBody_'+str(i+1), transformHeader)
+            fileIO.ExportAsCSV(npRigidBodyTransform, dirPath, name+'_Transform_RigidBody_'+str(i+1), transformHeader)
 
         print('Writing: Gripper value...')
-        npBendingSensorValue = np.array(self.dictGripperValue['gripperValue'])
+        for i in tqdm.tqdm(range(self.bendingSensorNum), ncols=150):
+            npGripper = np.array(self.dictGripperValue['gripperValue'+str(i+1)])
+            npBendingSensorValue = np.concatenate([npTime, npGripper], axis=1)
+            fileIO.ExportAsCSV(npBendingSensorValue, dirPath, name+'_GripperValue_'+str(i+1), bendingSensorHeader)
 
-        fileIO.ExportAsCSV(npBendingSensorValue, dirPath, 'GripperValue', bendingSensorHeader)
-
-        print('---------- Export completed ----------\n')            
+        print('---------- Export completed ----------\n') 
+                   

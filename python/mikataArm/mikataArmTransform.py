@@ -19,6 +19,7 @@ class mikataTransform:
 
     #入力位置変数
     x,y,z = 0,0,0
+    pitch = 0
 
     #極座標変数
     r     = 0
@@ -32,7 +33,7 @@ class mikataTransform:
     c1,c2,c3,c4 = 0,0,0,0
 
     # ----- Initial Position ----- #
-    __initX, __initY, __initZ = 100,0,0
+    __initX, __initY, __initZ = 160,0,0
 
     # ----- Initial limitation ----- #
     # __initd1, __initd2, __initd3, __initd4 = 270, 260, 100, 180
@@ -79,7 +80,7 @@ class mikataTransform:
         d1 = 270 - phi
         d2 = 260 - theta - math.degrees(math.acos(r/2/150))
         d3 = 100 + (180 - 2 * math.degrees(math.asin(r/2/150)))
-        d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150)))
+        d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150))) - self.pitch
 
         c1 = self.Degree2Current(d1)
         c2 = self.Degree2Current(d2)

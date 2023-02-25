@@ -10,8 +10,6 @@ xArmとmikataArmを接続し、多自由度化を目指すプロジェクトの�
 - numpy             1.22.4
 - pyaudio           0.2.11
 - pyserial          3.5
-- scipy             1.8.1
-- simpleaudio       1.0.4
 - tqdm              4.64.0
 - dynamixel-sdk     3.7.51
 - xArm-Python-SDK   1.9.0

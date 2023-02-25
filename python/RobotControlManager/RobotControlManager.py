@@ -7,36 +7,45 @@
 
 import time
 import threading
-from xarm.wrapper import XArmAPI
+import json as js
+from xArm.wrapper import XArmAPI
 
 # ----- Custom class ----- #
-from xArm.xArmTransform import xArmTransform
+from xArmTransform.xArmTransform import xArmTransform
 from mikataArm.mikataArmTransform import mikataTransform
 from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
-from FileIO.FileIO import FileIO
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 from SliderManager.SliderManager import SliderManager
 
 # ----- Setting: Number ----- #
+PairID                  = 1
+Switch                  = 0     #0:Off,  1:On
+FBmode                  = 1     #0:None, 1:FBEach, 2:FBArms
+TaskNum                 = 1
+
+# ----- Advanced Setting ----- #
+isSwitchRatio           = 1
+isTypeFilename          = 1
+filename                = "Test" #defaultname
+
 defaultRigidBodyNum     = 2
+bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
+executionTime           = 120
+
+NoSwitchedxRatio        = [1,1,0,0]
+NoSwitchedmikataRatio   = [0,1]
+SwitchedxRatio          = [0,0,1,1]
+SwitchedmikataRatio     = [1,0]
 
 class RobotControlManager:
     def __init__(self) ->None:
-        fileIO = FileIO()
-
-        dat = fileIO.Read('settings.csv',',')
-        self.xArmIpAddress = [addr for addr in dat if 'xArmIP' in addr[0]][0][1]
-        self.SliderPort    = [addr for addr in dat if 'SliderPort' in addr[0]][0][1]
-
-        self.xratio      = [1,1,0,0]
-        self.mikataratio = [0,1]
-
-        self.FBmode = 2     # 1:forshare, 2:forphantom
+        Parameter_f = open("parameter.json","r")
+        self.Parameter_js = js.load(Parameter_f)
 
     def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = False):
         # ----- Process info ----- #
@@ -49,26 +58,57 @@ class RobotControlManager:
         Behaviour           = MotionBehaviour(defaultRigidBodyNum)
         xArmtransform       = xArmTransform()
         mikatatransform     = mikataTransform()
-        motionManager       = MotionManager(defaultRigidBodyNum)
-        mikatacontrol       = mikataControl()
+        motionManager       = MotionManager(defaultRigidBodyNum,bendingSensorNum,self.Parameter_js["BendingSensorPorts"],self.Parameter_js["BendingSensorBaudrates"])
+        mikatacontrol       = mikataControl(self.Parameter_js["mikataArmPort"])
         dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
 
         if isSlider:
-            slidermanager       = SliderManager(self.SliderPort)
+            slidermanager = SliderManager(self.Parameter_js["SliderPort"])
             SliderThread = threading.Thread(target=slidermanager.receive)
             SliderThread.setDaemon(True)
             SliderThread.start()
 
         if isEnableArm:
-            arm = XArmAPI(self.xArmIpAddress)
+            arm = XArmAPI(self.Parameter_js["xArmIP"])
             self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
         # ----- Control flags ----- #
         isMoving = False
 
+        if isTypeFilename == 1:
+            if FBmode == 0:
+                strFB = 'None'
+            elif FBmode == 1:
+                strFB = 'Each'
+            elif FBmode == 2:
+                strFB = 'Arms'
+
+            if Switch == 0:
+                strSW = 'Off'
+            elif Switch == 1:
+                strSW = 'On'
+            
+        filename = 'H' + str(PairID) + strSW + strFB + str(TaskNum)
+
         try:
             while True:
+                if isMoving and (time.perf_counter() - taskStartTime > executionTime):
+                    isMoving = False
+
+                    self.taskTime.append(time.perf_counter() - taskStartTime)
+                    self.PrintProcessInfo()
+                    
+                    if isExportData:
+                        dataRecordManager.ExportSelf(filename)
+
+                    if isEnableArm:
+                        arm.disconnect()
+                        mikatacontrol.ClosePort()
+
+                    print('----- Finish Task -----')
+                    break
+
                 if isMoving:
                     # ----- Get transform data ----- #
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
@@ -78,12 +118,20 @@ class RobotControlManager:
                         xratio      = slidermanager.slider_xratio
                         mikataratio = slidermanager.slider_mikataratio
 
-                    else:
-                        xratio = self.xratio
-                        mikataratio = self.mikataratio
+                    elif isSwitchRatio:
+                        if Switch:
+                            xratio      = SwitchedxRatio
+                            mikataratio = SwitchedmikataRatio
+                        elif Switch == 0:
+                            xratio      = NoSwitchedxRatio
+                            mikataratio = NoSwitchedmikataRatio
 
-                    xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
-                    mikataPosition             = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
+                    else:
+                        xratio = self.Parameter_js["xRatio"]
+                        mikataratio = self.Parameter_js["mikataRatio"]
+
+                    xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
+                    mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -94,9 +142,13 @@ class RobotControlManager:
 
                     # ----- Set mikata transform ----- #
                     mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                    mikatatransform.pitch                                       = mikataRotation[0]
 
                     # ----- Bending sensor ----- #
-                    gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    gripperValue = 0
+                    for i in range(bendingSensorNum):
+                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                     # ----- Calculate mikata Current ----- #
                     mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
@@ -132,13 +184,14 @@ class RobotControlManager:
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
                     # ----- Vibrotactile Feedback ----- #
-                    if self.FBmode == 1:
-                        vibrotactileManager.forShared(localPosition, localRotation, xratio, mikataratio)
-                    elif self.FBmode == 2:
-                        vibrotactileManager.forPhantom(localPosition, localRotation, xratio, mikataratio)
+                    if FBmode == 1:
+                        vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
+                    elif FBmode == 2:
+                        vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
-                    dataRecordManager.Record(localPosition, localRotation, gripperValue)
+                    Time = time.perf_counter()
+                    dataRecordManager.Record(Time, localPosition, localRotation, dictBendingValue)
 
                     # ----- If xArm error has occured ----- #
                     if isEnableArm and arm.has_err_warn:
@@ -150,7 +203,8 @@ class RobotControlManager:
                     self.loopCount += 1
 
                 else:
-                    keycode = input('Input > "q": quit, "s": start control \n')
+                    print('Cullent OutputFilename = ' + filename)
+                    keycode = input('Input > "q": quit, "s": start control, "r": rename Outputfile \n')
 
                     # ----- Quit program ----- #
                     if keycode == 'q':
@@ -161,6 +215,11 @@ class RobotControlManager:
                         self.PrintProcessInfo()
                         break
 
+                    # ----- Rename ----- #
+                    elif keycode == 'r':
+                        filename = input('(Current Mode : PairID = ' + str(PairID) + ' , Switch = ' + strSW + ' , FeedBack = ' + strFB + ')\nFilename?:')
+                        continue
+
                     # ----- Start streaming ----- #
                     elif keycode == 's':
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
@@ -170,12 +229,21 @@ class RobotControlManager:
                             xratio      = slidermanager.slider_xratio
                             mikataratio = slidermanager.slider_mikataratio
 
-                        else:
-                            xratio = self.xratio
-                            mikataratio = self.mikataratio
                         
-                        xArmPosition,xArmRotation  = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
-                        mikataPosition             = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
+                        elif isSwitchRatio:
+                            if Switch:
+                                xratio      = SwitchedxRatio
+                                mikataratio = SwitchedmikataRatio
+                            elif Switch == 0:
+                                xratio      = NoSwitchedxRatio
+                                mikataratio = NoSwitchedmikataRatio
+
+                        else:
+                            xratio = self.Parameter_js["xRatio"]
+                            mikataratio = self.Parameter_js["mikataRatio"]
+                        
+                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
+                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
@@ -186,9 +254,13 @@ class RobotControlManager:
 
                         # ----- Set mikata transform ----- #
                         mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[0], mikataPosition[1]
+                        mikatatransform.pitch                                       = mikataRotation[0]
 
                         # ----- Bending sensor ----- #
-                        gripperValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                        gripperValue = 0
+                        for i in range(bendingSensorNum):
+                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                         beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z
                         beforeC1, beforeC2, beforeC3, beforeC4 = mikatatransform.Transform()
@@ -204,7 +276,7 @@ class RobotControlManager:
             self.PrintProcessInfo()
             
             if isExportData:
-                dataRecordManager.ExportSelf()
+                dataRecordManager.ExportSelf(filename)
 
             if isEnableArm:
                 arm.disconnect()

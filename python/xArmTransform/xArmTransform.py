@@ -5,7 +5,6 @@
 #           ロボットへ送る指令へのフィルター役
 # -----------------------------------------------------------------
 
-from math import pi
 import numpy as np
 
 class xArmTransform:
@@ -17,7 +16,7 @@ class xArmTransform:
     roll, pitch, yaw    = 0, 0, 0
 
     # ----- Initial transform ----- #
-    __initX, __initY, __initZ           = 310, 0, 600
+    __initX, __initY, __initZ           = 310, 0, 450
     __initRoll, __initPitch, __initYaw  = 179.9, 1.6, 0.3
 
     # ----- Minimum limitation ----- #
