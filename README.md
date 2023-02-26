@@ -1,9 +1,8 @@
-This is codes for mikataArm and xArm
-
 # --- mikataArm --- #
+DoF:4
 motor:'XM430-W350-R' by DYNAMIXEL
-RS485 serial connect and 12V DC in
-use U2D2 for convert from USB-microB to RS485
 
 # --- xArm --- #
+DoF:7
 model:'xArm7' by UFactory
+

@@ -19,12 +19,11 @@ bendingSensorClose = 0
 bendingSensorOpen = 1
 
 class MotionManager:
-    def __init__(self,defaultRigidBodyNum: int,bendingSensorNum: int,bendingSensorSerialPorts,bendingSensorSerialBaudrates) ->None:
-        self.defaultRigidBodyNum     = defaultRigidBodyNum
+    def __init__(self,rigidBodyNum: int,bendingSensorNum: int,bendingSensorSerialPorts,bendingSensorSerialBaudrates) ->None:
         self.bendingSensorNum        = bendingSensorNum
         self.InitBendingSensorValues = []
 
-        self.optiTrackStreamingManager = OptiTrackStreamingManager(defaultRigidBodyNum=defaultRigidBodyNum)
+        self.optiTrackStreamingManager = OptiTrackStreamingManager(rigidBodyNum=rigidBodyNum)
         streamingThread = threading.Thread(target=self.optiTrackStreamingManager.stream_run)
         streamingThread.setDaemon(True)
         streamingThread.start()

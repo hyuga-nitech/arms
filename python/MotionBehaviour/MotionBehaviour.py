@@ -27,8 +27,8 @@ class MotionBehaviour:
     mikataBeforeRotations        = {}
     mikataWeightedRotations      = {}
 
-    def __init__(self,defaultRigidBodyNum: int = 2) -> None:
-        for i in range(defaultRigidBodyNum):
+    def __init__(self,operatorNum: int = 2) -> None:
+        for i in range(operatorNum):
             self.originPositions['RigidBody'+str(i+1)] = np.zeros(3)
             self.inversedMatrix['RigidBody'+str(i+1)] = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
 
@@ -47,7 +47,7 @@ class MotionBehaviour:
             self.mikataBeforeRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
             self.mikataWeightedRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
 
-        self.RigidBodyNum = defaultRigidBodyNum
+        self.OperatorNum = operatorNum
 
     def GetxArmTransform(self,position: dict,rotation: dict) :
         """
@@ -95,7 +95,7 @@ class MotionBehaviour:
         pos = self.GetRelativePosition(position)
         rot = self.GetRelativeRotation(rotation)
 
-        for i in range(self.RigidBodyNum):
+        for i in range(self.OperatorNum):
             # ----- Position ----- #
             diffPos     = pos['RigidBody'+str(i+1)] - self.xBeforePositions['RigidBody'+str(i+1)]
             weightedPos = diffPos * xRatio[i*2] + self.xWeightedPositions['RigidBody'+str(i+1)]
@@ -146,7 +146,7 @@ class MotionBehaviour:
         pos = self.GetRelativePosition(position)
         rot = self.GetRelativeRotation(rotation)
 
-        for i in range(self.RigidBodyNum):
+        for i in range(self.OperatorNum):
             # ----- Position ----- #
             diffPos     = pos['RigidBody'+str(i+1)] - self.mikataBeforePositions['RigidBody'+str(i+1)]
             weightedPos = diffPos * mikataRatio[i] + self.mikataWeightedPositions['RigidBody'+str(i+1)]

@@ -27,11 +27,13 @@ FBmode                  = 1     #0:None, 1:FBEach, 2:FBArms
 TaskNum                 = 1
 
 # ----- Advanced Setting ----- #
-isSwitchRatio           = 1
-isTypeFilename          = 1
+isSwitchRatio           = 0
+isTypeFilename          = 0
 filename                = "Test" #defaultname
 
-defaultRigidBodyNum     = 2
+# ----- Core Setting ----- #
+OperatorNum             = 2
+RigidBodyNum            = 2
 bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
@@ -47,7 +49,7 @@ class RobotControlManager:
         Parameter_f = open("parameter.json","r")
         self.Parameter_js = js.load(Parameter_f)
 
-    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = False):
+    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
@@ -55,16 +57,16 @@ class RobotControlManager:
         taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
-        Behaviour           = MotionBehaviour(defaultRigidBodyNum)
+        Behaviour           = MotionBehaviour(OperatorNum)
         xArmtransform       = xArmTransform()
         mikatatransform     = mikataTransform()
-        motionManager       = MotionManager(defaultRigidBodyNum,bendingSensorNum,self.Parameter_js["BendingSensorPorts"],self.Parameter_js["BendingSensorBaudrates"])
+        motionManager       = MotionManager(RigidBodyNum,bendingSensorNum,self.Parameter_js["BendingSensorPorts"],self.Parameter_js["BendingSensorBaudrates"])
         mikatacontrol       = mikataControl(self.Parameter_js["mikataArmPort"])
-        dataRecordManager   = DataRecordManager(RigidBodyNum=defaultRigidBodyNum)
+        dataRecordManager   = DataRecordManager(rigidBodyNum=RigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
 
         if isSlider:
-            slidermanager = SliderManager(self.Parameter_js["SliderPort"])
+            slidermanager = SliderManager(self.Parameter_js["SliderPort"],OperatorNum)
             SliderThread = threading.Thread(target=slidermanager.receive)
             SliderThread.setDaemon(True)
             SliderThread.start()

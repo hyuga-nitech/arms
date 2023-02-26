@@ -17,8 +17,8 @@ class OptiTrackStreamingManager:
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]
     rotation = {}	# dict { 'RigidBodyN': [x, y, z, w]}. 
     
-    def __init__(self,defaultRigidBodyNum: int = 2):
-        for i in range(defaultRigidBodyNum):
+    def __init__(self,rigidBodyNum: int = 2):
+        for i in range(rigidBodyNum):
             self.position['RigidBody'+str(i+1)] = np.zeros(3)
             self.rotation['RigidBody'+str(i+1)] = np.zeros(4)
 

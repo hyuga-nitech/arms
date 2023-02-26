@@ -16,8 +16,8 @@ class DataRecordManager:
     dictGripperValue = {}
     listTime = []
 
-    def __init__(self, RigidBodyNum: int = 2, bendingSensorNum: int = 1) -> None:
-        self.RigidBodyNum       = RigidBodyNum
+    def __init__(self, rigidBodyNum: int = 2, bendingSensorNum: int = 1) -> None:
+        self.RigidBodyNum       = rigidBodyNum
         self.bendingSensorNum   = bendingSensorNum
 
         for i in range(self.RigidBodyNum):
