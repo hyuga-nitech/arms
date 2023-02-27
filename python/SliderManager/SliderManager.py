@@ -23,12 +23,12 @@ class SliderManager:
                 data = float(line.decode('utf-8').rstrip('\n'))
 
                 if self.operatorNum == 1:
-                    self.slider_xratio = [data,data]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-                    self.slider_mikataratio = [1-data]         #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+                    self.slider_xratio = [data,data]    #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot]
+                    self.slider_mikataratio = [1-data]  #[RigidBody1-to-mikataArmPos]
 
                 if self.operatorNum == 2:
                     self.slider_xratio = [data,data,1-data,1-data]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-                    self.slider_mikataratio = [1-data,data]                                 #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+                    self.slider_mikataratio = [1-data,data]         #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
             except:
                 print('Failed to read slider value')
