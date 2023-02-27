@@ -20,16 +20,15 @@ class SliderManager:
         while True:
             try:
                 line = self.slider_serial.readline()
-                data = line.decode('utf-8').rstrip('\n')
-                data = int(data)
+                data = float(line.decode('utf-8').rstrip('\n'))
 
                 if self.operatorNum == 1:
-                    self.slider_xratio = [(data/4095),(data/4095)]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-                    self.slider_mikataratio = [1-(data/4095)]         #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+                    self.slider_xratio = [data,data]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+                    self.slider_mikataratio = [1-data]         #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
                 if self.operatorNum == 2:
-                    self.slider_xratio = [0.5+(data/4095)/2,0.5+(data/4095)/2,0.5-(data/4095)/2,0.5-(data/4095)/2]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-                    self.slider_mikataratio = [0.5-(data/4095)/2,0.5+(data/4095)/2]                                 #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
+                    self.slider_xratio = [data,data,1-data,1-data]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
+                    self.slider_mikataratio = [1-data,data]                                 #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
 
             except:
                 print('Failed to read slider value')
