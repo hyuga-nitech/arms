@@ -36,7 +36,7 @@ RigidBodyNum            = 2
 bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-executionTime           = 120
+executionTime           = 60
 
 NoSwitchedxRatio        = [1,1,0,0]
 NoSwitchedmikataRatio   = [0,1]
