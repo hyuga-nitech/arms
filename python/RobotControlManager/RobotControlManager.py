@@ -29,7 +29,6 @@ TaskNum                 = 1
 # ----- Advanced Setting ----- #
 isSwitchRatio           = 0
 isTypeFilename          = 0
-filename                = "Test" #defaultname
 
 # ----- Core Setting ----- #
 OperatorNum             = 2
@@ -78,6 +77,8 @@ class RobotControlManager:
         # ----- Control flags ----- #
         isMoving = False
 
+        filename = "Test" #defaultname
+
         if isTypeFilename == 1:
             if FBmode == 0:
                 strFB = 'None'
@@ -91,7 +92,7 @@ class RobotControlManager:
             elif Switch == 1:
                 strSW = 'On'
             
-        filename = 'H' + str(PairID) + strSW + strFB + str(TaskNum)
+            filename = 'H' + str(PairID) + strSW + strFB + str(TaskNum)
 
         try:
             while True:
