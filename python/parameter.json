@@ -3,5 +3,6 @@
     "mikataArmPort":"COM4",
     "BendingSensorPorts":["COM7","COM3"],
     "BendingSensorBaudrates":["9600","115200"],
-    "SliderPort":"COM14"
+    "SliderPort":"COM15",
+    "GripperRatio":[0,1]
 }
