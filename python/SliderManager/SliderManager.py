@@ -22,15 +22,6 @@ class SliderManager:
                 line = self.slider_serial.readline()
                 data = int(line.decode('utf-8').rstrip('\n'))
 
-                # # These are codes for Toggle control
-                # if self.operatorNum == 1:
-                #     self.slider_xratio = [data,data]    #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot]
-                #     self.slider_mikataratio = [1-data]  #[RigidBody1-to-mikataArmPos]
-
-                # if self.operatorNum == 2:
-                #     self.slider_xratio = [data,data,1-data,1-data]  #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot, RigidBody2-to-xArmPos, RigidBody2-to-xArmRot]
-                #     self.slider_mikataratio = [1-data,data]         #[RigidBody1-to-mikataArmPos,RigidBody2-to-mikataArm]
-
                 if self.operatorNum == 1:
                     if data == 1:
                         self.slider_xratio = [1,1]    #[RigidBody1-to-xArmPos, RigidBody1-to-xArmRot]
