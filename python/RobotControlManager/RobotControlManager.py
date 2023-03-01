@@ -79,6 +79,9 @@ class RobotControlManager:
 
         filename = "Test" #defaultname
 
+        if OperatorNum == 1:
+            FBmode = 0
+
         if isTypeFilename == 1:
             if FBmode == 0:
                 strFB = 'None'
