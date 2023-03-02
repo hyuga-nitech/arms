@@ -35,34 +35,6 @@ bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
 
-# ----- Auto Set ----- #
-if Practice == 1:
-    executionTime = 60
-else:
-    executionTime = 9999
-
-if OperatorNum == 1:
-    Opemode = 'Solo'
-elif OperatorNum == 2:
-    Opemode = 'Pair'
-else:
-    print('[ERROR] -> Please Check the OperatorNum')
-
-if Practice == 1:
-    if PracArm == 0:
-        Taskmode = 'PracticexArm'
-    elif PracArm == 1:
-        Taskmode = 'PracticemikataArm'
-elif Practice == 0:
-    Taskmode = 'Avoidance'
-else:
-    print('[ERROR] -> Please Check the Practice')
-
-if OperatorNum == 1:
-    filename = Opemode + Taskmode + str(TaskNum)
-elif OperatorNum == 2:
-    filename = Opemode + str(OperatorID) +Taskmode + str(TaskNum)
-
 class RobotControlManager:
     def __init__(self) ->None:
         Parameter_f = open("parameter.json","r")
@@ -75,6 +47,34 @@ class RobotControlManager:
         self.errorCount     = 0
         taskStartTime       = 0
 
+        # ----- Auto Set ----- #
+        if Practice == 1:
+            executionTime = 60
+        else:
+            executionTime = 9999
+
+        if OperatorNum == 1:
+            Opemode = 'Solo'
+        elif OperatorNum == 2:
+            Opemode = 'Pair'
+        else:
+            print('[ERROR] -> Please Check the OperatorNum')
+
+        if Practice == 1:
+            if PracArm == 0:
+                Taskmode = 'PracticexArm'
+            elif PracArm == 1:
+                Taskmode = 'PracticemikataArm'
+        elif Practice == 0:
+            Taskmode = 'Avoidance'
+        else:
+            print('[ERROR] -> Please Check the Practice')
+
+        if OperatorNum == 1:
+            filename = Opemode + Taskmode + str(TaskNum)
+        elif OperatorNum == 2:
+            filename = Opemode + str(OperatorID) +Taskmode + str(TaskNum)
+            
         # ----- Instantiating custom classes ----- #
         Behaviour           = MotionBehaviour(OperatorNum)
         xArmtransform       = xArmTransform()
