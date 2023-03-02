@@ -40,10 +40,10 @@ class mikataTransform:
     __initd5 = 240
 
     # ----- Minimum limitation ----- #
-    __minR, __minPhi, __minTheta     = 60, -150, -30
+    __minR, __minPhi, __minTheta, __minSnap     = 60, -150, -30, -45
 
     # ----- Maximum limitation ----- #
-    __maxR, __maxPhi, __maxTheta     = 300, 150, 90
+    __maxR, __maxPhi, __maxTheta, __maxSnap     = 300, 150, 90, 45
 
     def __init__(self):
         
@@ -57,6 +57,7 @@ class mikataTransform:
         r     = math.sqrt(self.posX * self.posX + self.posY * self.posY + self.posZ * self.posZ )
         phi   = math.degrees(math.atan2(self.posY ,self.posX ))
         theta = -1 * math.degrees(math.atan2(self.posZ , math.sqrt(self.posX * self.posX + self.posY * self.posY )))
+        snap  = -1 * self.pitch
 
         # R limit
         if(r > self.__maxR):
@@ -76,11 +77,18 @@ class mikataTransform:
         elif(theta < self.__minTheta):
             theta = self.__minTheta
 
+        # Snap limit
+        if(snap > self.__maxSnap):
+            snap = self.__maxSnap
+        elif(snap < self.__minSnap):
+            snap = self.__minSnap
+
+
         # Motor's Kinematics
         d1 = 270 - phi
         d2 = 260 - theta - math.degrees(math.acos(r/2/150))
         d3 = 100 + (180 - 2 * math.degrees(math.asin(r/2/150)))
-        d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150))) - self.pitch
+        d4 = 180 + theta + math.degrees(math.acos(r/2/150)) - (180 - 2 * math.degrees(math.asin(r/2/150))) + snap
 
         c1 = self.Degree2Current(d1)
         c2 = self.Degree2Current(d2)
