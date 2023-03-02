@@ -26,6 +26,7 @@ PairID                  = 1
 OperatorID              = 1   #Only OperatorNum = 2
 
 Practice                = 0
+PracArm                 = 0   # 0:xArm, 1:mikataArm
 TaskNum                 = 1
 
 # ----- Core Setting ----- #
@@ -48,7 +49,10 @@ else:
     print('[ERROR] -> Please Check the OperatorNum')
 
 if Practice == 1:
-    Taskmode = 'Practice'
+    if PracArm == 0:
+        Taskmode = 'PracticexArm'
+    elif PracArm == 1:
+        Taskmode = 'PracticemikataArm'
 elif Practice == 0:
     Taskmode = 'Avoidance'
 else:
@@ -116,8 +120,17 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
-                    xratio      = slidermanager.slider_xratio
-                    mikataratio = slidermanager.slider_mikataratio
+                    if Practice == 1:
+                        if PracArm == 0:
+                            xratio      = [1,1,0,0]
+                            mikataratio = [0,0]
+                        elif PracArm == 1:
+                            xratio      = [0,0,0,0]
+                            mikataratio = [1,0]
+
+                    else:
+                        xratio      = slidermanager.slider_xratio
+                        mikataratio = slidermanager.slider_mikataratio
 
                     xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                     mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
@@ -212,8 +225,17 @@ class RobotControlManager:
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
 
-                        xratio      = slidermanager.slider_xratio
-                        mikataratio = slidermanager.slider_mikataratio
+                        if Practice == 1:
+                            if PracArm == 0:
+                                xratio      = [1,1,0,0]
+                                mikataratio = [0,0]
+                            elif PracArm == 1:
+                                xratio      = [0,0,0,0]
+                                mikataratio = [1,0]
+
+                        else:
+                            xratio      = slidermanager.slider_xratio
+                            mikataratio = slidermanager.slider_mikataratio
 
                         xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
                         mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
