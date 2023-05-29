@@ -130,8 +130,8 @@ class RobotControlManager:
 
                     else:
                         time2ratio = round((time.perf_counter() - taskStartTime)%3)
-                        xratio      = [1-time2ratio*0.1,1-time2ratio*0.1,time2ratio*0.1,time2ratio*0.1]
-                        mikataratio = [1-time2ratio*0.1,time2ratio*0.1]
+                        xratio      = [1-time2ratio*0.3,1-time2ratio*0.3,time2ratio*0.3,time2ratio*0.3]
+                        mikataratio = [1-time2ratio*0.3,time2ratio*0.3]
 
                     xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                     mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
