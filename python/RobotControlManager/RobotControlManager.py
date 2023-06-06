@@ -129,9 +129,14 @@ class RobotControlManager:
                             mikataratio = [1,0]
 
                     else:
-                        time2ratio = round((time.perf_counter() - taskStartTime)%3)
-                        xratio      = [1-time2ratio*0.3,1-time2ratio*0.3,time2ratio*0.3,time2ratio*0.3]
-                        mikataratio = [1-time2ratio*0.3,time2ratio*0.3]
+                        time2ratio = round((time.perf_counter() - taskStartTime)%20)
+                        if time2ratio <= 10:
+                            xratio      = [1-time2ratio*0.1,1-time2ratio*0.1,time2ratio*0.1,time2ratio*0.1]
+                            mikataratio = [time2ratio*0.1,1-time2ratio*0.1]
+                        else:
+                            time2ratio = 20- time2ratio
+                            xratio      = [1-time2ratio*0.1,1-time2ratio*0.1,time2ratio*0.1,time2ratio*0.1]
+                            mikataratio = [time2ratio*0.1,1-time2ratio*0.1]
 
                     xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                     mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
@@ -140,12 +145,12 @@ class RobotControlManager:
                     mikataPosition = mikataPosition * 1000
 
                     # ----- Set xArm transform ----- #
-                    xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], -1*xArmPosition[1], xArmPosition[0]
-                    xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], -1*xArmRotation[1], xArmRotation[0]
+                    xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], xArmPosition[1], -1*xArmPosition[0]
+                    xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw  = xArmRotation[2], xArmRotation[1], -1*xArmRotation[0]
 
                     # ----- Set mikata transform ----- #
-                    mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], -1*mikataPosition[1], mikataPosition[0]
-                    mikatatransform.pitch                                       = -1*mikataRotation[1]
+                    mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[1], -1*mikataPosition[0]
+                    mikatatransform.pitch                                       = mikataRotation[1]
 
                     # ----- Bending sensor ----- #
                     dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
@@ -245,12 +250,12 @@ class RobotControlManager:
                         mikataPosition = mikataPosition * 1000
 
                         # ----- Set xArm transform ----- #
-                        xArmtransform.x   , xArmtransform.y    , xArmtransform.z   = xArmPosition[2], -1*xArmPosition[1], xArmPosition[0]
-                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw = xArmRotation[2], -1*xArmRotation[1], xArmRotation[0]
+                        xArmtransform.x   , xArmtransform.y    , xArmtransform.z   = xArmPosition[2], xArmPosition[1], -1*xArmPosition[0]
+                        xArmtransform.roll, xArmtransform.pitch, xArmtransform.yaw = xArmRotation[2], xArmRotation[1], -1*xArmRotation[0]
 
                         # ----- Set mikata transform ----- #
-                        mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], -1*mikataPosition[1], mikataPosition[0]
-                        mikatatransform.pitch                                       = -1*mikataRotation[1]
+                        mikatatransform.x , mikatatransform.y  , mikatatransform.z = mikataPosition[2], mikataPosition[1], -1*mikataPosition[0]
+                        mikatatransform.pitch                                       = mikataRotation[1]
 
                         # ----- Bending sensor ----- #
                         dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
