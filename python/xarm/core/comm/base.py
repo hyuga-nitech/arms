@@ -158,6 +158,7 @@ class Port(threading.Thread):
                     timeout_count += 1
                     if timeout_count > 3:
                         self._connected = False
+                        logger.error('[{}] socket read timeout'.format(self.port_type))
                         break
                     continue
                 else:
@@ -165,6 +166,7 @@ class Port(threading.Thread):
                         failed_read_count += 1
                         if failed_read_count > 5:
                             self._connected = False
+                            logger.error('[{}] socket read failed, len=0'.format(self.port_type))
                             break
                         time.sleep(0.1)
                         continue
@@ -194,7 +196,7 @@ class Port(threading.Thread):
 
                         # # buffer[494:502]
                         # data_curr_us = convert.bytes_to_u64(buffer[-8:])
-                        # recv_curr_us = time.time() * 1000000
+                        # recv_curr_us = time.monotonic() * 1000000
                         #
                         # if data_prev_us != 0 and recv_prev_us != 0:
                         #     data_interval_us = data_curr_us - data_prev_us
@@ -257,6 +259,7 @@ class Port(threading.Thread):
                         failed_read_count += 1
                         if failed_read_count > 5:
                             self._connected = False
+                            logger.error('[{}] socket read failed, len=0'.format(self.port_type))
                             break
                         time.sleep(0.1)
                         continue
@@ -267,12 +270,14 @@ class Port(threading.Thread):
                         timeout_count += 1
                         if timeout_count > 3:
                             self._connected = False
+                            logger.error('[{}] socket read timeout'.format(self.port_type))
                             break
                         continue
                     if len(rx_data) == 0:
                         failed_read_count += 1
                         if failed_read_count > 5:
                             self._connected = False
+                            logger.error('[{}] socket read failed, len=0'.format(self.port_type))
                             break
                         time.sleep(0.1)
                         continue
