@@ -17,36 +17,23 @@ from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
-from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
-from SliderManager.SliderManager import SliderManager
-
-# ----- Setting: Number ----- #
-PairID                  = 1
-Switch                  = 0     #0:Off,  1:On
-FBmode                  = 1     #0:None, 1:FBEach, 2:FBArms
-TaskNum                 = 1
-
-# ----- Advanced Setting ----- #
-isSwitchRatio           = 0
-isTypeFilename          = 0
 
 # ----- Core Setting ----- #
+DelayTime               = 2
+isTypeFilename          = 0
+executionTime           = 120
+
 OperatorNum             = 2
 RigidBodyNum            = 2
 bendingSensorNum        = 1
 xArmMovingLimit         = 500
 mikataMovingLimit       = 1000
-executionTime           = 120
-
-NoSwitchedxRatio        = [1,1,0,0]
-NoSwitchedmikataRatio   = [0,1]
-SwitchedxRatio          = [0,0,1,1]
-SwitchedmikataRatio     = [1,0]
 
 class RobotControlManager:
     def __init__(self) ->None:
         Parameter_f = open("parameter.json","r")
         self.Parameter_js = js.load(Parameter_f)
+        Parameter_f.close()
 
     def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = True):
         # ----- Process info ----- #
@@ -55,6 +42,9 @@ class RobotControlManager:
         self.errorCount     = 0
         taskStartTime       = 0
 
+        self.Poslist        = []
+        self.Rotlist        = []
+
         # ----- Instantiating custom classes ----- #
         Behaviour           = MotionBehaviour(OperatorNum)
         xArmtransform       = xArmTransform()
@@ -62,13 +52,6 @@ class RobotControlManager:
         motionManager       = MotionManager(RigidBodyNum,bendingSensorNum,self.Parameter_js["BendingSensorPorts"],self.Parameter_js["BendingSensorBaudrates"])
         mikatacontrol       = mikataControl(self.Parameter_js["mikataArmPort"])
         dataRecordManager   = DataRecordManager(rigidBodyNum=RigidBodyNum)
-        vibrotactileManager = VibrotactileFeedbackManager()
-
-        if isSlider:
-            slidermanager = SliderManager(self.Parameter_js["SliderPort"],OperatorNum)
-            SliderThread = threading.Thread(target=slidermanager.receive)
-            SliderThread.setDaemon(True)
-            SliderThread.start()
 
         if isEnableArm:
             arm = XArmAPI(self.Parameter_js["xArmIP"])
@@ -78,21 +61,6 @@ class RobotControlManager:
         isMoving = False
 
         filename = "Test" #defaultname
-
-        if isTypeFilename == 1:
-            if FBmode == 0:
-                strFB = 'None'
-            elif FBmode == 1:
-                strFB = 'Each'
-            elif FBmode == 2:
-                strFB = 'Arms'
-
-            if Switch == 0:
-                strSW = 'Off'
-            elif Switch == 1:
-                strSW = 'On'
-            
-            filename = 'H' + str(PairID) + strSW + strFB + str(TaskNum)
 
         try:
             while True:
@@ -117,24 +85,17 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
-                    if isSlider:
-                        xratio      = slidermanager.slider_xratio
-                        mikataratio = slidermanager.slider_mikataratio
-
-                    elif isSwitchRatio:
-                        if Switch:
-                            xratio      = SwitchedxRatio
-                            mikataratio = SwitchedmikataRatio
-                        elif Switch == 0:
-                            xratio      = NoSwitchedxRatio
-                            mikataratio = NoSwitchedmikataRatio
-
+                    if (time.perf_counter() - taskStartTime > DelayTime):
+                        self.Poslist.append(localPosition)
+                        self.Rotlist.append(localRotation)
+                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(self.Poslist.pop(0),self.Rotlist.pop(0),xratio)
+                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(self.Poslist.pop(0),self.Rotlist.pop(0),mikataratio)
+                        
                     else:
-                        xratio = self.Parameter_js["xRatio"]
-                        mikataratio = self.Parameter_js["mikataRatio"]
-
-                    xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
-                    mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
+                        self.Poslist.append(localPosition)
+                        self.Rotlist.append(localRotation)
+                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(InitlocalPosition,InitlocalRotation,xratio)
+                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(InitlocalPosition,InitlocalRotation,mikataratio)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -186,12 +147,6 @@ class RobotControlManager:
                             arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
 
-                    # ----- Vibrotactile Feedback ----- #
-                    if FBmode == 1:
-                        vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
-                    elif FBmode == 2:
-                        vibrotactileManager.FBArms(localPosition, localRotation, xratio, mikataratio)
-
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
                     dataRecordManager.Record(Time, localPosition, localRotation, dictBendingValue)
@@ -220,7 +175,7 @@ class RobotControlManager:
 
                     # ----- Rename ----- #
                     elif keycode == 'r':
-                        filename = input('(Current Mode : PairID = ' + str(PairID) + ' , Switch = ' + strSW + ' , FeedBack = ' + strFB + ')\nFilename?:')
+                        filename = input('Filename?:')
                         continue
 
                     # ----- Start streaming ----- #
@@ -228,25 +183,14 @@ class RobotControlManager:
                         Behaviour.SetOriginPosition(motionManager.LocalPosition())
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
 
-                        if isSlider:
-                            xratio      = slidermanager.slider_xratio
-                            mikataratio = slidermanager.slider_mikataratio
+                        xratio = self.Parameter_js["xRatio"]
+                        mikataratio = self.Parameter_js["mikataRatio"]
 
+                        InitlocalPosition = motionManager.LocalPosition()
+                        InitlocalRotation = motionManager.LocalRotation()
                         
-                        elif isSwitchRatio:
-                            if Switch:
-                                xratio      = SwitchedxRatio
-                                mikataratio = SwitchedmikataRatio
-                            elif Switch == 0:
-                                xratio      = NoSwitchedxRatio
-                                mikataratio = NoSwitchedmikataRatio
-
-                        else:
-                            xratio = self.Parameter_js["xRatio"]
-                            mikataratio = self.Parameter_js["mikataRatio"]
-                        
-                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
-                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),mikataratio)
+                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(InitlocalPosition,InitlocalRotation,xratio)
+                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(InitlocalPosition,InitlocalRotation,mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
