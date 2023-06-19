@@ -8,7 +8,7 @@
 import time
 import threading
 import json as js
-from xArm.wrapper import XArmAPI
+from xarm.wrapper import XArmAPI
 
 # ----- Custom class ----- #
 from xArmTransform.xArmTransform import xArmTransform
@@ -26,7 +26,7 @@ executionTime           = 120
 OperatorNum             = 2
 RigidBodyNum            = 2
 bendingSensorNum        = 1
-xArmMovingLimit         = 500
+xArmMovingLimit         = 10
 mikataMovingLimit       = 1000
 
 class RobotControlManager:
@@ -42,8 +42,10 @@ class RobotControlManager:
         self.errorCount     = 0
         taskStartTime       = 0
 
-        self.Poslist        = []
-        self.Rotlist        = []
+        self.xPoslist       = []
+        self.xRotlist       = []
+        self.mikataPoslist  = []
+        self.mikataRotlist  = []
 
         # ----- Instantiating custom classes ----- #
         Behaviour           = MotionBehaviour(OperatorNum)
@@ -85,17 +87,25 @@ class RobotControlManager:
                     localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
 
+                    NowxArmPosition,NowxArmRotation     = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
+                    NowmikataPosition,NowmikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
+
                     if (time.perf_counter() - taskStartTime > DelayTime):
-                        self.Poslist.append(localPosition)
-                        self.Rotlist.append(localRotation)
-                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(self.Poslist.pop(0),self.Rotlist.pop(0),xratio)
-                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(self.Poslist.pop(0),self.Rotlist.pop(0),mikataratio)
+                        self.xPoslist.append(NowxArmPosition)
+                        self.xRotlist.append(NowxArmRotation)
+                        self.mikataPoslist.append(NowmikataPosition)
+                        self.mikataRotlist.append(NowmikataRotation)
+
+                        xArmPosition = self.xPoslist.pop(0)
+                        xArmRotation = self.xRotlist.pop(0)
+                        mikataPosition = self.mikataPoslist.pop(0)
+                        mikataRotation = self.mikataRotlist.pop(0)
                         
                     else:
-                        self.Poslist.append(localPosition)
-                        self.Rotlist.append(localRotation)
-                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(InitlocalPosition,InitlocalRotation,xratio)
-                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(InitlocalPosition,InitlocalRotation,mikataratio)
+                        self.xPoslist.append(NowxArmPosition)
+                        self.xRotlist.append(NowxArmRotation)
+                        self.mikataPoslist.append(NowmikataPosition)
+                        self.mikataRotlist.append(NowmikataRotation)
 
                     xArmPosition   = xArmPosition * 1000
                     mikataPosition = mikataPosition * 1000
@@ -186,11 +196,11 @@ class RobotControlManager:
                         xratio = self.Parameter_js["xRatio"]
                         mikataratio = self.Parameter_js["mikataRatio"]
 
-                        InitlocalPosition = motionManager.LocalPosition()
-                        InitlocalRotation = motionManager.LocalRotation()
+                        localPosition = motionManager.LocalPosition()
+                        localRotation = motionManager.LocalRotation()
                         
-                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(InitlocalPosition,InitlocalRotation,xratio)
-                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(InitlocalPosition,InitlocalRotation,mikataratio)
+                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
+                        mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
                         
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
