@@ -10,8 +10,8 @@ import numpy as np
 
 class OptiTrackStreamingManager:
     # ---------- Settings: Optitrack streaming address ---------- #
-    serverAddress	= '133.68.35.155'
-    localAddress	= '133.68.35.155'
+    serverAddress	= '127.0.0.1'
+    localAddress	= '127.0.0.1'
 
     # ---------- Variables ---------- #
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]
