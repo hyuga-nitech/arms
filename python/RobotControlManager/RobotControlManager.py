@@ -17,6 +17,7 @@ from mikataArm.mikataControl import mikataControl
 from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
+from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Core Setting ----- #
 DelayTime               = 2
@@ -54,6 +55,7 @@ class RobotControlManager:
         motionManager       = MotionManager(RigidBodyNum,bendingSensorNum,self.Parameter_js["BendingSensorPorts"],self.Parameter_js["BendingSensorBaudrates"])
         mikatacontrol       = mikataControl(self.Parameter_js["mikataArmPort"])
         dataRecordManager   = DataRecordManager(rigidBodyNum=RigidBodyNum)
+        vibrotactileManager = VibrotactileFeedbackManager()
 
         if isEnableArm:
             arm = XArmAPI(self.Parameter_js["xArmIP"])
@@ -156,6 +158,9 @@ class RobotControlManager:
                             # ----- Send to Arms ----- #
                             arm.set_servo_cartesian(xArmtransform.Transform(isOnlyPosition = False))
                             mikatacontrol.dxl_goal_position = [mikataC1, mikataC2, mikataC3, mikataC4, mikataC5]
+
+                    # ----- Vibrotactile Feedback ----- #
+                    vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
