@@ -182,10 +182,13 @@ class VibrotactileFeedbackManager:
             fb_vel_1 = (velPosP1+velRotP1*p_r_gain)*vel_gain
             fb_vel_2 = (velPosP2+velRotP2*p_r_gain)*vel_gain
 
-            self.data_out_1 = fb_vel_2 * xratio[2]
+            # self.data_out_1 = fb_vel_2 * xratio[2]
+            # self.data_out_2 = fb_vel_1 * xratio[0]
+            # self.data_out_3 = fb_vel_2 * mikataratio[1]
+            # self.data_out_4 = fb_vel_1 * mikataratio[0]
+
+            self.data_out_1 = fb_vel_2 * mikataratio[1]
             self.data_out_2 = fb_vel_1 * xratio[0]
-            self.data_out_3 = fb_vel_2 * mikataratio[1]
-            self.data_out_4 = fb_vel_1 * mikataratio[0]
 
             del self.listRigidBodyPos1[0]
             del self.listRigidBodyPos2[0]

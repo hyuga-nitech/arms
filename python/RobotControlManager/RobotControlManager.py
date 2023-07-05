@@ -20,7 +20,8 @@ from MotionManager.MotionManager import MotionManager
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Core Setting ----- #
-DelayTime               = 2
+DelayTime               = 0.3
+filename                = "Test" #defaultname
 isTypeFilename          = 0
 executionTime           = 120
 
@@ -63,8 +64,6 @@ class RobotControlManager:
 
         # ----- Control flags ----- #
         isMoving = False
-
-        filename = "Test" #defaultname
 
         try:
             while True:
