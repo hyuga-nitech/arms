@@ -7,5 +7,6 @@
 
     "xRatio":[1,1,0,0],
     "mikataRatio":[0,1],
-    "GripperRatio":[1,0]
+    "GripperRatio":[1,0],
+    "LEDport":"COM1"
 }

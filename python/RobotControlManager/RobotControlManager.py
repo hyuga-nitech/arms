@@ -18,6 +18,7 @@ from MotionBehaviour.MotionBehaviour import MotionBehaviour
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
+from LEDdirectionManager.LEDdirectionManager import LEDdirectionManager
 
 # ----- Core Setting ----- #
 DelayTime               = 0.3
@@ -57,6 +58,7 @@ class RobotControlManager:
         mikatacontrol       = mikataControl(self.Parameter_js["mikataArmPort"])
         dataRecordManager   = DataRecordManager(rigidBodyNum=RigidBodyNum)
         vibrotactileManager = VibrotactileFeedbackManager()
+        LEDManager          = LEDdirectionManager(self.Parameter_js["LEDport"])
 
         if isEnableArm:
             arm = XArmAPI(self.Parameter_js["xArmIP"])
@@ -160,6 +162,9 @@ class RobotControlManager:
 
                     # ----- Vibrotactile Feedback ----- #
                     vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
+
+                    # ----- LED Feedback ----- #
+                    LEDManager.send(localPosition)
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()

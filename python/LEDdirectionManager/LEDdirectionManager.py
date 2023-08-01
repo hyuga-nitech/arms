@@ -15,9 +15,17 @@ class LEDdirectionManager:
         except:
             print('Failed to connect to LED')
 
-    def send(self,xArmy,xArmz,mArmy,mArmz):
+    def send(self, position):
         while True:
             try:
+                posRigidBody1 = position['RigidBody1'] * 1000
+                posRigidBody2 = position['RigidBody2'] * 1000
+
+                xArmy = posRigidBody1[0]
+                xArmz = posRigidBody1[1]
+                mArmy = posRigidBody2[0]
+                mArmz = posRigidBody2[1]
+
                 message = str(int(xArmy * self.gain)) + ", " + str(int(xArmz * self.gain)) + ", " + str(int(mArmy * self.gain)) + ", " + str(int(mArmz * self.gain))
                 serial.write(message.encode('utf-8'))
 
