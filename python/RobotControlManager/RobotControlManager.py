@@ -22,7 +22,6 @@ from LEDdirectionManager.LEDdirectionManager import LEDdirectionManager
 
 # ----- Core Setting ----- #
 DelayTime               = 0.3
-filename                = "Test" #defaultname
 isTypeFilename          = 0
 executionTime           = 120
 
@@ -66,6 +65,8 @@ class RobotControlManager:
 
         # ----- Control flags ----- #
         isMoving = False
+
+        filename = "Test" #defaultname
 
         LEDThread = threading.Thread(target=LEDManager.send)
         LEDThread.setDaemon(True)
