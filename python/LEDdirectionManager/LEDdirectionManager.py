@@ -5,6 +5,7 @@
 # -----------------------------------------------------------------
 
 import serial
+import numpy as np
 
 class LEDdirectionManager:
     def __init__(self, port):
@@ -15,19 +16,47 @@ class LEDdirectionManager:
         except:
             print('Failed to connect to LED')
 
-    def send(self, position):
+        self.position = 0
+        self.rotation = 0
+
+    def send(self):
         while True:
             try:
-                posRigidBody1 = position['RigidBody1'] * 1000
-                posRigidBody2 = position['RigidBody2'] * 1000
+                posRigidBody1 = self.position['RigidBody1'] * 1000
+                posRigidBody2 = self.position['RigidBody2'] * 1000
+                rotRigidBody1 = np.rad2deg(self.Behaviour.Quaternion2Euler(self.rotation['RigidBody1']))
+                rotRigidBody2 = np.rad2deg(self.Behaviour.Quaternion2Euler(self.rotation['RigidBody2']))
 
-                xArmy = posRigidBody1[0]
-                xArmz = posRigidBody1[1]
-                mArmy = posRigidBody2[0]
-                mArmz = posRigidBody2[1]
 
-                message = str(int(xArmy * self.gain)) + ", " + str(int(xArmz * self.gain)) + ", " + str(int(mArmy * self.gain)) + ", " + str(int(mArmz * self.gain))
+                self.get_pos_1_box.append(np.concatenate([posRigidBody1, rotRigidBody1], 0))
+                get_pos_1_filt = self.filter_FB.lowpass2(self.get_pos_1_box, self.get_pos_1_filt_box)
+                self.get_pos_1_filt_box.append(get_pos_1_filt)
+                del self.get_pos_1_box[0]
+                del self.get_pos_1_filt_box[0]
+
+                self.get_pos_2_box.append(np.concatenate([posRigidBody2, rotRigidBody2]))
+                get_pos_2_filt = self.filter_FB.lowpass2(self.get_pos_2_box, self.get_pos_2_filt_box)
+                self.get_pos_2_filt_box.append(get_pos_2_filt)
+                del self.get_pos_2_box[0]
+                del self.get_pos_2_filt_box[0]
+
+                self.listRigidBodyPos1.append(get_pos_1_filt[0:3])
+                self.listRigidBodyPos2.append(get_pos_2_filt[0:3])
+
+                if len(self.listRigidBodyPos1)== 2:
+                    listvelPosP1 = (np.diff(self.listRigidBodyPos1, n=1, axis=0)/self.dt)
+                    listvelPosP2 = (np.diff(self.listRigidBodyPos2, n=1, axis=0)/self.dt)
+
+                xArmy = listvelPosP1[0][0]
+                xArmz = listvelPosP1[0][1]
+                mArmy = listvelPosP2[0][0]
+                mArmz = listvelPosP2[0][1]
+
+                message = str(int(xArmy * self.gain)) + "," + str(int(xArmz * self.gain)) + "," + str(int(mArmy * self.gain)) + "," + str(int(mArmz * self.gain)) + "\n"
                 serial.write(message.encode('utf-8'))
+
+                del self.listRigidBodyPos1[0]
+                del self.listRigidBodyPos2[0]
 
             except:
                 print('Failed to send to LED')

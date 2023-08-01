@@ -67,6 +67,10 @@ class RobotControlManager:
         # ----- Control flags ----- #
         isMoving = False
 
+        LEDThread = threading.Thread(target=LEDManager.send)
+        LEDThread.setDaemon(True)
+        LEDThread.start()
+
         try:
             while True:
                 if isMoving and (time.perf_counter() - taskStartTime > executionTime):
