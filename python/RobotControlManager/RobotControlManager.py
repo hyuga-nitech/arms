@@ -169,7 +169,8 @@ class RobotControlManager:
                     vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- LED Feedback ----- #
-                    LEDManager.send(localPosition)
+                    LEDManager.position = localPosition
+                    LEDManager.rotation = localRotation
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
