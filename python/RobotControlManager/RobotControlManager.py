@@ -28,7 +28,7 @@ executionTime           = 120
 OperatorNum             = 2
 RigidBodyNum            = 2
 bendingSensorNum        = 1
-xArmMovingLimit         = 10
+xArmMovingLimit         = 100
 mikataMovingLimit       = 1000
 
 class RobotControlManager:
@@ -79,7 +79,7 @@ class RobotControlManager:
 
                     self.taskTime.append(time.perf_counter() - taskStartTime)
                     self.PrintProcessInfo()
-                    
+
                     if isExportData:
                         dataRecordManager.ExportSelf(filename)
 
@@ -109,14 +109,14 @@ class RobotControlManager:
                         mikataPosition = self.mikataPoslist.pop(0)
                         mikataRotation = self.mikataRotlist.pop(0)
                         
+                        xArmPosition   = xArmPosition * 1000
+                        mikataPosition = mikataPosition * 1000
+
                     else:
                         self.xPoslist.append(NowxArmPosition)
                         self.xRotlist.append(NowxArmRotation)
                         self.mikataPoslist.append(NowmikataPosition)
                         self.mikataRotlist.append(NowmikataRotation)
-
-                    xArmPosition   = xArmPosition * 1000
-                    mikataPosition = mikataPosition * 1000
 
                     # ----- Set xArm transform ----- #
                     xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], xArmPosition[0], xArmPosition[1]
@@ -140,7 +140,7 @@ class RobotControlManager:
                     xArmdiffX    = xArmtransform.x - beforeX
                     xArmdiffY    = xArmtransform.y - beforeY
                     xArmdiffZ    = xArmtransform.z - beforeZ
-                    
+
                     mikatadiffC1 = mikataC1 - beforeC1
                     mikatadiffC2 = mikataC2 - beforeC2
                     mikatadiffC3 = mikataC3 - beforeC3
@@ -169,8 +169,9 @@ class RobotControlManager:
                     vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- LED Feedback ----- #
-                    LEDManager.position = localPosition
-                    LEDManager.rotation = localRotation
+                    flag, mes = LEDManager.flagchecker(localPosition)
+                    if flag == 1:
+                        LEDManager.send(mes)
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
@@ -213,6 +214,8 @@ class RobotControlManager:
 
                         localPosition = motionManager.LocalPosition()
                         localRotation = motionManager.LocalRotation()
+
+                        flag, mes = LEDManager.flagchecker(localPosition)
                         
                         xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                         mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
@@ -246,7 +249,7 @@ class RobotControlManager:
 
             self.taskTime.append(time.perf_counter() - taskStartTime)
             self.PrintProcessInfo()
-            
+
             if isExportData:
                 dataRecordManager.ExportSelf(filename)
 
@@ -291,7 +294,7 @@ class RobotControlManager:
 
     def PrintProcessInfo(self):
         """
-        Print process information. 
+        Print process information.
         """
 
         print('----- Process info -----')
@@ -300,4 +303,3 @@ class RobotControlManager:
             print('Task time\t > ', ttask, '[s]')
         print('Error count\t > ', self.errorCount)
         print('------------------------')
-        
