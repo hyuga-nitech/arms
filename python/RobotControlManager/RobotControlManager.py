@@ -68,10 +68,6 @@ class RobotControlManager:
 
         filename = "Test" #defaultname
 
-        LEDThread = threading.Thread(target=LEDManager.send)
-        LEDThread.setDaemon(True)
-        LEDThread.start()
-
         try:
             while True:
                 if isMoving and (time.perf_counter() - taskStartTime > executionTime):
@@ -108,7 +104,7 @@ class RobotControlManager:
                         xArmRotation = self.xRotlist.pop(0)
                         mikataPosition = self.mikataPoslist.pop(0)
                         mikataRotation = self.mikataRotlist.pop(0)
-                        
+
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
 
@@ -216,10 +212,10 @@ class RobotControlManager:
                         localRotation = motionManager.LocalRotation()
 
                         flag, mes = LEDManager.flagchecker(localPosition)
-                        
+
                         xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                         mikataPosition,mikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
-                        
+
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
 
