@@ -63,6 +63,10 @@ class RobotControlManager:
             arm = XArmAPI(self.Parameter_js["xArmIP"])
             self.InitializeAll(arm, xArmtransform, mikatatransform, mikatacontrol)
 
+        intialmes = '0,0,0,0'
+
+        LEDManager.send(intialmes.encode())
+
         # ----- Control flags ----- #
         isMoving = False
 

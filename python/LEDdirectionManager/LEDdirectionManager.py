@@ -31,7 +31,7 @@ class LEDdirectionManager:
         self.listpos2 = []
 
         self.lastsendtime = 0
-        self.thresholdVel = 0.1
+        self.thresholdVel = 1
 
     def send(self, message):
         try:
@@ -46,7 +46,7 @@ class LEDdirectionManager:
         self.sendFlag = 0
         message = ''
 
-        if (time.perf_counter - self.lastsendtime > 0.05):
+        if ((time.perf_counter() - self.lastsendtime) > 0.05):
             pos1 = position['RigidBody1'] * 1000
             pos2 = position['RigidBody2'] * 1000
 
