@@ -12,7 +12,6 @@ class LEDdirectionManager:
     def __init__(self, port):
         try:
             self.LED_serial = serial.Serial(port, 9600, timeout=0.1)
-            self.gain = 1
 
         except:
             print('Failed to connect to LED')
@@ -31,7 +30,7 @@ class LEDdirectionManager:
         self.listpos2 = []
 
         self.lastsendtime = 0
-        self.thresholdVel = 1
+        self.thresholdVel = 0.1
 
     def send(self, message):
         try:
@@ -54,11 +53,11 @@ class LEDdirectionManager:
             self.listpos2.append(pos2)
 
             if len(self.listpos1) == 2:
-                if (self.xbeforeyFlag != 1) and (self.listpos1[1][0] - self.listpos1[0][0] > self.thresholdVel):
+                if (self.xbeforeyFlag != 1) and (self.listpos1[1][0] - self.listpos1[0][0] < (-1 * self.thresholdVel)):
                     self.xyFlag = 1
                     self.xbeforeyFlag = 1
                     self.sendFlag = 1
-                elif(self.xbeforeyFlag != -1) and (self.listpos1[1][0] - self.listpos1[0][0] < (-1 * self.thresholdVel)):
+                elif(self.xbeforeyFlag != -1) and (self.listpos1[1][0] - self.listpos1[0][0] > self.thresholdVel):
                     self.xyFlag = -1
                     self.xbeforeyFlag = -1
                     self.sendFlag = 1
@@ -80,11 +79,11 @@ class LEDdirectionManager:
                     self.xbeforezFlag = 0
                     self.sendFlag = 1
 
-                if (self.mbeforeyFlag != 1) and (self.listpos2[1][0] - self.listpos2[0][0] > self.thresholdVel):
+                if (self.mbeforeyFlag != 1) and (self.listpos2[1][0] - self.listpos2[0][0] < (-1 * self.thresholdVel)):
                     self.myFlag = 1
                     self.mbeforeyFlag = 1
                     self.sendFlag = 1
-                elif(self.mbeforeyFlag != -1) and (self.listpos2[1][0] - self.listpos2[0][0] < (-1 * self.thresholdVel)):
+                elif(self.mbeforeyFlag != -1) and (self.listpos2[1][0] - self.listpos2[0][0] > self.thresholdVel):
                     self.myFlag = -1
                     self.mbeforeyFlag = -1
                     self.sendFlag = 1

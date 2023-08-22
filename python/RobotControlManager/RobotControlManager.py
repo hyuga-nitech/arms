@@ -21,9 +21,10 @@ from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbac
 from LEDdirectionManager.LEDdirectionManager import LEDdirectionManager
 
 # ----- Core Setting ----- #
-DelayTime               = 0.3
+DelayTime               = 0.2 #Valid if isdelay = 1
 isTypeFilename          = 0
 executionTime           = 120
+isdelay                 = 1
 
 OperatorNum             = 2
 RigidBodyNum            = 2
@@ -37,6 +38,9 @@ class RobotControlManager:
         self.Parameter_js = js.load(Parameter_f)
         Parameter_f.close()
 
+        if isdelay == 0:
+            DelayTime = 0
+
     def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
@@ -48,6 +52,7 @@ class RobotControlManager:
         self.xRotlist       = []
         self.mikataPoslist  = []
         self.mikataRotlist  = []
+        self.gripperlist    = []
 
         # ----- Instantiating custom classes ----- #
         Behaviour           = MotionBehaviour(OperatorNum)
@@ -98,16 +103,24 @@ class RobotControlManager:
                     NowxArmPosition,NowxArmRotation     = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
                     NowmikataPosition,NowmikataRotation  = Behaviour.GetSharedmikataArmTransform(localPosition,localRotation,mikataratio)
 
+                    # ----- Bending sensor ----- #
+                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
+                    NowgripperValue = 0
+                    for i in range(bendingSensorNum):
+                        NowgripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
+
                     if (time.perf_counter() - taskStartTime > DelayTime):
                         self.xPoslist.append(NowxArmPosition)
                         self.xRotlist.append(NowxArmRotation)
                         self.mikataPoslist.append(NowmikataPosition)
                         self.mikataRotlist.append(NowmikataRotation)
+                        self.gripperlist.append(NowgripperValue)
 
                         xArmPosition = self.xPoslist.pop(0)
                         xArmRotation = self.xRotlist.pop(0)
                         mikataPosition = self.mikataPoslist.pop(0)
                         mikataRotation = self.mikataRotlist.pop(0)
+                        gripperValue = self.gripperlist.pop(0)
 
                         xArmPosition   = xArmPosition * 1000
                         mikataPosition = mikataPosition * 1000
@@ -117,6 +130,7 @@ class RobotControlManager:
                         self.xRotlist.append(NowxArmRotation)
                         self.mikataPoslist.append(NowmikataPosition)
                         self.mikataRotlist.append(NowmikataRotation)
+                        self.gripperlist.append(NowgripperValue)
 
                     # ----- Set xArm transform ----- #
                     xArmtransform.x   , xArmtransform.y    , xArmtransform.z    = xArmPosition[2], xArmPosition[0], xArmPosition[1]
@@ -125,12 +139,6 @@ class RobotControlManager:
                     # ----- Set mikata transform ----- #
                     mikatatransform.x , mikatatransform.y  , mikatatransform.z  = mikataPosition[2], mikataPosition[0], mikataPosition[1]
                     mikatatransform.pitch                                       = mikataRotation[0]
-
-                    # ----- Bending sensor ----- #
-                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                    gripperValue = 0
-                    for i in range(bendingSensorNum):
-                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.Parameter_js["GripperRatio"][i]
 
                     # ----- Calculate mikata Current ----- #
                     mikataC1, mikataC2, mikataC3, mikataC4 = mikatatransform.Transform()
@@ -169,9 +177,10 @@ class RobotControlManager:
                     vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
 
                     # ----- LED Feedback ----- #
-                    flag, mes = LEDManager.flagchecker(localPosition)
-                    if flag == 1:
-                        LEDManager.send(mes)
+                    if isdelay == 1:
+                        flag, mes = LEDManager.flagchecker(localPosition)
+                        if flag == 1:
+                            LEDManager.send(mes)
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
