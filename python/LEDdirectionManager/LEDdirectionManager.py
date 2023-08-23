@@ -30,8 +30,17 @@ class LEDdirectionManager:
         self.listpos2 = []
 
         self.lastsendtime = 0
-        self.thresholdVel = 0.1
+        self.thresholdVel = 0.5
 
+    def init_send(self):
+        try:
+            message = '0,0,0,0\n'
+            mes = message.encode()
+            self.LED_serial.write(mes)
+
+        except:
+            print('Failed to send to LED')
+    
     def send(self, message):
         try:
             mes = message.encode()
