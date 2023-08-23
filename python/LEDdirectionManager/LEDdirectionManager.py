@@ -103,15 +103,15 @@ class LEDdirectionManager:
 
                 if (self.mbeforezFlag != 1) and (self.listpos2[1][1] - self.listpos2[0][1] > self.thresholdVel):
                     self.mzFlag = 1
-                    self.mbeforeyFlag = 1
+                    self.mbeforezFlag = 1
                     self.sendFlag = 1
                 elif(self.mbeforezFlag != -1) and (self.listpos2[1][1] - self.listpos2[0][1] < (-1 * self.thresholdVel)):
                     self.mzFlag = -1
-                    self.mbeforeyFlag = -1
+                    self.mbeforezFlag = -1
                     self.sendFlag = 1
                 elif(self.mbeforezFlag != 0) and ((-1 * self.thresholdVel) <= (self.listpos2[1][1] - self.listpos2[0][1]) <= self.thresholdVel):
                     self.mzFlag = 0
-                    self.mbeforeyFlag = 0
+                    self.mbeforezFlag = 0
                     self.sendFlag = 1
 
                 message = str(int(self.xyFlag)) + "," + str(int(self.xzFlag)) + "," + str(int(self.myFlag)) + "," + str(int(self.mzFlag)) + "\n"
