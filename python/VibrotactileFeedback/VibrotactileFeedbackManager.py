@@ -1,27 +1,16 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takumi Katagiri, Takumi Nishimura (Nagoya Institute of Technology)
-# Created:         2022/6/13
-# Summary:         振動フィードバック制御マネージャー
-# -----------------------------------------------------------------
-
 import pyaudio
 import numpy as np
 import math
 
-from MotionFilter.MotionFilter import MotionFilter
-from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
-from MotionBehaviour.MotionBehaviour import MotionBehaviour
+from python.lib.self.MotionFilter import MotionFilter
+from python.lib.self.AudioDeviceIndexes import AudioDeviceIndexes
 
 class VibrotactileFeedbackManager:
     def __init__(self):
         # ----- Find audio device indexes ----- #
-        audioDeviceIndexes = AudioDeviceIndexes()
-        ListIndexNum = audioDeviceIndexes.Find(host_api='Windows DirectSound', name='Sound Blaster Play! 3')
-        OutputDeviceNum = len(ListIndexNum)
-        print(ListIndexNum)
-
-        self.Behaviour = MotionBehaviour()
+        audio_device_indexes = AudioDeviceIndexes()
+        list_index_num = audio_device_indexes.find_sound_device(host_api='Windows DirectSound', name='Sound Blaster Play! 3')
+        output_device_num = len(list_index_num)
     
         self.p = pyaudio.PyAudio()
         self.format = pyaudio.paInt16
@@ -33,13 +22,13 @@ class VibrotactileFeedbackManager:
         self.CHUNK = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.CHUNK) * float(self.freq) / float(self.rate))
 
-        # ----- Initialize the parameter of data_out according as OutputDeviceNum ----- #
-        for i in range(OutputDeviceNum):    # note: 2 is for stereo
+        # ----- Initialize the parameter of data_out according as output_device_num ----- #
+        for i in range(output_device_num):
             data_out_command = 'self.data_out_' + str(i+1) + '= 0.0'
             exec(data_out_command)
 
-        # ----- Define streamming command according as OutputDeviceNum ----- #
-        for i in range(OutputDeviceNum):
+        # ----- Define streamming command according as output_device_num ----- #
+        for i in range(output_device_num):
             stream_command = 'self.stream' + str(i+1) + '= self.p.open('\
                 + 'rate = self.rate,'\
                 + 'channels = self.channels,'\
@@ -58,7 +47,7 @@ class VibrotactileFeedbackManager:
         fp = 10
         fs = 180
         self.filter_FB = MotionFilter()
-        self.filter_FB.InitLowPassFilterWithOrder(fs, fp, n)
+        self.filter_FB.init_lowpassfilter_with_order(fs, fp, n)
         self.dt = round(1/fs, 4)
 
         self.initGripperPosition = np.array([0, 0, -200])

@@ -11,7 +11,7 @@ class MotionFilter:
     def __init__(self) -> None:
         pass
     
-    def InitLowPassFilter(self, samplerate, fp, fs, gpass: int = 3, gstop: int = 40):
+    def init_lowpassfilter(self, samplerate, fp, fs, gpass: int = 3, gstop: int = 40):
         """
         Initialize low pass filter
         Order and Butterworth normalized frequency will calculate automatically.
@@ -40,7 +40,7 @@ class MotionFilter:
         self.lowB = self.lowB.tolist()
         self.lowA = self.lowA.tolist()
     
-    def InitLowPassFilterWithOrder(self, samplerate, fp, n):
+    def init_lowpassfilter_with_order(self, samplerate, fp, n):
         """
         Initialize low pass filter with order.
 
@@ -62,7 +62,7 @@ class MotionFilter:
         self.lowA = self.lowA.tolist()
         self.lowN = n
     
-    def InitHighPassFilter(self, samplerate, fp, fs, gpass: int = 3, gstop: int = 40):
+    def init_highpassfilter(self, samplerate, fp, fs, gpass: int = 3, gstop: int = 40):
         """
         Initialize high pass filter.
         Order and Butterworth normalized frequency will calculate automatically.
@@ -91,7 +91,7 @@ class MotionFilter:
         self.highB = self.highB.tolist()
         self.highA = self.highA.tolist()
     
-    def InitHighPassFilterWithOrder(self, samplerate, fp, n):
+    def init_highpassfilter_with_order(self, samplerate, fp, n):
         """
         Initialize high pass filter with order.
 
@@ -144,7 +144,7 @@ class MotionFilter:
         y = list(map(lambda x, y: x - y, y1_all, y2_all))
         return np.array(y)
     
-    def ButterFilter(self, x):
+    def butterfilter(self, x):
         """
         Butterworth filter
 
@@ -162,7 +162,7 @@ class MotionFilter:
         y = signal.filtfilt(self.lowB, self.lowA, x)
         return y
     
-    def HighPassFilter(self, x):
+    def highpassfilter(self, x):
         """
         High pass filter
 

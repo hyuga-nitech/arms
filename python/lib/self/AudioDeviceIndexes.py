@@ -1,16 +1,10 @@
-# -----------------------------------------------------------------------
-# Author:   Takumi Katagiri (Nagoya Institute of Technology), Takayoshi Hagiwara (KMD)
-# Created:  2021/11/17
-# Summary:  Get index of audio output devices
-# -----------------------------------------------------------------------
-
 import pyaudio
 
 class AudioDeviceIndexes:
     def __init__(self) -> None:
         pass
     
-    def Find(self, host_api: str = 'Windows DirectSound', name: str = 'Sound Blaster Play! 3'):
+    def find_sound_device(self, host_api: str = 'Windows DirectSound', name: str = 'Sound Blaster Play! 3'):
         """
         Find devices that contain the specified string in their names
 

@@ -1,0 +1,48 @@
+{
+    "xArmConfigs": {
+        "xArm1": {
+            "IP": "192.168.1.217",
+            "Mount": "flat",
+            "InitPos": [
+                250,
+                -100,
+                100
+            ],
+            "InitRot": [
+                180,
+                0,
+                90
+            ],
+            "MaxPos": [
+                650,
+                100,
+                500
+            ],
+            "MinPos": [
+                200,
+                -300,
+                -30
+            ],
+            "MaxRot": [
+                220,
+                20,
+                20
+            ],
+            "MinRot": [
+                180,
+                -20,
+                -20
+            ]
+        }
+    },
+    "ParticipantsConfigs": {
+        "participant1": {
+            "RigidBody": 1,
+            "GripperSerialCOM": "COM10"
+        },
+        "participant2": {
+            "RigidBody": 2,
+            "GripperSerialCOM": "COM7"
+        }
+    }
+}

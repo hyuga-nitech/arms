@@ -1,0 +1,40 @@
+{
+    "TargetConfigs": {
+        "Target1": {
+            "Position": [
+                100,
+                100,
+                100
+            ],
+            "rotation": [
+                100,
+                100,
+                100
+            ]
+        },
+        "Target2": {
+            "Position": [
+                100,
+                100,
+                100
+            ],
+            "rotation": [
+                100,
+                100,
+                100
+            ]
+        },
+        "Target3": {
+            "Position": [
+                100,
+                100,
+                100
+            ],
+            "rotation": [
+                100,
+                100,
+                100
+            ]
+        }
+    }
+}
