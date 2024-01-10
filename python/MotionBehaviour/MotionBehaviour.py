@@ -1,10 +1,3 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takayoshi Hagiwara (KMD)
-# Created:         2022/5/20
-# Summary:         RigidBody座標に基づくアーム座標の指令値計算
-# -----------------------------------------------------------------
-
 import numpy as np
 import math
 
@@ -21,12 +14,6 @@ class MotionBehaviour:
     xBeforeRotations        = {}
     xWeightedRotations      = {}
 
-    mikataBeforePositions     = {}
-    mikataWeightedPositions   = {}
-
-    mikataBeforeRotations        = {}
-    mikataWeightedRotations      = {}
-
     def __init__(self,operatorNum: int = 2) -> None:
         for i in range(operatorNum):
             self.originPositions['RigidBody'+str(i+1)] = np.zeros(3)
@@ -40,12 +27,6 @@ class MotionBehaviour:
 
             self.xBeforeRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
             self.xWeightedRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
-
-            self.mikataBeforePositions['RigidBody'+str(i+1)] = np.zeros(3)
-            self.mikataWeightedPositions['RigidBody'+str(i+1)] = np.zeros(3)
-
-            self.mikataBeforeRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
-            self.mikataWeightedRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
 
         self.OperatorNum = operatorNum
 
@@ -64,20 +45,6 @@ class MotionBehaviour:
         relativeRot = self.Quaternion2Euler(Rot['RigidBody1'])
 
         return relativePos , relativeRot
-
-    def GetmikataArmTransform(self,position :dict,rotation: dict) :
-        """
-        Calculate the mikataArm transforms
-        Use  relative Position & relative Rotation
-
-        初期位置、初期回転角との差を利用する
-        """
-
-        Pos = self.GetRelativePosition(position)
-
-        relativePos = Pos['RigidBody2']
-
-        return relativePos
 
     def GetSharedxArmTransform(self,position: dict,rotation: dict, xRatio) :
         """
@@ -129,57 +96,6 @@ class MotionBehaviour:
             self.xBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
         
         return sharedPosition , sharedRotation_euler
-
-    def GetSharedmikataArmTransform(self,position :dict,rotation: dict, mikataRatio) :
-        """
-        Calculate the mikataArm transforms
-        Use  relative Position & relative Rotation
-
-        前回位置、前回回転角との差を利用する
-        ※初期位置を使用してしまうと互いの剛体が引きずり合う
-        """
-
-        # ----- Shared transform ----- #
-        sharedPosition = [0, 0, 0]
-        sharedRotation_euler = [0, 0, 0]
-
-        pos = self.GetRelativePosition(position)
-        rot = self.GetRelativeRotation(rotation)
-
-        for i in range(self.OperatorNum):
-            # ----- Position ----- #
-            diffPos     = pos['RigidBody'+str(i+1)] - self.mikataBeforePositions['RigidBody'+str(i+1)]
-            weightedPos = diffPos * mikataRatio[i] + self.mikataWeightedPositions['RigidBody'+str(i+1)]
-            sharedPosition += weightedPos
-
-            self.mikataWeightedPositions['RigidBody'+str(i+1)] = weightedPos
-            self.mikataBeforePositions['RigidBody'+str(i+1)]   = pos['RigidBody'+str(i+1)]
-
-            # ----- Rotation ----- #
-            qw, qx, qy, qz = self.mikataBeforeRotations['RigidBody'+str(i+1)][3], self.mikataBeforeRotations['RigidBody'+str(i+1)][0], self.mikataBeforeRotations['RigidBody'+str(i+1)][1], self.mikataBeforeRotations['RigidBody'+str(i+1)][2]
-            mat4x4 = np.array([ [qw, qz, -qy, qx],
-                                [-qz, qw, qx, qy],
-                                [qy, -qx, qw, qz],
-                                [-qx,-qy, -qz, qw]])
-            currentRot = rot['RigidBody'+str(i+1)]
-            diffRot = np.dot(np.linalg.inv(mat4x4), currentRot)
-            diffRotEuler = self.Quaternion2Euler(np.array(diffRot))
-            
-            weightedDiffRotEuler = list(map(lambda x: x * mikataRatio[i] , diffRotEuler))
-            weightedDiffRot = self.Euler2Quaternion(np.array(weightedDiffRotEuler))
-
-            nqw, nqx, nqy, nqz = weightedDiffRot[3], weightedDiffRot[0], weightedDiffRot[1], weightedDiffRot[2]
-            neomat4x4 = np.array([[nqw, -nqz, nqy, nqx],
-                                    [nqz, nqw, -nqx, nqy],
-                                    [-nqy, nqx, nqw, nqz],
-                                    [-nqx,-nqy, -nqz, nqw]])
-            weightedRot = np.dot(neomat4x4,  self.mikataWeightedRotations['RigidBody'+str(i+1)])
-            sharedRotation_euler += self.Quaternion2Euler(weightedRot)
-
-            self.mikataWeightedRotations['RigidBody'+str(i+1)]  = weightedRot
-            self.mikataBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
-        
-        return sharedPosition, sharedRotation_euler
 
     def SetOriginPosition(self, position) -> None:
         """

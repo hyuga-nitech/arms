@@ -1,66 +1,47 @@
-# -----------------------------------------------------------------
-# Author:   Takayoshi Hagiwara (KMD)
-# Created:  2021/8/12
-# Summary:  xArmの初期値、限界値の設定
-#           ロボットへ送る指令へのフィルター役
-# -----------------------------------------------------------------
-
 import numpy as np
+import json as js
+import logging
 
 class xArmTransform:
-    """
-    xArmの座標と回転を保持するクラス
-    """
+    def __init__(self,arm_key):
+        xArm_setting_f = open("xArm_setting.json","r")
+        self.xArm_js = js.load(xArm_setting_f)
 
-    x, y, z             = 0, 0, 0
-    roll, pitch, yaw    = 0, 0, 0
+        self.mount = self.xArm_js[arm_key]["Mount"]
 
-    # ----- Initial transform ----- #
-    __initX, __initY, __initZ           = 280, 0, 300
-    __initRoll, __initPitch, __initYaw  = 179.9, 1.6, 0.3
+        self.__initX, self.__initY, self.__initZ = self.xArm_js[arm_key]["InitialPos"]
+        self.__initRoll, self.__initPitch, self.__initYaw = self.xArm_js[arm_key]["InitialRot"]
+        self.__maxX, self.__maxY, self.__maxZ = self.xArm_js[arm_key]["MaxPos"]
+        self.__maxRoll, self.__maxPitch, self.__maxYaw = self.xArm_js[arm_key]["MaxRot"]
+        self.__minX, self.__minY, self.__minZ = self.xArm_js[arm_key]["MinPos"]
+        self.__minRoll, self.__minPitch, self.__minYaw = self.xArm_js[arm_key]["MinRot"]
 
-    # ----- Minimum limitation ----- #
-    __minX, __minY, __minZ          = 280, -300, 225
-    __minRoll, __minPitch, __minYaw = -90, -65, -90
+        logging.info("Initial setting : %c", arm_key)
 
-    # ----- Maximum limitation ----- #
-    __maxX, __maxY, __maxZ          = 650, 300, 650
-    __maxRoll, __maxPitch, __maxYaw = 90, 70, 90
-
-    def __init__(self):
-        pass
-
-    def GetInitialTransform(self):
+    def get_initial_transform(self):
         """
         Get the initial position and rotation.
         """
 
         return self.__initX, self.__initY, self.__initZ, self.__initRoll, self.__initPitch, self.__initYaw
     
-    def Transform(self, posMagnification = 1, rotMagnification = 1, isLimit = True, isOnlyPosition = False):
-        """
-        Calculate the position and rotation to be sent to xArm.
+    def transform(self, pos_list, rot_list, isLimit = True, isOnlyPosition = False):
         
-        Parameters
-        ----------
-        posMagnification: int (Default = 1)
-            Magnification of the position. Used when you want to move the position less or more.
-        rotMagnification: int (Default = 1)
-            Magnification of the rotation. Used when you want to move the position less or more.
-        isLimit: bool (Default = True)
-            Limit the position and rotation.
-            Note that if it is False, it may result in dangerous behavior.
-        isOnlyPosition: bool (Default = True)
-            Reflect only the position.
-            If True, the rotations are __initRoll, __initPitch, and __initYaw.
-            If False, the rotation is also reflected.
-        """
-        
-        x, y, z             = self.x * posMagnification + self.__initX, self.y * posMagnification + self.__initY, self.z * posMagnification + self.__initZ
-        roll, pitch, yaw    = self.roll * rotMagnification + self.__initRoll, self.pitch * rotMagnification + self.__initPitch, self.yaw * rotMagnification + self.__initYaw
+        pos_list = pos_list * 1000
 
+        if  self.mount == "flat":
+            x, y, z = pos_list[2] + self.__initX, pos_list[0] + self.__initY, pos_list[1] + self.__initZ
+            roll, pitch, yaw = rot_list[2] + self.__initRoll, rot_list[0] + self.__initPitch, rot_list[1] + self.__initYaw
+
+        elif self.mount == "right":
+            x, y, z = pos_list[2] + self.__initX, pos_list[0] + self.__initY, pos_list[1] + self.__initZ
+            roll, pitch, yaw = rot_list[2] + self.__initRoll, rot_list[0] + self.__initPitch, rot_list[1] + self.__initYaw
+
+        else:
+            print("Hey!!! You've not program this.")
+    
         if isOnlyPosition:
-            roll, pitch, yaw    = self.__initRoll, self.__initPitch, self.__initYaw
+            roll, pitch, yaw = self.__initRoll, self.__initPitch, self.__initYaw
 
         if isLimit:
             # pos X

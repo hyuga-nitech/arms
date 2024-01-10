@@ -1,29 +1,25 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takumi Katagiri (Nagoya Institute of Technology), Takayoshi Hagiwara (KMD)
-# Created:         2022/5/20
-# Summary:         BendingSensorの値を取得（シリアル通信）
-# -----------------------------------------------------------------
-
 import serial
+import logging
 
 class BendingSensorManager:
 
-    bendingValue = 0
+    bending_value = 0
     
     def __init__(self, port, baudrate) -> None:
         
-        self.serialObject = serial.Serial(port,baudrate)
+        self.serial_object = serial.Serial(port,baudrate)
+        logging.info("Start serial: %c ", port)
     
-    def StartReceiving(self):
+    def start_receiving(self):
         """
         Receiving data from bending sensor and update self.bendingValue
         """
-        
+
         try:
             while True:
-                data = self.serialObject.readline()
-                self.bendingValue = float(data.strip().decode('utf-8'))
+                data = self.serial_object.readline()
+                self.bending_value = float(data.strip().decode('utf-8'))
 
         except KeyboardInterrupt:
-            print('KeyboardInterrupt >> Stop: BendingSensorManager.py')
+            self.serial_object.close()
+            logging.info('KeyboardInterrupt >> Stop: BendingSensorManager.py')

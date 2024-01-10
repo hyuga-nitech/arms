@@ -1,17 +1,10 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takayoshi Hagiwara (KMD)
-# Created:         2022/5/20
-# Summary:         OptiTrackからのストリーミング管理マネージャー
-# -----------------------------------------------------------------
-
 from Optitrack import NatNetClient
 import numpy as np
 
 class OptiTrackStreamingManager:
     # ---------- Settings: Optitrack streaming address ---------- #
-    serverAddress	= '133.68.35.155'
-    localAddress	= '133.68.35.155'
+    serverAddress	= '133.68.108.109'
+    localAddress	= '133.68.108.109'
 
     # ---------- Variables ---------- #
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]

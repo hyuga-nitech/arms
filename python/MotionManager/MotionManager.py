@@ -37,7 +37,7 @@ class MotionManager:
             self.bendingSensors.append(bendingSensorManager)
 
             # ----- Start receiving bending sensor value from UDP socket ----- #
-            bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
+            bendingSensorThread = threading.Thread(target=bendingSensorManager.start_receiving)
             bendingSensorThread.setDaemon(True)
             bendingSensorThread.start()
 

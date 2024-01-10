@@ -1,13 +1,9 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takayoshi Hagiwara (KMD)
-# Created:         2022/5/25
-# Summary:         Experiment manager
-# -----------------------------------------------------------------
-
+import logging
 from RobotControlManager.RobotControlManager import RobotControlManager
 
+logging.basicConfig(filename='mylog.log', encoding='utf-8', format='%(asctime)s - %(levelname)s:%(message)s', level=logging.DEBUG)
+
 if __name__ == '__main__':
-    robotControlManager = RobotControlManager()
-    robotControlManager.SendDataToRobot()
-    print('\n----- End program: ExManager.py -----')
+    robot_control_manager = RobotControlManager()
+    robot_control_manager.SendDataToRobot()
+    logging.info('----- End program: ExManager.py -----')
