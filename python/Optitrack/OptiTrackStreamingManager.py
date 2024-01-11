@@ -1,5 +1,6 @@
 from Optitrack import NatNetClient
 import numpy as np
+import json as js
 
 class OptiTrackStreamingManager:
     # ---------- Settings: Optitrack streaming address ---------- #
@@ -10,10 +11,13 @@ class OptiTrackStreamingManager:
     position = {}	# dict { 'RigidBodyN': [x, y, z] }.  Unit = [m]
     rotation = {}	# dict { 'RigidBodyN': [x, y, z, w]}. 
     
-    def __init__(self,rigidBodyNum: int = 2):
-        for i in range(rigidBodyNum):
-            self.position['RigidBody'+str(i+1)] = np.zeros(3)
-            self.rotation['RigidBody'+str(i+1)] = np.zeros(4)
+    def __init__(self):
+        rigidbody_f = open("rigidbody_setting.json","r")
+        self.rigidbody_js = js.load(rigidbody_f)
+
+        for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
+            self.position[rigidbody] = np.zeros(3)
+            self.rotation[rigidbody] = np.zeros(4)
 
     # This is a callback function that gets connected to the NatNet client and called once per mocap frame.
     def receive_new_frame(self, data_dict):
@@ -45,9 +49,9 @@ class OptiTrackStreamingManager:
         rotation: array
             Rotation
         """
-        if 'RigidBody'+str(new_id) in self.position:
-            self.position['RigidBody'+str(new_id)] = np.array(position)
-            self.rotation['RigidBody'+str(new_id)] = np.array(rotation)
+        for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
+            self.position[rigidbody] = np.array(position)
+            self.rotation[rigidbody] = np.array(rotation)
 
     def stream_run(self):
         streamingClient = NatNetClient.NatNetClient(serverIP=self.serverAddress, localIP=self.localAddress)

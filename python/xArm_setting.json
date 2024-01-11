@@ -2,7 +2,7 @@
     "xArmConfig":{
         "xArm1":{
             "IP":"192.168.1.199",
-            "mount":"right",
+            "Mount":"right",
             "InitialPos":[300,0,200],
             "InitialRot":[180,0,0],
             "MaxPos":[600,200,300],

@@ -1,5 +1,6 @@
 import numpy as np
 import tqdm
+import json as js
 
 from FileIO.FileIO import FileIO
 
@@ -7,32 +8,30 @@ class DataRecordManager:
     dictPosition = {}
     dictRotation = {}
     dictGripperValue = {}
+    dictRatio = {}
     listTime = []
 
-    def __init__(self, rigidBodyNum: int = 2, bendingSensorNum: int = 1) -> None:
-        self.RigidBodyNum       = rigidBodyNum
-        self.bendingSensorNum   = bendingSensorNum
+    def __init__(self) -> None:
+        bending_f = open("bending_sensor_setting.json","r")
+        self.bending_sensor_js = js.load(bending_f)
+        xArm_setting_f = open("xArm_setting.json","r")
+        self.xArm_js = js.load(xArm_setting_f)
+        rigidbody_f = open("rigidbody_setting.json","r")
+        self.rigidbody_js = js.load(rigidbody_f)
+
+        self.RigidBodyNum = len(self.rigidbody_js["RigidBodyConfig"])
 
         for i in range(self.RigidBodyNum):
             self.dictPosition['RigidBody'+str(i+1)] = []
             self.dictRotation['RigidBody'+str(i+1)] = []
 
-        for i in range(bendingSensorNum):
+        for i in range(self.bendingSensorNum):
             self.dictGripperValue['gripperValue'+str(i+1)] = []
 
-    def Record(self, time, position, rotation, bendingSensor):
-        """
-        Record the data.
+        for i in range(self.RigidBodyNum):
+            self.dictRatio['RigidBody'+str(i+1)] = []
 
-        Parameters
-        ----------
-        position: dict
-            Position
-        ratation: dict
-            Rotation
-        bendingSensor: dict
-            Bending Sensor values
-        """
+    def Record(self, time, position, rotation, bendingSensor, ratio):
         self.listTime.append([time])
 
         for i in range(self.RigidBodyNum):
@@ -41,6 +40,9 @@ class DataRecordManager:
 
         for i in range(self.bendingSensorNum):
             self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor['gripperValue'+str(i+1)]])
+
+        for i in range(self.RigidBodyNum):
+            self.dictRatio['RigidBody'+str(i+1)].append(ratio['RigidBody'+str(i+1)])
 
     def ExportSelf(self, name, dirPath: str = 'ExportData'):
         """

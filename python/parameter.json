@@ -1,5 +1,0 @@
-{
-    "BendingSensorPorts":["COM6","COM5"],
-    "BendingSensorBaudrates":["9600","115200"],
-    "GripperRatio":[0.5,0.5]
-}

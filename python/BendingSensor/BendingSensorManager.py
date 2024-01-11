@@ -2,11 +2,8 @@ import serial
 import logging
 
 class BendingSensorManager:
-
-    bending_value = 0
-    
     def __init__(self, port, baudrate) -> None:
-        
+        self.bending_value = 0
         self.serial_object = serial.Serial(port,baudrate)
         logging.info("Start serial: %c ", port)
     

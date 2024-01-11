@@ -11,7 +11,7 @@ import math
 
 from MotionFilter.MotionFilter import MotionFilter
 from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
-from MotionBehaviour.MotionBehaviour import MotionBehaviour
+from MotionBehaviour.MotionCalculator import MotionBehaviour
 
 class VibrotactileFeedbackManager:
     def __init__(self):

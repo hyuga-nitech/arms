@@ -1,0 +1,14 @@
+{
+    "RigidBodyConfig":{
+        "RigidBody1":{
+            "ID":1,
+            "Operator":1,
+            "Arm":"xArm1"
+        },
+        "RigidBody2":{
+            "ID":2,
+            "Operator":2,
+            "Arm":"xArm1"
+        }
+    }
+}

@@ -2,15 +2,14 @@ import time
 import threading
 import logging
 import json as js
-from xArm.wrapper import XArmAPI
+from xarm.wrapper import XArmAPI
 
 # ----- Custom class ----- #
 from xArmTransform.xArmTransform import xArmTransform
-from MotionBehaviour.MotionBehaviour import MotionBehaviour
+from MotionCalculator.MotionCalculator import MotionCalculator
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
-from RobotControlManager.SafetyChecker import SafetyChecker
 
 # ----- Setting ----- #
 OperatorNum             = 2
@@ -20,19 +19,16 @@ OperatorID              = 1   #Only OperatorNum = 2
 xratio = [0.5,0.5,0.5,0.5]
 
 # ----- Core Setting ----- #
-RigidBodyNum            = 2
 bendingSensorNum        = 2
 xArmMovingLimit         = 500
 executionTime           = 9999
 
 class RobotControlManager:
     def __init__(self) ->None:
-        parameter_f = open("parameter.json","r")
-        self.parameter_js = js.load(parameter_f)
         xArm_setting_f = open("xArm_setting.json","r")
         self.xArm_js = js.load(xArm_setting_f)
 
-    def SendDataToRobot(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = True):
+    def mainloop(self,isExportData: bool = True, isEnableArm: bool = True, isSlider: bool = True):
         # ----- Process info ----- #
         self.loopCount      = 0
         self.taskTime       = []
@@ -40,9 +36,9 @@ class RobotControlManager:
         taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
-        Behaviour           = MotionBehaviour(OperatorNum)
-        motionManager       = MotionManager(RigidBodyNum,bendingSensorNum,self.parameter_js["BendingSensorPorts"],self.parameter_js["BendingSensorBaudrates"])
-        dataRecordManager   = DataRecordManager(rigidBodyNum=RigidBodyNum)
+        Behaviour           = MotionCalculator(OperatorNum)
+        motionManager       = MotionManager()
+        dataRecordManager   = DataRecordManager()
         # vibrotactileManager = VibrotactileFeedbackManager()
 
         if isEnableArm:
@@ -76,26 +72,21 @@ class RobotControlManager:
 
                 if isMoving:
                     # ----- Get transform data ----- #
-                    localPosition    = motionManager.LocalPosition(loopCount=self.loopCount)
-                    localRotation    = motionManager.LocalRotation(loopCount=self.loopCount)
+                    local_position    = motionManager.LocalPosition(loopCount=self.loopCount)
+                    local_rotation    = motionManager.LocalRotation(loopCount=self.loopCount)
                     # モーキャプからの生の値を取得する．
 
-                    xArm_pos,xArm_rot = Behaviour.GetSharedxArmTransform(localPosition,localRotation,xratio)
+                    xArm_pos, xArm_rot, ratio_dict = Behaviour.calculate_shared_pos_rot()
                     # これはdictで作る．アームごとのdictのイメージ
 
                     if isEnableArm:
                         self.move_arms(self.arm_object_dict, self.xArm_transform_dict, xArm_pos, xArm_rot)
 
                     # ----- Bending sensor ----- #
-                    dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                    gripperValue = 0
-                    for i in range(bendingSensorNum):
-                        gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.parameter_js["GripperRatio"][i]
-                    # 右手と左手で分けてベンディングセンサーを設計する必要あり
-                    
-                    gripper_value_dict = {}
-                    gripper_value_dict["xArm1"] = gripperValue
-                    
+                    dict_bending_value = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
+
+                    gripper_value_dict = Behaviour.calculate_shared_grip()
+
                     if isEnableArm:
                         self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)
 
@@ -105,7 +96,7 @@ class RobotControlManager:
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
-                    dataRecordManager.Record(Time, localPosition, localRotation, dictBendingValue)
+                    dataRecordManager.Record(Time, local_position, local_rotation, dict_bending_value, ratio_dict)
 
                     self.error_check(self.arm_object_dict)
 
@@ -131,19 +122,20 @@ class RobotControlManager:
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
-                        Behaviour.SetOriginPosition(motionManager.LocalPosition())
-                        Behaviour.SetInversedMatrix(motionManager.LocalRotation())
+                        Behaviour.set_origin_position(motionManager.LocalPosition())
+                        Behaviour.set_inversed_matrix(motionManager.LocalRotation())
 
-
-                        xArm_pos, xArm_rot      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
+                        xArm_pos, xArm_rot = Behaviour.calculate_shared_pos_rot(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
                         
                         self.move_arms(self.arm_object_dict, self.xArm_transform_dict, xArm_pos, xArm_rot)
 
                         # ----- Bending sensor ----- #
-                        dictBendingValue = motionManager.GripperControlValue(loopCount=self.loopCount)
-                        gripperValue = 0
-                        for i in range(bendingSensorNum):
-                            gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.parameter_js["GripperRatio"][i]
+                        dictBendingValue = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
+
+                        gripper_value_dict = Behaviour.calculate_shared_grip()
+
+                        if isEnableArm:
+                            self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)
 
                         # beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z
 
@@ -167,7 +159,7 @@ class RobotControlManager:
             import traceback
             traceback.print_exc()
 
-    def initialize_arm(self, arm_object_dict, xArm_transform_dict, isSetInitPosition = True):
+    def initialize_arms(self, arm_object_dict, xArm_transform_dict, isSetInitPosition = True):
         for arm in arm_object_dict.keys():
             arm_object_dict[arm].connect()
             if arm_object_dict[arm].warn_code != 0:
@@ -183,7 +175,7 @@ class RobotControlManager:
                 arm_object_dict[arm].set_position(x=initX, y=initY, z=initZ, roll=initRoll, pitch=initPitch, yaw=initYaw, wait=True)
             else:
                 arm_object_dict[arm].reset(wait=True)
-            logging.info('Initialized > %c', arm)
+            logging.info('Initialized > %s', arm)
 
             arm_object_dict[arm].set_mode(1)
             arm_object_dict[arm].set_state(state=0)
@@ -191,7 +183,7 @@ class RobotControlManager:
     def disconnect_arms(self, arm_object_dict):
         for arm in arm_object_dict.keys():
             arm_object_dict[arm].disconnect()
-            logging.info('Disconnect > %c', arm)
+            logging.info('Disconnect > %s', arm)
 
     def move_arms(self, arm_object_dict, xArm_transform_dict, pos_dict, rot_dict):
         for arm in arm_object_dict.keys():
@@ -199,7 +191,7 @@ class RobotControlManager:
 
     def grip_arms(self, arm_object_dict, xArm_transform_dict, bending_value_dict):
         for arm in arm_object_dict.keys():
-            code_1, ret_1 = arm_object_dict[arm].getset_tgpio_modbus_data(xArm_transform_dict[arm].ConvertToModbusData(bending_value_dict[arm]))
+            code_1, ret_1 = arm_object_dict[arm].getset_tgpio_modbus_data(xArm_transform_dict[arm].convert_to_Modbus(bending_value_dict[arm]))
 
     def error_check(self, arm_object_dict):
         for arm in arm_object_dict.keys():

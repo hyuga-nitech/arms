@@ -7,16 +7,18 @@ class xArmTransform:
         xArm_setting_f = open("xArm_setting.json","r")
         self.xArm_js = js.load(xArm_setting_f)
 
-        self.mount = self.xArm_js[arm_key]["Mount"]
+        arm_setting = self.xArm_js["xArmConfig"][arm_key]
 
-        self.__initX, self.__initY, self.__initZ = self.xArm_js["xArmConfig"][arm_key]["InitialPos"]
-        self.__initRoll, self.__initPitch, self.__initYaw = self.xArm_js["xArmConfig"][arm_key]["InitialRot"]
-        self.__maxX, self.__maxY, self.__maxZ = self.xArm_js["xArmConfig"][arm_key]["MaxPos"]
-        self.__maxRoll, self.__maxPitch, self.__maxYaw = self.xArm_js["xArmConfig"][arm_key]["MaxRot"]
-        self.__minX, self.__minY, self.__minZ = self.xArm_js["xArmConfig"][arm_key]["MinPos"]
-        self.__minRoll, self.__minPitch, self.__minYaw = self.xArm_js["xArmConfig"][arm_key]["MinRot"]
+        self.mount = arm_setting["Mount"]
 
-        logging.info("Initial setting : %c", arm_key)
+        self.__initX, self.__initY, self.__initZ = arm_setting["InitialPos"]
+        self.__initRoll, self.__initPitch, self.__initYaw = arm_setting["InitialRot"]
+        self.__maxX, self.__maxY, self.__maxZ = arm_setting["MaxPos"]
+        self.__maxRoll, self.__maxPitch, self.__maxYaw = arm_setting["MaxRot"]
+        self.__minX, self.__minY, self.__minZ = arm_setting["MinPos"]
+        self.__minRoll, self.__minPitch, self.__minYaw = arm_setting["MinRot"]
+
+        logging.info("Initial setting : %s", arm_key)
 
     def get_initial_transform(self):
         """
@@ -34,8 +36,12 @@ class xArmTransform:
             roll, pitch, yaw = rot_list[2] + self.__initRoll, rot_list[0] + self.__initPitch, rot_list[1] + self.__initYaw
 
         elif self.mount == "right":
-            x, y, z = pos_list[2] + self.__initX, pos_list[0] + self.__initY, pos_list[1] + self.__initZ
-            roll, pitch, yaw = rot_list[2] + self.__initRoll, rot_list[0] + self.__initPitch, rot_list[1] + self.__initYaw
+            x, y, z = pos_list[2] + self.__initX, pos_list[1] + self.__initY, -1 * pos_list[0] + self.__initZ
+            roll, pitch, yaw = rot_list[2] + self.__initRoll, rot_list[1] + self.__initPitch, -1 * rot_list[0] + self.__initYaw
+
+        elif self.mount == "left":
+            x, y, z = pos_list[2] + self.__initX, -1 * pos_list[1] + self.__initY, pos_list[0] + self.__initZ
+            roll, pitch, yaw = rot_list[2] + self.__initRoll, -1 * rot_list[1] + self.__initPitch, rot_list[0] + self.__initYaw
 
         else:
             print("Hey!!! You've not program this.")
@@ -82,7 +88,7 @@ class xArmTransform:
 
         return np.array([x, y, z, roll, pitch, yaw])
     
-    def ConvertToModbusData(self, value: int):
+    def convert_to_Modbus(self, value: int):
         """
         Converts the data to modbus type.
 
