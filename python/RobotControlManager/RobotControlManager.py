@@ -45,7 +45,7 @@ class RobotControlManager:
         Behaviour           = MotionBehaviour(OperatorNum)
         motionManager       = MotionManager(RigidBodyNum,bendingSensorNum,self.parameter_js["BendingSensorPorts"],self.parameter_js["BendingSensorBaudrates"])
         dataRecordManager   = DataRecordManager(rigidBodyNum=RigidBodyNum)
-        vibrotactileManager = VibrotactileFeedbackManager()
+        # vibrotactileManager = VibrotactileFeedbackManager()
 
         if isEnableArm:
             self.arm_object_dict = {}
@@ -93,10 +93,17 @@ class RobotControlManager:
                     gripperValue = 0
                     for i in range(bendingSensorNum):
                         gripperValue += dictBendingValue['gripperValue'+str(i+1)] * self.parameter_js["GripperRatio"][i]
+                    # 右手と左手で分けてベンディングセンサーを設計する必要あり
+                    
+                    gripper_value_dict = {}
+                    gripper_value_dict["xArm1"] = gripperValue
+                    
+                    if isEnableArm:
+                        self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)
 
                     # ----- Vibrotactile Feedback ----- #
-                    if OperatorNum == 2:
-                        vibrotactileManager.FBEachOther(localPosition, localRotation, xratio, mikataratio)
+                    # if OperatorNum == 2:
+                    #     vibrotactileManager.FBEachOther(localPosition, localRotation, xratio)
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
@@ -190,6 +197,10 @@ class RobotControlManager:
     def move_arms(self, arm_object_dict, xArm_transform_dict, pos_dict, rot_dict):
         for arm in arm_object_dict.keys():
             arm_object_dict[arm].set_servo_cartesian(xArm_transform_dict[arm].transform(pos_dict[arm], rot_dict[arm]))
+
+    def grip_arms(self, arm_object_dict, xArm_transform_dict, bending_value_dict):
+        for arm in arm_object_dict.keys():
+            code_1, ret_1 = arm_object_dict[arm].getset_tgpio_modbus_data(xArm_transform_dict[arm].ConvertToModbusData(bending_value_dict[arm]))
 
     def error_check(self, arm_object_dict):
         for arm in arm_object_dict.keys():

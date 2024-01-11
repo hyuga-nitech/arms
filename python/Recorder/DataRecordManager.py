@@ -1,10 +1,3 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takayoshi Hagiwara (KMD)
-# Created:         2022/6/3
-# Summary:         BendingSensorの値を取得（シリアル通信）
-# -----------------------------------------------------------------
-
 import numpy as np
 import tqdm
 

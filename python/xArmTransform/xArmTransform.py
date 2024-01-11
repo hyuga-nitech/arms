@@ -81,3 +81,36 @@ class xArmTransform:
                 yaw = self.__minYaw
 
         return np.array([x, y, z, roll, pitch, yaw])
+    
+    def ConvertToModbusData(self, value: int):
+        """
+        Converts the data to modbus type.
+
+        Parameters
+        ----------
+        value: int
+            The data to be converted.
+            Range: 0 ~ 800
+        """
+
+        if int(value) <= 255 and int(value) >= 0:
+            dataHexThirdOrder = 0x00
+            dataHexAdjustedValue = int(value)
+
+        elif int(value) > 255 and int(value) <= 511:
+            dataHexThirdOrder = 0x01
+            dataHexAdjustedValue = int(value)-256
+
+        elif int(value) > 511 and int(value) <= 767:
+            dataHexThirdOrder = 0x02
+            dataHexAdjustedValue = int(value)-512
+
+        elif int(value) > 767 and int(value) <= 1123:
+            dataHexThirdOrder = 0x03
+            dataHexAdjustedValue = int(value)-768
+
+        modbus_data = [0x08, 0x10, 0x07, 0x00, 0x00, 0x02, 0x04, 0x00, 0x00]
+        modbus_data.append(dataHexThirdOrder)
+        modbus_data.append(dataHexAdjustedValue)
+
+        return modbus_data

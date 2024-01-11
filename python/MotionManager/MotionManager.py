@@ -1,10 +1,3 @@
-# -----------------------------------------------------------------
-# Author:          Hyuga Suzuki
-# Original Author: Takayoshi Hagiwara (KMD)
-# Created:         2022/5/20
-# Summary:         RigidBody座標の取得
-# -----------------------------------------------------------------
-
 import threading
 import numpy as np
 
@@ -13,8 +6,8 @@ from Optitrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from BendingSensor.BendingSensorManager import BendingSensorManager
 
 # ----- Numeric range remapping ----- #
-targetMin        = 186
-targetMax        = 240
+targetMin        = 0
+targetMax        = 850
 bendingSensorClose = 0
 bendingSensorOpen = 1
 
@@ -44,7 +37,7 @@ class MotionManager:
     def GripperControlValue(self,loopCount: int = 0):
         dictGripperValue = {}
         for i in range(self.bendingSensorNum):
-            bendingVal = self.bendingSensors[i].bendingValue
+            bendingVal = self.bendingSensors[i].bending_value
             if bendingSensorClose < bendingSensorOpen:
                 bendingValueNorm = (bendingVal - bendingSensorClose) / (bendingSensorOpen - bendingSensorClose) * (targetMax - targetMin) + targetMin
             elif bendingSensorClose > bendingSensorOpen:
