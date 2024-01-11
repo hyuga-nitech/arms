@@ -94,8 +94,12 @@ class MotionBehaviour:
 
             self.xWeightedRotations['RigidBody'+str(i+1)]  = weightedRot
             self.xBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
+
+            shared_pos_dict = {"xArm1": sharedPosition}
+            shared_rot_dict = {"xArm1": sharedRotation_euler}
+
         
-        return sharedPosition , sharedRotation_euler
+        return shared_pos_dict, shared_rot_dict
 
     def SetOriginPosition(self, position) -> None:
         """

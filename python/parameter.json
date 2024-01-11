@@ -1,7 +1,5 @@
 {
-    "xArmIP":"192.168.1.240",
-    "BendingSensorPorts":["COM7","COM3"],
+    "BendingSensorPorts":["COM6","COM5"],
     "BendingSensorBaudrates":["9600","115200"],
-    "SliderPort":"COM15",
     "GripperRatio":[0.5,0.5]
 }

@@ -9,12 +9,12 @@ class xArmTransform:
 
         self.mount = self.xArm_js[arm_key]["Mount"]
 
-        self.__initX, self.__initY, self.__initZ = self.xArm_js[arm_key]["InitialPos"]
-        self.__initRoll, self.__initPitch, self.__initYaw = self.xArm_js[arm_key]["InitialRot"]
-        self.__maxX, self.__maxY, self.__maxZ = self.xArm_js[arm_key]["MaxPos"]
-        self.__maxRoll, self.__maxPitch, self.__maxYaw = self.xArm_js[arm_key]["MaxRot"]
-        self.__minX, self.__minY, self.__minZ = self.xArm_js[arm_key]["MinPos"]
-        self.__minRoll, self.__minPitch, self.__minYaw = self.xArm_js[arm_key]["MinRot"]
+        self.__initX, self.__initY, self.__initZ = self.xArm_js["xArmConfig"][arm_key]["InitialPos"]
+        self.__initRoll, self.__initPitch, self.__initYaw = self.xArm_js["xArmConfig"][arm_key]["InitialRot"]
+        self.__maxX, self.__maxY, self.__maxZ = self.xArm_js["xArmConfig"][arm_key]["MaxPos"]
+        self.__maxRoll, self.__maxPitch, self.__maxYaw = self.xArm_js["xArmConfig"][arm_key]["MaxRot"]
+        self.__minX, self.__minY, self.__minZ = self.xArm_js["xArmConfig"][arm_key]["MinPos"]
+        self.__minRoll, self.__minPitch, self.__minYaw = self.xArm_js["xArmConfig"][arm_key]["MinRot"]
 
         logging.info("Initial setting : %c", arm_key)
 

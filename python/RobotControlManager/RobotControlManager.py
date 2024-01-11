@@ -25,8 +25,6 @@ bendingSensorNum        = 2
 xArmMovingLimit         = 500
 executionTime           = 9999
 
-filename = "test"
-
 class RobotControlManager:
     def __init__(self) ->None:
         parameter_f = open("parameter.json","r")
@@ -51,7 +49,7 @@ class RobotControlManager:
             self.arm_object_dict = {}
             self.xArm_transform_dict = {}
             for arm in self.xArm_js["xArmConfig"]:
-                self.arm_object_dict[arm] = XArmAPI(arm["IP"])
+                self.arm_object_dict[arm] = XArmAPI(self.xArm_js["xArmConfig"][arm]["IP"])
                 self.xArm_transform_dict[arm] = xArmTransform(arm)
             self.initialize_arms(self.arm_object_dict, self.xArm_transform_dict)
 
@@ -114,6 +112,7 @@ class RobotControlManager:
                     self.loopCount += 1
 
                 else:
+                    filename = "test"
                     print('Cullent OutputFilename = ' + filename)
                     keycode = input('Input > "q": quit, "s": start control, "r": rename Outputfile \n')
 
@@ -136,7 +135,7 @@ class RobotControlManager:
                         Behaviour.SetInversedMatrix(motionManager.LocalRotation())
 
 
-                        xArmPosition,xArmRotation      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
+                        xArm_pos, xArm_rot      = Behaviour.GetSharedxArmTransform(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
                         
                         self.move_arms(self.arm_object_dict, self.xArm_transform_dict, xArm_pos, xArm_rot)
 
