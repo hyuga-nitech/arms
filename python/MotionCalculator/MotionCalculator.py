@@ -5,17 +5,19 @@ import json as js
 from MotionCalculator.MinimumJerk import MinimumJerk
 
 class MotionCalculator:
-    originPositions         = {}
-    inversedMatrix          = {}
+    origin_position_dict = {}
+    inversed_matrix_dict = {}
 
-    Positions               = {}
-    Rotations               = {}
+    position_dict = {}
+    rotation_dict = {}
 
-    xBeforePositions        = {}
-    xWeightedPositions      = {}
+    before_position_dict = {}
+    before_rotation_dict = {}
 
-    xBeforeRotations        = {}
-    xWeightedRotations      = {}
+    weighted_position_dict = {}
+    weighted_rotation_dict = {}
+
+    rigidbody_list_dict = {}
 
     def __init__(self,operatorNum: int = 2) -> None:
         bending_f = open("bending_sensor_setting.json","r")
@@ -30,88 +32,78 @@ class MotionCalculator:
         # ここから下は要書き換え
 
         for arm in self.xArm_js["xArmConfig"]:
+            self.rigidbody_list_dict[arm] = []
             for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
                 if self.rigidbody_js["RigidBodyConfig"][rigidbody]["Arm"] == arm:
-                    self.rigidbody_list[arm].append(rigidbody)
-            self.minimumJerk_dict[arm] = MinimumJerk(self.rigidbody_list[arm])
+                    self.rigidbody_list_dict[arm].append(rigidbody)
+            self.minimumJerk_dict[arm] = MinimumJerk(self.rigidbody_list_dict[arm])
 
-        for i in range(operatorNum):
-            self.originPositions['RigidBody'+str(i+1)] = np.zeros(3)
-            self.inversedMatrix['RigidBody'+str(i+1)] = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+        for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
+            self.origin_position_dict[rigidbody] = np.zeros(3)
+            self.inversed_matrix_dict[rigidbody] = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
 
-            self.Positions['RigidBody'+str(i+1)] = np.zeros(3)
-            self.Rotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
-            
-            self.xBeforePositions['RigidBody'+str(i+1)] = np.zeros(3)
-            self.xWeightedPositions['RigidBody'+str(i+1)] = np.zeros(3)
+            self.position_dict[rigidbody] = np.zeros(3)
+            self.rotation_dict[rigidbody] = np.array([0,0,0,1])
 
-            # 日向メモ：ここわからなくなって困った．Beforeは現実世界での前回の位置を保持，Weightは倍率かけた世界での前回の位置を保持って感じぽい
-            # 多分普通に書き換えて大丈夫　RigidBodyConfigのリストで作る
+            self.before_position_dict[rigidbody] = np.zeros(3)
+            self.before_rotation_dict[rigidbody] = np.array([0,0,0,1])
 
-            self.xBeforeRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
-            self.xWeightedRotations['RigidBody'+str(i+1)] = np.array([0,0,0,1])
+            self.weighted_position_dict[rigidbody] = np.zeros(3)
+            self.weighted_rotation_dict[rigidbody] = np.array([0,0,0,1])
 
         self.OperatorNum = operatorNum
 
-    def calculate_shared_pos_rot(self, position: dict, rotation: dict):
+    def calculate_shared_pos_rot(self, position: dict, rotation: dict, arm_position: dict):
         # ----- Shared transform ----- #
         shared_pos_dict = {}
         shared_rot_dict = {}
 
-        pos = self.get_relative_position(position)
-        rot = self.get_relative_rotation(rotation)
+        relative_pos = self.get_relative_position(position)
+        relative_rot = self.get_relative_rotation(rotation)
 
         for arm in self.xArm_js["xArmConfig"]:
             diffpos_dict = {}
             diffrot_dict = {}
 
-            ratio_dict, diffpos_dict["Assist"], diffrot_dict["Assist"], = self.minimumJerk_dict[arm].assist_calculate()
+            diffpos_dict["Assist"], diffrot_dict["Assist"], ratio_dict = self.minimumJerk_dict[arm].assist_calculate(relative_pos, relative_rot, arm_position)
 
-            for rigidbody in self.rigidbody_list[arm]:
-                diffpos_dict[rigidbody] = self.get_diff_position(rigidbody)
-                diffrot_dict[rigidbody] = self.get_diff_rotation(rigidbody)
+            for rigidbody in self.rigidbody_list_dict[arm]:
+                diffpos_dict[rigidbody] = self.get_diff_position(rigidbody, relative_pos)
+                diffrot_dict[rigidbody] = self.get_diff_rotation(rigidbody, relative_rot)
             
-            shared_pos_dict[arm] = self.calculate_ratio()
-            # ここで倍率かけていく
-                
-            #shared_dictに追加
+            shared_pos_dict[arm] = self.calculate_ratio_pos(diffpos_dict, ratio_dict)
+            shared_rot_dict[arm] = self.calculate_ratio_rot(diffrot_dict, ratio_dict)
 
-
-        # ここから下は関数に移動
-        # for i in range(self.OperatorNum):
-        #     # ----- Position ----- #
-        #     diffPos     = pos['RigidBody'+str(i+1)] - self.xBeforePositions['RigidBody'+str(i+1)]
-        #     weightedPos = diffPos * xRatio[i*2] + self.xWeightedPositions['RigidBody'+str(i+1)]
-        #     sharedPosition += weightedPos
-
-        #     self.xWeightedPositions['RigidBody'+str(i+1)] = weightedPos
-        #     self.xBeforePositions['RigidBody'+str(i+1)]   = pos['RigidBody'+str(i+1)]
-
-        #     # ----- Rotation ----- #
-        #     qw, qx, qy, qz = self.xBeforeRotations['RigidBody'+str(i+1)][3], self.xBeforeRotations['RigidBody'+str(i+1)][0], self.xBeforeRotations['RigidBody'+str(i+1)][1], self.xBeforeRotations['RigidBody'+str(i+1)][2]
-        #     mat4x4 = np.array([ [qw, qz, -qy, qx],
-        #                         [-qz, qw, qx, qy],
-        #                         [qy, -qx, qw, qz],
-        #                         [-qx,-qy, -qz, qw]])
-        #     currentRot = rot['RigidBody'+str(i+1)]
-        #     diffRot = np.dot(np.linalg.inv(mat4x4), currentRot)
-        #     diffRotEuler = self.quaternion_to_euler(np.array(diffRot))
-            
-        #     weightedDiffRotEuler = list(map(lambda x: x * xRatio[i*2+1] , diffRotEuler))
-        #     weightedDiffRot = self.euler_to_quaternion(np.array(weightedDiffRotEuler))
-
-        #     nqw, nqx, nqy, nqz = weightedDiffRot[3], weightedDiffRot[0], weightedDiffRot[1], weightedDiffRot[2]
-        #     neomat4x4 = np.array([[nqw, -nqz, nqy, nqx],
-        #                             [nqz, nqw, -nqx, nqy],
-        #                             [-nqy, nqx, nqw, nqz],
-        #                             [-nqx,-nqy, -nqz, nqw]])
-        #     weightedRot = np.dot(neomat4x4,  self.xWeightedRotations['RigidBody'+str(i+1)])
-        #     sharedRotation_euler += self.quaternion_to_euler(weightedRot)
-
-        #     self.xWeightedRotations['RigidBody'+str(i+1)]  = weightedRot
-        #     self.xBeforeRotations['RigidBody'+str(i+1)]    = rot['RigidBody'+str(i+1)]
-        
         return shared_pos_dict, shared_rot_dict, ratio_dict
+
+    def calculate_ratio_pos(self, diffpos: dict, ratio: dict):
+        ratio_pos = [0, 0, 0]
+        for operator in diffpos.keys():
+            weighted_pos = diffpos[operator] * ratio[operator][0]
+            ratio_pos += weighted_pos
+            self.weighted_rotation_dict[operator] = weighted_pos
+
+        return ratio_pos
+    
+    def calculate_ratio_rot(self, diffrot: dict, ratio: dict):
+        ratio_rot_euler = [0, 0, 0]
+        for operator in diffrot.keys():
+            diffrot_euler = self.quaternion_to_euler(np.array(diffrot[operator]))
+            weighted__diff_rot_euler = list(map(lambda x: x * ratio[operator][1] , diffrot_euler))
+            weighted_diff_rot = self.euler_to_quaternion(np.array(weighted__diff_rot_euler))
+
+            nqw, nqx, nqy, nqz = weighted_diff_rot[3], weighted_diff_rot[0], weighted_diff_rot[1], weighted_diff_rot[2]
+            neomat4x4 = np.array([[nqw, -nqz, nqy, nqx],
+                                  [nqz, nqw, -nqx, nqy],
+                                  [-nqy, nqx, nqw, nqz],
+                                  [-nqx,-nqy, -nqz, nqw]])
+            
+            weighted_rot = np.dot(neomat4x4, self.weighted_rotation_dict[operator])
+            ratio_rot_euler += self.quaternion_to_euler(weighted_rot)
+
+            self.weighted_rotation_dict[operator] = weighted_rot
+
+        return ratio_rot_euler
     
     def calculate_shared_grip(self, bending_sensor_value: dict):
         gripper_value_dict = {}
@@ -153,7 +145,7 @@ class MotionCalculator:
         self.RigidBodyNum = len(listRigidBody)
         
         for i in range(self.RigidBodyNum):
-            self.originPositions['RigidBody'+str(i+1)] = position['RigidBody'+str(i+1)]
+            self.origin_position_dict['RigidBody'+str(i+1)] = position['RigidBody'+str(i+1)]
        
     def set_inversed_matrix(self, rotation) -> None:
         """
@@ -176,7 +168,7 @@ class MotionCalculator:
                                 [qy, qw, -qz, qx],
                                 [-qx, qz, qw, qy],
                                 [-qz,-qx, -qy, qw]])
-            self.inversedMatrix['RigidBody'+str(i+1)] = np.linalg.pinv(mat4x4)
+            self.inversed_matrix_dict['RigidBody'+str(i+1)] = np.linalg.pinv(mat4x4)
 
     def get_relative_position(self, position):
         """
@@ -197,7 +189,7 @@ class MotionCalculator:
 
         relativePos = {}
         for i in range(self.RigidBodyNum):
-            relativePos['RigidBody'+str(i+1)] = position['RigidBody'+str(i+1)] - self.originPositions['RigidBody'+str(i+1)]
+            relativePos['RigidBody'+str(i+1)] = position['RigidBody'+str(i+1)] - self.origin_position_dict['RigidBody'+str(i+1)]
         
         return relativePos
 
@@ -223,6 +215,24 @@ class MotionCalculator:
             relativeRot['RigidBody'+str(i+1)] = np.dot(self.inversedMatrix['RigidBody'+str(i+1)], rotation['RigidBody'+str(i+1)])
 
         return relativeRot
+    
+    def get_diff_position(self, rigidbody, relative_pos):
+        diffpos = relative_pos[rigidbody] - self.before_position_dict[rigidbody]
+        self.before_position_dict[rigidbody] = relative_pos[rigidbody]
+        return diffpos
+    
+    def get_diff_rotation(self, rigidbody, relative_rot):
+        qw, qx, qy, qz = self.before_rotation_dict[rigidbody][3], self.before_rotation_dict[rigidbody][0], self.before_rotation_dict[rigidbody][1], self.before_rotation_dict[rigidbody][2]
+        mat4x4 = np.array([ [qw, qz, -qy, qx],
+                            [-qz, qw, qx, qy],
+                            [qy, -qx, qw, qz],
+                            [-qx,-qy, -qz, qw]])
+        current_rot = relative_rot[rigidbody]
+        diffrot = np.dot(np.linalg.inv(mat4x4), current_rot)
+
+        self.before_rotation_dict[rigidbody] = relative_rot[rigidbody]
+
+        return diffrot
 
     def quaternion_to_euler(self, q, isDeg: bool = True):
         """

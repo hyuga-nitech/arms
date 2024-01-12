@@ -36,7 +36,7 @@ class RobotControlManager:
         taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
-        Behaviour           = MotionCalculator(OperatorNum)
+        Calculator           = MotionCalculator(OperatorNum)
         motionManager       = MotionManager()
         dataRecordManager   = DataRecordManager()
         # vibrotactileManager = VibrotactileFeedbackManager()
@@ -76,7 +76,14 @@ class RobotControlManager:
                     local_rotation    = motionManager.LocalRotation(loopCount=self.loopCount)
                     # モーキャプからの生の値を取得する．
 
-                    xArm_pos, xArm_rot, ratio_dict = Behaviour.calculate_shared_pos_rot()
+                    arm_position = {}
+
+                    for arm in self.xArm_js["xArmConfig"]:
+                        error, arm_position[arm] = self.arm_object_dict[arm].get_position()
+                        if error != 0:
+                            logging.error("Can NOT get position about %s", arm)
+
+                    xArm_pos, xArm_rot, ratio_dict = Calculator.calculate_shared_pos_rot(local_position, local_rotation, arm_position)
                     # これはdictで作る．アームごとのdictのイメージ
 
                     if isEnableArm:
@@ -85,7 +92,7 @@ class RobotControlManager:
                     # ----- Bending sensor ----- #
                     dict_bending_value = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
 
-                    gripper_value_dict = Behaviour.calculate_shared_grip()
+                    gripper_value_dict = Calculator.calculate_shared_grip()
 
                     if isEnableArm:
                         self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)
@@ -122,17 +129,24 @@ class RobotControlManager:
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
-                        Behaviour.set_origin_position(motionManager.LocalPosition())
-                        Behaviour.set_inversed_matrix(motionManager.LocalRotation())
+                        Calculator.set_origin_position(motionManager.LocalPosition())
+                        Calculator.set_inversed_matrix(motionManager.LocalRotation())
 
-                        xArm_pos, xArm_rot = Behaviour.calculate_shared_pos_rot(motionManager.LocalPosition(),motionManager.LocalRotation(),xratio)
+                        arm_position = {}
+
+                        for arm in self.xArm_js["xArmConfig"]:
+                            error, arm_position[arm] = self.arm_object_dict[arm].get_position()
+                            if error != 0:
+                                logging.error("Can NOT get position about %s", arm)
+
+                        xArm_pos, xArm_rot = Calculator.calculate_shared_pos_rot(motionManager.LocalPosition(), motionManager.LocalRotation(), arm_position)
                         
                         self.move_arms(self.arm_object_dict, self.xArm_transform_dict, xArm_pos, xArm_rot)
 
                         # ----- Bending sensor ----- #
-                        dictBendingValue = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
+                        dict_bending_value = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
 
-                        gripper_value_dict = Behaviour.calculate_shared_grip()
+                        gripper_value_dict = Calculator.calculate_shared_grip()
 
                         if isEnableArm:
                             self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)

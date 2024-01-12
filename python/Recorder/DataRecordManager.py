@@ -58,6 +58,7 @@ class DataRecordManager:
 
         transformHeader = ['time','x','y','z','qx','qy','qz','qw']
         bendingSensorHeader = ['time','bendingValue']
+        ratioHeader = ['time','position','rotation']
 
         print('\n---------- DataRecordManager.ExportSelf ----------')
         print('Making: Time axis list...')
@@ -76,6 +77,13 @@ class DataRecordManager:
             npGripper = np.array(self.dictGripperValue['gripperValue'+str(i+1)])
             npBendingSensorValue = np.concatenate([npTime, npGripper], axis=1)
             fileIO.ExportAsCSV(npBendingSensorValue, dirPath, name+'_GripperValue_'+str(i+1), bendingSensorHeader)
+
+        print('Writing: Ratio...')
+        for i in tqdm.tqdm(range(self.RigidBodyNum), ncols=150):
+            npRatio = np.array(self.dictRatio['RigidBody'+str(i+1)])
+            npRatioValue = np.concatenate([npTime, npRatio], axis=1)
+
+            fileIO.ExportAsCSV(npRatioValue, dirPath, name+'_Ratio_'+str(i+1), ratioHeader)
 
         print('---------- Export completed ----------\n') 
                    
