@@ -20,6 +20,7 @@ class DataRecordManager:
         self.rigidbody_js = js.load(rigidbody_f)
 
         self.RigidBodyNum = len(self.rigidbody_js["RigidBodyConfig"])
+        self.bendingSensorNum = len(self.bending_sensor_js["BendingSensorConfig"])
 
         for i in range(self.RigidBodyNum):
             self.dictPosition['RigidBody'+str(i+1)] = []

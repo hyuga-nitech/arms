@@ -9,6 +9,7 @@ from xArmTransform.xArmTransform import xArmTransform
 from MotionCalculator.MotionCalculator import MotionCalculator
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
+from FootSwitchManager.FootSwitchManager import FootSwitchManager
 from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Setting ----- #
@@ -49,6 +50,11 @@ class RobotControlManager:
                 self.xArm_transform_dict[arm] = xArmTransform(arm)
             self.initialize_arms(self.arm_object_dict, self.xArm_transform_dict)
 
+        self.foot_switch_manager = FootSwitchManager()
+        streamingThread = threading.Thread(target=self.foot_switch_manager.detect_sensor)
+        streamingThread.setDaemon(True)
+        streamingThread.start()
+
         # ----- Control flags ----- #
         isMoving = False
 
@@ -83,7 +89,7 @@ class RobotControlManager:
                         if error != 0:
                             logging.error("Can NOT get position about %s", arm)
 
-                    xArm_pos, xArm_rot, ratio_dict = Calculator.calculate_shared_pos_rot(local_position, local_rotation, arm_position)
+                    xArm_pos, xArm_rot, ratio_dict = Calculator.calculate_shared_pos_rot(self.foot_switch_manager.flag, local_position, local_rotation, arm_position)
                     # これはdictで作る．アームごとのdictのイメージ
 
                     if isEnableArm:
@@ -136,6 +142,7 @@ class RobotControlManager:
 
                         for arm in self.xArm_js["xArmConfig"]:
                             error, arm_position[arm] = self.arm_object_dict[arm].get_position()
+                            # オイラーで取得する
                             if error != 0:
                                 logging.error("Can NOT get position about %s", arm)
 

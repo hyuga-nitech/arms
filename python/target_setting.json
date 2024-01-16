@@ -1,0 +1,25 @@
+{
+    "TargetConfig":{
+        "xArm1":{
+            "Target1":{
+                "TargetPos": [],
+                "TargetRot": []
+            },
+            "Target2":{
+                "TargetPos": [],
+                "TargetRot": []
+            }
+        },
+        "xArm2":{
+            "Target1":{
+                "TargetPos": [],
+                "TargetRot": []
+            },
+            "Target2":{
+                "TargetPos": [],
+                "TargetRot": []
+            }
+        }
+    },
+    "TargetMode": 1
+}
