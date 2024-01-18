@@ -62,7 +62,7 @@ class MotionCalculator:
             for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
                 if self.rigidbody_js["RigidBodyConfig"][rigidbody]["Arm"] == arm:
                     self.rigidbody_list_dict[arm].append(rigidbody)
-            self.minimumJerk_dict[arm] = MinimumJerk(self.rigidbody_list_dict[arm])
+            self.minimumJerk_dict[arm] = MinimumJerk(self.rigidbody_list_dict[arm], arm)
             self.minimumJerk_dict[arm].set_target(self.get_relative_target_position(arm))
 
     def calculate_shared_pos_rot(self, flag, position: dict, rotation: dict, arm_position: dict):

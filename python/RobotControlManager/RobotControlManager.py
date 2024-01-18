@@ -17,8 +17,6 @@ OperatorNum             = 2
 PairID                  = 1
 OperatorID              = 1   #Only OperatorNum = 2
 
-xratio = [0.5,0.5,0.5,0.5]
-
 # ----- Core Setting ----- #
 bendingSensorNum        = 2
 xArmMovingLimit         = 500
@@ -109,7 +107,7 @@ class RobotControlManager:
 
                     # ----- Data recording ----- #
                     Time = time.perf_counter()
-                    dataRecordManager.Record(Time, local_position, local_rotation, dict_bending_value, ratio_dict)
+                    dataRecordManager.record(Time, local_position, local_rotation, dict_bending_value, ratio_dict)
 
                     self.error_check(self.arm_object_dict)
 
@@ -146,9 +144,10 @@ class RobotControlManager:
                             if error != 0:
                                 logging.error("Can NOT get position about %s", arm)
 
-                        xArm_pos, xArm_rot = Calculator.calculate_shared_pos_rot(motionManager.LocalPosition(), motionManager.LocalRotation(), arm_position)
+                        xArm_pos, xArm_rot, ratio_dict = Calculator.calculate_shared_pos_rot(self.foot_switch_manager.flag, motionManager.LocalPosition(), motionManager.LocalRotation(), arm_position)
                         
-                        self.move_arms(self.arm_object_dict, self.xArm_transform_dict, xArm_pos, xArm_rot)
+                        if isEnableArm:
+                            self.move_arms(self.arm_object_dict, self.xArm_transform_dict, xArm_pos, xArm_rot)
 
                         # ----- Bending sensor ----- #
                         dict_bending_value = motionManager.get_gripper_value_dict(loopCount=self.loopCount)

@@ -10,6 +10,10 @@ class DataRecordManager:
     dictGripperValue = {}
     dictRatio = {}
     listTime = []
+    
+    listAssistTime = []
+    listCurrentArmVel = []
+    listAtTimeArmVel = []
 
     def __init__(self) -> None:
         bending_f = open("bending_sensor_setting.json","r")
@@ -32,7 +36,7 @@ class DataRecordManager:
         for i in range(self.RigidBodyNum):
             self.dictRatio['RigidBody'+str(i+1)] = []
 
-    def Record(self, time, position, rotation, bendingSensor, ratio):
+    def record(self, time, position, rotation, bendingSensor, ratio):
         self.listTime.append([time])
 
         for i in range(self.RigidBodyNum):
@@ -44,6 +48,12 @@ class DataRecordManager:
 
         for i in range(self.RigidBodyNum):
             self.dictRatio['RigidBody'+str(i+1)].append(ratio['RigidBody'+str(i+1)])
+
+    def record_arm(self, time, current_vel, at_time_vel):
+        self.listAssistTime.append([time])
+
+        self.listCurrentArmVel.append(current_vel)
+        self.listAtTimeArmVel.append(at_time_vel)
 
     def ExportSelf(self, name, dirPath: str = 'ExportData'):
         """
@@ -87,4 +97,17 @@ class DataRecordManager:
             fileIO.ExportAsCSV(npRatioValue, dirPath, name+'_Ratio_'+str(i+1), ratioHeader)
 
         print('---------- Export completed ----------\n') 
-                   
+
+    def export_arm(self, name, dirPath: str = 'ExportData'):
+
+        fileIO = FileIO()
+
+        armHeader = ['time','CurrentVel','AtTimeVel']
+
+        npTime = np.array(self.listAssistTime)
+        npCurrent = np.array(self.listCurrentArmVel)
+        npAtTime = np.array(self.listAtTimeArmVel)
+
+        npArmVel = np.concatenate([npTime, npCurrent, npAtTime], axis=1)
+
+        fileIO.ExportAsCSV(npArmVel, dirPath, name+'_MinimumJerk_ArmVel', armHeader)

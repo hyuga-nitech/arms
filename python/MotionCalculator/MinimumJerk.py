@@ -1,11 +1,12 @@
 import json as js
 import numpy as np
+import time
 from scipy.spatial.transform import Slerp, Rotation
 
-from FileIO.FileIO import FileIO
+from Recorder.DataRecordManager import DataRecordManager
 
 class MinimumJerk:
-    def __init__(self, rigidbody: list, isDemo = True, isRecord = True) -> None:
+    def __init__(self, rigidbody: list, arm, isDemo = True, isRecord = True) -> None:
         self.isAssistStandby = False
         self.isAssist = False
         self.before_flag = False
@@ -13,6 +14,7 @@ class MinimumJerk:
         self.start_rot = []
         
         self.rigidbody_list = rigidbody
+        self.arm_name = arm
 
         self.target_dict = {}
         self.target = ""
@@ -30,6 +32,10 @@ class MinimumJerk:
         self.route_length
 
         self.predictional_time = 0.25
+
+        self.dataRecordManager = DataRecordManager()
+        self.filename = self.arm_name
+        self.filecount = 1
         
     def assist_calculate(self, flag: bool, pos: dict, rot: dict, arm_pos, arm_rot):
         self.flag_check(flag, arm_pos, arm_rot)
@@ -60,6 +66,10 @@ class MinimumJerk:
             assist_diff_rot = self.get_arm_diff_rotation(arm_rot, rot_at_time)
             # 理想の場所と現在の場所とのdiffを出力する
 
+            passed_time = time.perf_counter() - self.start_time
+
+            self.dataRecordManager.record_arm(passed_time, arm_velocity, vel_at_time)
+
         ratio_dict = {}
 
         if self.isDemo:
@@ -86,8 +96,13 @@ class MinimumJerk:
             self.start_pos = arm_pos
             self.start_rot = arm_rot
 
+            self.start_time = time.perf_counter()
+
         elif (flag == False)&(self.before_flag == True):
             self.isAssistStandby == False
+
+            self.dataRecordManager.ExportSelf(self.filename + str(self.filecount))
+            self.filecount += 1
 
         if self.isAssistStandby == True:
             self.target = self.target_decide()
