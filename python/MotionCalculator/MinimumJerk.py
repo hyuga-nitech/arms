@@ -29,7 +29,7 @@ class MinimumJerk:
         self.interval = 5
         self.dt = 1/120
 
-        self.route_length
+        self.route_length = 0
 
         self.predictional_time = 0.25
 
@@ -73,13 +73,13 @@ class MinimumJerk:
         ratio_dict = {}
 
         if self.isDemo:
-            ratio_dict["Assist"] = [0,0]
+            ratio_dict["Assist" + self.arm_name] = [0,0]
 
             for rigidbody in self.rigidbody_list:
                 ratio_dict[rigidbody] = [(1 / len(self.rigidbody_list)),(1 / len(self.rigidbody_list))]
 
         else:
-            ratio_dict["Assist"] = [t,t]
+            ratio_dict["Assist" + self.arm_name] = [t,t]
 
             for rigidbody in self.rigidbody_list:
                 ratio_dict[rigidbody] = [((1-t) / len(self.rigidbody_list)),((1-t) / len(self.rigidbody_list))]

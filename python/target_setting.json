@@ -2,22 +2,22 @@
     "TargetConfig":{
         "xArm1":{
             "Target1":{
-                "TargetPos": [],
-                "TargetRot": []
+                "TargetPos": [541.540222, -257.522034, 316.480133],
+                "TargetRot": [127.178067, 20.859846, 61.31399]
             },
             "Target2":{
-                "TargetPos": [],
-                "TargetRot": []
+                "TargetPos": [578.320129, -238.470779, 242.871246],
+                "TargetRot": [129.0105, 24.671333, 60.3489]
             }
         },
         "xArm2":{
             "Target1":{
-                "TargetPos": [],
-                "TargetRot": []
+                "TargetPos": [576.436951, 254.678619, 242.92009],
+                "TargetRot": [-106.197212, 21.759333, -42.242517]
             },
             "Target2":{
-                "TargetPos": [],
-                "TargetRot": []
+                "TargetPos": [597.103821, 258.115112, 176.364899],
+                "TargetRot": [-116.884593, 21.342449, -52.668744]
             }
         }
     },

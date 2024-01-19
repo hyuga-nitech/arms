@@ -26,28 +26,24 @@ class DataRecordManager:
         self.RigidBodyNum = len(self.rigidbody_js["RigidBodyConfig"])
         self.bendingSensorNum = len(self.bending_sensor_js["BendingSensorConfig"])
 
-        for i in range(self.RigidBodyNum):
-            self.dictPosition['RigidBody'+str(i+1)] = []
-            self.dictRotation['RigidBody'+str(i+1)] = []
+        for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
+            self.dictPosition[rigidbody] = []
+            self.dictRotation[rigidbody] = []
+            self.dictRatio[rigidbody] = []
 
-        for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)] = []
-
-        for i in range(self.RigidBodyNum):
-            self.dictRatio['RigidBody'+str(i+1)] = []
+        for bendingsensor in self.bending_sensor_js["BendingSensorConfig"]:
+            self.dictGripperValue[bendingsensor] = []
 
     def record(self, time, position, rotation, bendingSensor, ratio):
         self.listTime.append([time])
 
-        for i in range(self.RigidBodyNum):
-            self.dictPosition['RigidBody'+str(i+1)].append(position['RigidBody'+str(i+1)])
-            self.dictRotation['RigidBody'+str(i+1)].append(rotation['RigidBody'+str(i+1)])
+        for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
+            self.dictPosition[rigidbody].append(position[rigidbody])
+            self.dictRotation[rigidbody].append(rotation[rigidbody])
+            self.dictRatio[rigidbody].append(ratio[rigidbody])
 
-        for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor['gripperValue'+str(i+1)]])
-
-        for i in range(self.RigidBodyNum):
-            self.dictRatio['RigidBody'+str(i+1)].append(ratio['RigidBody'+str(i+1)])
+        for bendingsensor in self.bending_sensor_js["BendingSensorConfig"]:
+            self.dictGripperValue[bendingsensor].append([bendingSensor[bendingsensor]])
 
     def record_arm(self, time, current_vel, at_time_vel):
         self.listAssistTime.append([time])

@@ -46,14 +46,16 @@ class MotionCalculator:
             self.weighted_rotation_dict[rigidbody] = np.array([0,0,0,1])
 
         for arm in self.xArm_js["xArmConfig"]:
-            self.arm_origin_position_dict[arm] = self.xArm_js["xArmCongig"][arm]["InitPos"]
-            q = self.euler_to_quaternion(self.xArm_js["xArmCongig"][arm]["InitRot"])
+            self.arm_origin_position_dict[arm] = self.xArm_js["xArmConfig"][arm]["InitialPos"]
+            q = self.euler_to_quaternion(self.xArm_js["xArmConfig"][arm]["InitialRot"])
             qw, qx, qy, qz = q[3], q[1], q[2], q[0]
             mat4x4 = np.array([ [qw, -qy, qx, qz],
                                 [qy, qw, -qz, qx],
                                 [-qx, qz, qw, qy],
                                 [-qz,-qx, -qy, qw]])
             self.arm_inversed_matrix_dict[arm] = np.linalg.pinv(mat4x4)
+            self.weighted_position_dict["Assist" + arm] = np.zeros(3)
+            self.weighted_rotation_dict["Assist" + arm] = np.array([0,0,0,1])
         
         self.minimumJerk_dict = {}
 
@@ -63,7 +65,8 @@ class MotionCalculator:
                 if self.rigidbody_js["RigidBodyConfig"][rigidbody]["Arm"] == arm:
                     self.rigidbody_list_dict[arm].append(rigidbody)
             self.minimumJerk_dict[arm] = MinimumJerk(self.rigidbody_list_dict[arm], arm)
-            self.minimumJerk_dict[arm].set_target(self.get_relative_target_position(arm))
+            target_pos, target_rot = self.get_relative_target_position(arm)
+            self.minimumJerk_dict[arm].set_target(target_pos, target_rot)
 
     def calculate_shared_pos_rot(self, flag, position: dict, rotation: dict, arm_position: dict):
         # ----- Shared transform ----- #
@@ -79,7 +82,7 @@ class MotionCalculator:
             diffpos_dict = {}
             diffrot_dict = {}
 
-            diffpos_dict["Assist"], diffrot_dict["Assist"], ratio_dict = self.minimumJerk_dict[arm].assist_calculate(flag, relative_pos, relative_rot, relative_arm_pos[arm], relative_arm_rot[arm])
+            diffpos_dict["Assist" + arm], diffrot_dict["Assist" + arm], ratio_dict = self.minimumJerk_dict[arm].assist_calculate(flag, relative_pos, relative_rot, relative_arm_pos[arm], relative_arm_rot[arm])
 
             for rigidbody in self.rigidbody_list_dict[arm]:
                 diffpos_dict[rigidbody] = self.get_diff_position(rigidbody, relative_pos)
@@ -109,23 +112,23 @@ class MotionCalculator:
             arm_rot_euler = arm_position[arm][3],arm_position[arm][4],arm_position[arm][5]
             mount = self.xArm_js["xArmConfig"][arm]["Mount"]
 
-            diff_arm_pos = arm_pos - self.arm_origin_position_dict[arm]
+            diff_arm_pos = np.array(arm_pos) - np.array(self.arm_origin_position_dict[arm])
             diff_arm_rot = np.dot(self.arm_inversed_matrix_dict[arm], self.euler_to_quaternion(arm_rot_euler))
 
-            diff_arm_pos = diff_arm_pos / 1000
+            diff_arm_pos = np.array(diff_arm_pos) / 1000
             diff_arm_rot_euler = self.euler_to_quaternion(diff_arm_rot)
             
             if mount == "flat":
-                relative_arm_pos = diff_arm_pos[1], diff_arm_pos[2], diff_arm_pos[0]
-                relative_arm_rot_euler = diff_arm_rot_euler[1], diff_arm_rot_euler[2], diff_arm_rot_euler[0] 
+                relative_arm_pos = [diff_arm_pos[1], diff_arm_pos[2], diff_arm_pos[0]]
+                relative_arm_rot_euler = [diff_arm_rot_euler[1], diff_arm_rot_euler[2], diff_arm_rot_euler[0]]
             
             elif mount == "right":
-                relative_arm_pos = -1 * diff_arm_pos[2], diff_arm_pos[1], diff_arm_pos[0]
-                relative_arm_rot_euler = -1 * diff_arm_rot_euler[2], diff_arm_rot_euler[1], diff_arm_rot_euler[0]
+                relative_arm_pos = [-1 * diff_arm_pos[2], diff_arm_pos[1], diff_arm_pos[0]]
+                relative_arm_rot_euler = [-1 * diff_arm_rot_euler[2], diff_arm_rot_euler[1], diff_arm_rot_euler[0]]
 
             elif mount == "left":
-                relative_arm_pos = diff_arm_pos[2], -1 * diff_arm_pos[1], diff_arm_pos[0]
-                relative_arm_rot_euler = diff_arm_rot_euler[2], -1 * diff_arm_rot_euler[1], diff_arm_rot_euler[0]
+                relative_arm_pos = [diff_arm_pos[2], -1 * diff_arm_pos[1], diff_arm_pos[0]]
+                relative_arm_rot_euler = [diff_arm_rot_euler[2], -1 * diff_arm_rot_euler[1], diff_arm_rot_euler[0]]
             
             relative_pos_dict[arm] = relative_arm_pos
             relative_rot_dict[arm] = self.euler_to_quaternion(relative_arm_rot_euler)
@@ -151,24 +154,24 @@ class MotionCalculator:
             target_rot_euler = self.target_js["TargetConfig"][arm][target]["TargetRot"]
             mount = self.xArm_js["xArmConfig"][arm]["Mount"]
 
-            diff_target_pos = target_pos - self.arm_origin_position_dict[arm]
+            diff_target_pos = np.array(target_pos) - np.array(self.arm_origin_position_dict[arm])
             diff_target_rot = np.dot(self.arm_inversed_matrix_dict[arm], self.euler_to_quaternion(target_rot_euler))
 
-            diff_target_pos = diff_target_pos / 1000
+            diff_target_pos = np.array(diff_target_pos) / 1000
             diff_target_rot_euler = self.euler_to_quaternion(diff_target_rot)
             
             if mount == "flat":
-                relative_target_pos = diff_target_pos[1], diff_target_pos[2], diff_target_pos[0]
-                relative_target_rot_euler = diff_target_rot_euler[1], diff_target_rot_euler[2], diff_target_rot_euler[0]
+                relative_target_pos = [diff_target_pos[1], diff_target_pos[2], diff_target_pos[0]]
+                relative_target_rot_euler = [diff_target_rot_euler[1], diff_target_rot_euler[2], diff_target_rot_euler[0]]
 
             elif mount == "right":
-                relative_target_pos = -1 * diff_target_pos[2], diff_target_pos[1], diff_target_pos[0]
-                relative_target_rot_euler = -1 * diff_target_rot_euler[2], diff_target_rot_euler[1], diff_target_rot_euler[0]
+                relative_target_pos = [-1 * diff_target_pos[2], diff_target_pos[1], diff_target_pos[0]]
+                relative_target_rot_euler = [-1 * diff_target_rot_euler[2], diff_target_rot_euler[1], diff_target_rot_euler[0]]
 
             elif mount == "left":
-                relative_target_pos = diff_target_pos[2], -1 * diff_target_pos[1], diff_target_pos[0]
-                relative_target_rot_euler = diff_target_rot_euler[2], -1 * diff_target_rot_euler[1], diff_target_rot_euler[0]
-            
+                relative_target_pos = [diff_target_pos[2], -1 * diff_target_pos[1], diff_target_pos[0]]
+                relative_target_rot_euler = [diff_target_rot_euler[2], -1 * diff_target_rot_euler[1], diff_target_rot_euler[0]]
+                
             relative_pos_dict[target] = relative_target_pos
             relative_rot_dict[target] = self.euler_to_quaternion(relative_target_rot_euler)
 

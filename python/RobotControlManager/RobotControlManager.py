@@ -10,7 +10,7 @@ from MotionCalculator.MotionCalculator import MotionCalculator
 from Recorder.DataRecordManager import DataRecordManager
 from MotionManager.MotionManager import MotionManager
 from FootSwitchManager.FootSwitchManager import FootSwitchManager
-from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
+# from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Setting ----- #
 OperatorNum             = 2
