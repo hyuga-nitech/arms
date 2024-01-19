@@ -35,7 +35,7 @@ class RobotControlManager:
         taskStartTime       = 0
 
         # ----- Instantiating custom classes ----- #
-        Calculator           = MotionCalculator(OperatorNum)
+        Calculator           = MotionCalculator()
         motionManager       = MotionManager()
         dataRecordManager   = DataRecordManager()
         # vibrotactileManager = VibrotactileFeedbackManager()
@@ -96,7 +96,7 @@ class RobotControlManager:
                     # ----- Bending sensor ----- #
                     dict_bending_value = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
 
-                    gripper_value_dict = Calculator.calculate_shared_grip()
+                    gripper_value_dict = Calculator.calculate_shared_grip(dict_bending_value)
 
                     if isEnableArm:
                         self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)
@@ -152,7 +152,7 @@ class RobotControlManager:
                         # ----- Bending sensor ----- #
                         dict_bending_value = motionManager.get_gripper_value_dict(loopCount=self.loopCount)
 
-                        gripper_value_dict = Calculator.calculate_shared_grip()
+                        gripper_value_dict = Calculator.calculate_shared_grip(dict_bending_value)
 
                         if isEnableArm:
                             self.grip_arms(self.arm_object_dict, self.xArm_transform_dict, gripper_value_dict)

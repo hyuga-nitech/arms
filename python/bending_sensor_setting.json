@@ -2,11 +2,11 @@
     "BendingSensorConfig":{
         "BendingSensor1":{
             "Port":"COM6",
-            "Baudrate":"9600",
+            "Baudrate":"115200",
             "Arm":"xArm1"
         },
         "BendingSensor2":{
-            "Port":"COM5",
+            "Port":"COM10",
             "Baudrate":"115200",
             "Arm":"xArm1"
         }

@@ -36,7 +36,7 @@ class MotionManager:
 
     def get_gripper_value_dict(self,loopCount: int = 0):
         dict_gripper_value = {}
-        for sensor in range(self.bending_sensor_js):
+        for sensor in self.bending_sensor_js["BendingSensorConfig"]:
             bending_norm = self.bending_sensor_object_dict[sensor].bending_value
             if SENSOR_CLOSE < SENSOR_OPEN:
                 bending_norm = (bending_norm - SENSOR_CLOSE) / (SENSOR_OPEN - SENSOR_CLOSE) * (TARGET_MAX - TARGET_MIN) + TARGET_MIN
