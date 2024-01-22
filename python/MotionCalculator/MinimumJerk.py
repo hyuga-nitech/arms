@@ -46,10 +46,10 @@ class MinimumJerk:
         arm_velocity = self.calculate_arm_velocity(arm_pos)
 
         if self.isAssistStandby:
-            t = self.get_elasped_time()
+            t = self.get_elasped_time(arm_pos)
             # positionの情報を元に，進捗を0~1の値で取得する
 
-            unit_velocity = self.get_velocity_per_unit()
+            unit_velocity = self.get_velocity_per_unit(t)
             # 全体の距離を１としたときに，進捗時に取りうる速度の値を取得する
 
             self.route_length = self.get_ideal_route_length()
@@ -92,7 +92,7 @@ class MinimumJerk:
 
     def flag_check(self, flag, arm_pos, arm_rot):
         if (flag == True)&(self.before_flag == False):
-            self.isAssistStandby == True
+            self.isAssistStandby = True
             self.start_pos = arm_pos
             self.start_rot = arm_rot
 
@@ -101,9 +101,9 @@ class MinimumJerk:
             self.before_flag = True
 
         elif (flag == False)&(self.before_flag == True):
-            self.isAssistStandby == False
+            self.isAssistStandby = False
 
-            self.dataRecordManager.ExportSelf(self.filename + '_data' + str(self.filecount))
+            self.dataRecordManager.export_arm(self.filename + '_data' + str(self.filecount))
             self.filecount += 1
 
             self.before_flag = False
@@ -115,7 +115,7 @@ class MinimumJerk:
         return "Target1"
     
     def get_ideal_route_length(self):
-        ideal_vector = self.target_pos_dict[self.target] - self.start_pos
+        ideal_vector = np.array(self.target_pos_dict[self.target]) - np.array(self.start_pos)
         route_length = np.linalg.norm(ideal_vector)
 
         return route_length
@@ -133,13 +133,13 @@ class MinimumJerk:
         return arm_v
 
     def get_elasped_time(self, arm_pos):
-        ideal_vector = self.target_pos_dict[self.target] - self.start_pos
-        current_vector = arm_pos - self.start_pos
+        ideal_vector = np.array(self.target_pos_dict[self.target]) - np.array(self.start_pos)
+        current_vector = np.array(arm_pos) - np.array(self.start_pos)
         
-        diff_vector = current_vector - ideal_vector
-        unit_normal = ideal_vector / np.linalg.norm(ideal_vector)
+        diff_vector = np.array(current_vector) - np.array(ideal_vector)
+        unit_normal = np.array(ideal_vector) / np.linalg.norm(ideal_vector)
         projection_OC = np.dot(diff_vector, unit_normal) * unit_normal
-        OC = ideal_vector + projection_OC
+        OC = np.array(ideal_vector) + np.array(projection_OC)
 
         t = np.linalg.norm(OC) / np.linalg.norm(ideal_vector)
 
@@ -161,8 +161,8 @@ class MinimumJerk:
         elif 1 < t:
             t = 1
 
-        ideal_vector = self.target_pos_dict[self.target] - self.start_pos
-        pos = self.start_pos + ((6 * (t ** 5) - 15 * (t ** 4) + 10 * (t ** 3)) * ideal_vector)
+        ideal_vector = np.array(self.target_pos_dict[self.target]) - np.array(self.start_pos)
+        pos = np.array(self.start_pos) + ((6 * (t ** 5) - 15 * (t ** 4) + 10 * (t ** 3)) * np.array(ideal_vector))
         
         return pos
     
@@ -172,8 +172,8 @@ class MinimumJerk:
         elif 1 < t:
             t = 1
     
-        start = self.start_rot / np.linalg.norm(self.start_rot)
-        end = self.target_rot_dict[self.target] / np.linalg.norm(self.target_rot_dict[self.target])
+        start = np.array(self.start_rot) / np.linalg.norm(self.start_rot)
+        end = np.array(self.target_rot_dict[self.target]) / np.linalg.norm(self.target_rot_dict[self.target])
 
         # Perform Slerp
         rotation = Slerp([0, 1], Rotation.from_quat([start, end]))
@@ -191,16 +191,14 @@ class MinimumJerk:
         
         return (v * self.route_length)
     
-    def get_arm_diff_position(self, rigidbody, relative_pos):
-        diffpos = relative_pos[rigidbody] - self.before_position_dict[rigidbody]
-        self.before_position_dict[rigidbody] = relative_pos[rigidbody]
+    def get_arm_diff_position(self, current_pos, at_time_pos):
+        diffpos = np.array(at_time_pos) - np.array(current_pos)
         return diffpos
     
-    def get_arm_diff_rotation(self, rigidbody, relative_rot):
-        qw, qx, qy, qz = self.before_rotation_dict[rigidbody][3], self.before_rotation_dict[rigidbody][0], self.before_rotation_dict[rigidbody][1], self.before_rotation_dict[rigidbody][2]
+    def get_arm_diff_rotation(self, current_rot, at_time_rot):
+        qw, qx, qy, qz = current_rot[3], current_rot[0], current_rot[1], current_rot[2]
         mat4x4 = np.array([ [qw, qz, -qy, qx],
                             [-qz, qw, qx, qy],
                             [qy, -qx, qw, qz],
                             [-qx,-qy, -qz, qw]])
-        current_rot = relative_rot[rigidbody]
-        diffrot = np.dot(np.linalg.inv(mat4x4), current_rot)
+        diffrot = np.dot(np.linalg.inv(mat4x4), at_time_rot)

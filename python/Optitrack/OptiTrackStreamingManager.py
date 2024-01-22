@@ -49,9 +49,9 @@ class OptiTrackStreamingManager:
         rotation: array
             Rotation
         """
-        for rigidbody in self.rigidbody_js["RigidBodyConfig"]:
-            self.position[rigidbody] = np.array(position)
-            self.rotation[rigidbody] = np.array(rotation)
+        if 'RigidBody'+str(new_id) in self.position:
+            self.position['RigidBody'+str(new_id)] = np.array(position)
+            self.rotation['RigidBody'+str(new_id)] = np.array(rotation)
 
     def stream_run(self):
         streamingClient = NatNetClient.NatNetClient(serverIP=self.serverAddress, localIP=self.localAddress)

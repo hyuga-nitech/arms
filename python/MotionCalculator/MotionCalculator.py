@@ -180,7 +180,7 @@ class MotionCalculator:
     def calculate_ratio_pos(self, diffpos: dict, ratio: dict):
         ratio_pos = [0, 0, 0]
         for operator in diffpos.keys():
-            weighted_pos = diffpos[operator] * ratio[operator][0]
+            weighted_pos = np.array(diffpos[operator]) * ratio[operator][0] + np.array(self.weighted_position_dict[operator])
             ratio_pos += weighted_pos
             self.weighted_position_dict[operator] = weighted_pos
 
