@@ -8,18 +8,20 @@ class FootSwitchManager:
     def detect_sensor(self):
         time.sleep(3)
 
+        logging.info('Start foot switch manager')
         try:
             while True:
                 key = input('press to change mode')
                 if key == 'f':
                     if self.flag == False:
                         self.flag = True
-                        logging.info("On")
+                        logging.info("Assist stanby ON")
 
                     elif self.flag == True:
                         self.flag = False
-                        logging.info("Off")
-                
+                        logging.info("Assist stanby OFF")
+                else:
+                    pass
                 time.sleep(0.1)
 
         except:

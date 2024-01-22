@@ -12,11 +12,6 @@ from MotionManager.MotionManager import MotionManager
 from FootSwitchManager.FootSwitchManager import FootSwitchManager
 # from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
-# ----- Setting ----- #
-OperatorNum             = 2
-PairID                  = 1
-OperatorID              = 1   #Only OperatorNum = 2
-
 # ----- Core Setting ----- #
 bendingSensorNum        = 2
 xArmMovingLimit         = 500
@@ -111,6 +106,8 @@ class RobotControlManager:
 
                     self.error_check(self.arm_object_dict)
 
+                    logging.info('Finish robot_control loop: %d', self.loopCount)
+
                     self.loopCount += 1
 
                 else:
@@ -135,6 +132,8 @@ class RobotControlManager:
                     elif keycode == 's':
                         Calculator.set_origin_position(motionManager.LocalPosition())
                         Calculator.set_inversed_matrix(motionManager.LocalRotation())
+
+                        logging.info('Set original_position and inversed_matrix')
 
                         arm_position = {}
 
@@ -161,6 +160,7 @@ class RobotControlManager:
 
                         isMoving = True
                         taskStartTime = time.perf_counter()
+                        logging.info('Task start')
 
         except KeyboardInterrupt:
             print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
