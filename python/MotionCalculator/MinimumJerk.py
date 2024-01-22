@@ -103,7 +103,7 @@ class MinimumJerk:
         elif (flag == False)&(self.before_flag == True):
             self.isAssistStandby == False
 
-            self.dataRecordManager.ExportSelf(self.filename + str(self.filecount))
+            self.dataRecordManager.ExportSelf(self.filename + '_data' + str(self.filecount))
             self.filecount += 1
 
             self.before_flag = False
