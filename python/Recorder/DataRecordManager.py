@@ -48,8 +48,8 @@ class DataRecordManager:
     def record_arm(self, time, current_vel, at_time_vel):
         self.listAssistTime.append([time])
 
-        self.listCurrentArmVel.append(current_vel)
-        self.listAtTimeArmVel.append(at_time_vel)
+        self.listCurrentArmVel.append([current_vel])
+        self.listAtTimeArmVel.append([at_time_vel])
 
     def ExportSelf(self, name, dirPath: str = 'ExportData'):
         """

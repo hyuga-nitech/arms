@@ -57,10 +57,15 @@ class MinimumJerk:
             ideal_velocity = unit_velocity * self.route_length
             # 1秒でスタートからゴールまで移動できる場合に，今の進捗度でとるべき速度
 
-            pos_at_time = self.calculate_position_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
-            rot_at_time = self.calculate_rotation_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
-            vel_at_time = self.calculate_velocity_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
+            if (0<t<1):
+                pos_at_time = self.calculate_position_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
+                rot_at_time = self.calculate_rotation_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
+                vel_at_time = self.calculate_velocity_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
             # 最短軌道上で今いるべき場所 or 数秒後に居たい場所を算出
+            else:
+                pos_at_time = arm_pos
+                rot_at_time = arm_rot
+                vel_at_time = arm_velocity
             
             assist_diff_pos = self.get_arm_diff_position(arm_pos, pos_at_time)
             assist_diff_rot = self.get_arm_diff_rotation(arm_rot, rot_at_time)
@@ -202,3 +207,5 @@ class MinimumJerk:
                             [qy, -qx, qw, qz],
                             [-qx,-qy, -qz, qw]])
         diffrot = np.dot(np.linalg.inv(mat4x4), at_time_rot)
+
+        return diffrot
