@@ -13,6 +13,7 @@ from FootSwitchManager.FootSwitchManager import FootSwitchManager
 # from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Core Setting ----- #
+executionTime = 9999
 framerate = 120
 # you have to check MinimumJerk.py
 
@@ -105,9 +106,10 @@ class RobotControlManager:
 
                     self.error_check(self.arm_object_dict)
 
-                    self.fix_framerate((time.perf_counter - taskStartTime), 1/framerate)
+                    self.fix_framerate((time.perf_counter() - loopStartTime), 1/framerate)
 
                     self.loopCount += 1
+                    loopStartTime = time.perf_counter()
 
                 else:
                     filename = "test"
@@ -158,7 +160,7 @@ class RobotControlManager:
                         # beforeX , beforeY , beforeZ            = xArmtransform.x, xArmtransform.y, xArmtransform.z
 
                         isMoving = True
-                        taskStartTime = time.perf_counter()
+                        taskStartTime = loopStartTime = time.perf_counter()
                         logging.info('Task start')
 
         except KeyboardInterrupt:
