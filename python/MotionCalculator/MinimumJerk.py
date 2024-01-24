@@ -130,7 +130,7 @@ class MinimumJerk:
 
         if len(self.arm_pos_list) == self.interval:
             diff_norm = np.linalg.norm((np.array(self.arm_pos_list[self.interval - 1]) - np.array(self.arm_pos_list[0])), ord=2)
-            arm_v = np.array(diff_norm) / (self.dt * (self.interval - 4))
+            arm_v = np.array(diff_norm) / (self.dt * (self.interval - 1))
             del self.arm_pos_list[0]
         else:
             arm_v = 0
