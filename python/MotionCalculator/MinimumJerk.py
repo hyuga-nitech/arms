@@ -26,7 +26,7 @@ class MinimumJerk:
         # 一旦使用していない．ロボットアームの速度だけでなく，各rigidbodyの速度が必要になったら使う
         self.arm_pos_list = []
 
-        self.interval = 5
+        self.interval = 20
         self.dt = 1/120
 
         self.route_length = 0
@@ -73,7 +73,7 @@ class MinimumJerk:
 
             passed_time = time.perf_counter() - self.start_time
 
-            self.dataRecordManager.record_arm(passed_time, arm_velocity, vel_at_time)
+            self.dataRecordManager.record_arm(passed_time, arm_velocity, vel_at_time, t)
 
         ratio_dict = {}
 

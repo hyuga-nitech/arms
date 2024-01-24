@@ -14,6 +14,7 @@ class DataRecordManager:
     listAssistTime = []
     listCurrentArmVel = []
     listAtTimeArmVel = []
+    listTau = []
 
     def __init__(self) -> None:
         bending_f = open("bending_sensor_setting.json","r")
@@ -45,11 +46,12 @@ class DataRecordManager:
         for bendingsensor in self.bending_sensor_js["BendingSensorConfig"]:
             self.dictGripperValue[bendingsensor].append([bendingSensor[bendingsensor]])
 
-    def record_arm(self, time, current_vel, at_time_vel):
+    def record_arm(self, time, current_vel, at_time_vel, tau):
         self.listAssistTime.append([time])
 
         self.listCurrentArmVel.append([current_vel])
         self.listAtTimeArmVel.append([at_time_vel])
+        self.listTau.append([tau])
 
     def ExportSelf(self, name, dirPath: str = 'ExportData'):
         """
@@ -98,12 +100,18 @@ class DataRecordManager:
 
         fileIO = FileIO()
 
-        armHeader = ['time','CurrentVel','AtTimeVel']
+        armHeader = ['time','CurrentVel','AtTimeVel', 'tau']
 
         npTime = np.array(self.listAssistTime)
         npCurrent = np.array(self.listCurrentArmVel)
         npAtTime = np.array(self.listAtTimeArmVel)
+        npTau = np.array(self.listTau)
 
-        npArmVel = np.concatenate([npTime, npCurrent, npAtTime], axis=1)
+        npArmVel = np.concatenate([npTime, npCurrent, npAtTime, npTau], axis=1)
 
         fileIO.ExportAsCSV(npArmVel, dirPath, name+'_MinimumJerk_ArmVel', armHeader)
+
+        self.listAssistTime = []
+        self.listCurrentArmVel = []
+        self.listAtTimeArmVel = []
+        self.listTau = []
