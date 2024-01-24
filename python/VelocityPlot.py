@@ -10,7 +10,7 @@ current_vel = input_csv[input_csv.keys()[1]]
 at_time_vel = input_csv[input_csv.keys()[2]]
 tau = input_csv[input_csv.keys()[3]]
 
-fig = plt.figure(dpi = 1200)
+fig = plt.figure(dpi = 300)
 
 ax = fig.add_subplot(111)
 ax.plot(time, current_vel, label='Current_Vel', color='r')
@@ -22,4 +22,3 @@ ax.set_ylabel('Velocity [m/s]')
 
 ax.legend(loc='upper left', bbox_to_anchor=(1,1))
 plt.show()
-plt.save('Velocity.png', bbox_inches='tight')

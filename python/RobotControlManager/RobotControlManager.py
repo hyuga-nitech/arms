@@ -13,9 +13,8 @@ from FootSwitchManager.FootSwitchManager import FootSwitchManager
 # from VibrotactileFeedback.VibrotactileFeedbackManager import VibrotactileFeedbackManager
 
 # ----- Core Setting ----- #
-bendingSensorNum        = 2
-xArmMovingLimit         = 500
-executionTime           = 9999
+framerate = 120
+# you have to check MinimumJerk.py
 
 class RobotControlManager:
     def __init__(self) ->None:
@@ -106,7 +105,7 @@ class RobotControlManager:
 
                     self.error_check(self.arm_object_dict)
 
-                    logging.info('Finish robot_control loop: %d', self.loopCount)
+                    self.fix_framerate((time.perf_counter - taskStartTime), 1/framerate)
 
                     self.loopCount += 1
 
@@ -220,6 +219,13 @@ class RobotControlManager:
                 self.errorCount += 1
                 logging.error("xArm Error has occured")
                 print('[ERROR] >> xArm Error has occured. Please enter "q" to quit')
+
+    def fix_framerate(self, process_duration, looptime):
+        sleeptime = looptime - process_duration
+        if sleeptime < 0:
+            pass
+        else:
+            time.sleep(sleeptime)
 
     def print_process_info(self):
         """
