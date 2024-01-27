@@ -23,7 +23,9 @@ class MinimumJerk:
         self.isRecord = isRecord
 
         self.pos_list_dict = {}
-        # 一旦使用していない．ロボットアームの速度だけでなく，各rigidbodyの速度が必要になったら使う
+        for rigidbody in self.rigidbody_list:
+            self.pos_list_dict[rigidbody] = []
+
         self.arm_pos_list = []
 
         self.interval = 20
@@ -31,7 +33,7 @@ class MinimumJerk:
 
         self.route_length = 0
 
-        self.predictional_time = 0.25
+        self.predictional_time = 0.15
 
         self.dataRecordManager = DataRecordManager()
         self.filename = self.arm_name
@@ -44,6 +46,9 @@ class MinimumJerk:
         assist_diff_rot = [0,0,0,1]
 
         arm_velocity = self.calculate_arm_velocity(arm_pos)
+        operated_velocity = self.calculate_rigidbody_mean_velocity(pos)
+
+        ratio_dict = {}
 
         if self.isAssistStandby:
             t = self.get_elasped_time(arm_pos)
@@ -58,14 +63,14 @@ class MinimumJerk:
             # 1秒でスタートからゴールまで移動できる場合に，今の進捗度でとるべき速度
 
             if (0<t<1):
-                pos_at_time = self.calculate_position_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
-                rot_at_time = self.calculate_rotation_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
-                vel_at_time = self.calculate_velocity_at_time(t + (self.predictional_time * (arm_velocity / ideal_velocity)))
+                pos_at_time = self.calculate_position_at_time(t + (self.predictional_time * (operated_velocity / ideal_velocity)))
+                rot_at_time = self.calculate_rotation_at_time(t + (self.predictional_time * (operated_velocity / ideal_velocity)))
+                vel_at_time = self.calculate_velocity_at_time(t + (self.predictional_time * (operated_velocity / ideal_velocity)))
             # 最短軌道上で今いるべき場所 or 数秒後に居たい場所を算出
             else:
                 pos_at_time = arm_pos
                 rot_at_time = arm_rot
-                vel_at_time = arm_velocity
+                vel_at_time = operated_velocity
             
             assist_diff_pos = self.get_arm_diff_position(arm_pos, pos_at_time)
             assist_diff_rot = self.get_arm_diff_rotation(arm_rot, rot_at_time)
@@ -75,19 +80,24 @@ class MinimumJerk:
 
             self.dataRecordManager.record_arm(passed_time, arm_velocity, vel_at_time, t)
 
-        ratio_dict = {}
+            if (self.isDemo != True) and (0.2 < t):
+                ratio_dict["Assist" + self.arm_name] = [t,t]
 
-        if self.isDemo:
+                for rigidbody in self.rigidbody_list:
+                    ratio_dict[rigidbody] = [((1-t) / len(self.rigidbody_list)),((1-t) / len(self.rigidbody_list))]
+            
+            else:
+                ratio_dict["Assist" + self.arm_name] = [0,0]
+
+                for rigidbody in self.rigidbody_list:
+                    ratio_dict[rigidbody] = [(1 / len(self.rigidbody_list)),(1 / len(self.rigidbody_list))]
+
+        else:
             ratio_dict["Assist" + self.arm_name] = [0,0]
 
             for rigidbody in self.rigidbody_list:
                 ratio_dict[rigidbody] = [(1 / len(self.rigidbody_list)),(1 / len(self.rigidbody_list))]
 
-        else:
-            ratio_dict["Assist" + self.arm_name] = [t,t]
-
-            for rigidbody in self.rigidbody_list:
-                ratio_dict[rigidbody] = [((1-t) / len(self.rigidbody_list)),((1-t) / len(self.rigidbody_list))]
 
         return assist_diff_pos, assist_diff_rot, ratio_dict
     
@@ -136,6 +146,30 @@ class MinimumJerk:
             arm_v = 0
 
         return arm_v
+    
+    def calculate_rigidbody_mean_velocity(self, pos):
+        if len(self.rigidbody_list) > 0:
+            rigidbody_v_sum = 0
+
+            for rigidbody in self.rigidbody_list:
+                self.pos_list_dict[rigidbody].append(pos[rigidbody])
+
+                if len(self.pos_list_dict[rigidbody]) == self.interval:
+                    diff_norm = np.linalg.norm((np.array(self.pos_list_dict[rigidbody][self.interval - 1]) - np.array(self.pos_list_dict[rigidbody][0])), ord=2)
+                    rigidbody_v = np.array(diff_norm) / (self.dt * (self.interval - 1))
+                    del self.pos_list_dict[rigidbody][0]
+
+                else:
+                    rigidbody_v = 0
+
+                rigidbody_v_sum += rigidbody_v
+
+            rigidbody_v_mean = rigidbody_v_sum / len(self.rigidbody_list)
+
+        else:
+            rigidbody_v_mean = 0
+
+        return rigidbody_v_mean
 
     def get_elasped_time(self, arm_pos):
         ideal_vector = np.array(self.target_pos_dict[self.target]) - np.array(self.start_pos)
